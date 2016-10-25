@@ -329,11 +329,15 @@ umask(0000);
 
          # If 'block' is set to 1, wait for pipeline to return non-running state
             my $p_state = '';
-            if ( $args{block} ) {
+           if ( $args{block} ) {
                 do {
                     $p_state = $self->pipeline_state;
+                    sleep 60;
                 } while ( $p_state =~ /(running|pending|waiting)/i );
-                return $p_state;
+
+                # If end-state is complete, return 1.  Otherwise return 0
+                return 1 if ($p_state eq 'complete');
+                return 0;
             }
 
             exit;
