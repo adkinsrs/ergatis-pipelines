@@ -230,7 +230,11 @@ sub is_bam_truncated {
     print_log_msg($DEBUG, "INFO : $sub_name :: Checking to see if BAM file is truncated\nINFO : $sub_name :: Command : $cmd");
     $exit_code = system($cmd);
     if ( $exit_code != 0 ) {
-        $cmd = $cmd_line_args->{'samtools_path'} . " view " . $cmd_line_args->{'output_dir'} . "/" . $out;
+		my $args = '';
+		if ($cmd_line_args->{'nThrds'}){
+			$args .= "-@ " . ($cmd_line_args->{'nThrds'} -1) . " ";
+		}
+        $cmd = $cmd_line_args->{'samtools_path'} . " view " . $args . $cmd_line_args->{'output_dir'} . "/" . $out;
         print_log_msg($DEBUG, "INFO : $sub_name :: This version of Samtools does not have 'quickcheck' command.  Using alternate command\nINFO : $sub_name :: Command : $cmd");
         $exit_code = system($cmd);
         if ( $exit_code != 0 ) {
@@ -379,7 +383,7 @@ sub determine_format {
                 push @list_files, $merged_bam;
             }
 
-# Currently the script cannot process multiple samples.  Ideally the list file should just contain 1 sample, which is either 1 single-end fastq, 1 BAM, or 2 paired-end fastq files.  Also the .blank file originating from the sra2fastq component in Ergatis can exist in a list file
+# Currently the script cannot process multiple samples.  Ideally the list file should just contain 1 sample, which is either 1 single-end fastq, 1 BAM, or 2 paired-end fastq files.  Also the .pair file originating from the sra2fastq component in Ergatis can exist in a list file
             foreach my $f (@list_files) {
 				chomp $f;
 
@@ -396,7 +400,7 @@ sub determine_format {
                     }
                 } else {
 
-          # For the BAM, or .blank extensions, we can just recycle current code.
+          # For the BAM, or .pair extensions, we can just recycle current code.
                     my $temp_opts = {};
                     $temp_opts->{'input_file'} = $f;
                     determine_format( $temp_opts, $file_type );
@@ -407,10 +411,10 @@ sub determine_format {
         } elsif ( $ext =~ /fastq/ ) {    # Single-end FASTQ file
             set_query_to_file_type( $file_type, 'fastq', $file );
             $fastq_paired = 0;
-        } elsif ( $ext =~ /blank/ ) {
+        } elsif ( $ext =~ /\.pair/ ) {
 
-# My way of grouping paired FASTQ files is to use the basename in a .blank file
-# .blank is just to indicate the 2 paired-end fastq files exist in that directory
+# My way of grouping paired FASTQ files is to use the basename in a .pair file
+# .pair is just to indicate the 2 paired-end fastq files exist in that directory
             grab_files_from_dir( $dir_path, $file_type );
         }
     } else {
