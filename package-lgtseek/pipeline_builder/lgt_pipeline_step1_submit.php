@@ -127,7 +127,7 @@
 			# Construct filename for new list
 			$new_list = $new_dir . "/" . $file_base;
 
-			$fh = fopen($mounted_file, "r");
+			$fh = fopen($mounted_file, "r") or die("Cannot open $mounted_file - check the path to make sure it exists");
 			$new_fh = fopen($new_list, "w");
 			while (($line = fgets($fh)) !== false) {
 				$path_base = basename(trim($line));
