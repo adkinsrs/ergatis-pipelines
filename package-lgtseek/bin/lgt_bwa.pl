@@ -53,7 +53,7 @@ GetOptions(
     'maxGapE=i',           'gapOsc=i',
     'gapEsc=i',            'nThrds|t=i',
     'maxOcc=i',            'bwa_params|B=s',
-    'samtools_params|S=s',
+    'samtools_params|S=s', 'tmp_dir|T=s',
     'log|l=s',             'help|h'
 ) or pod2usage();
 
@@ -286,11 +286,17 @@ sub align_BWA {
         $opts .= " " . $cmd_line_args->{'bwa_params'};
     }
 
+	my $tmp_dir_env = '';
+    if ( exists( $cmd_line_args->{'tmp_dir'} ) ) {
+        $tmp_dir_env = 'TMP_DIR=' . $cmd_line_args->{'tmp_dir'} . ' ';
+	}
+
 	# Same files passed from lgt_bwa component to another lgt_bwa component may have .bwa.prelim.filtered.bam endings.  This doesn't break the script by having it but I would like to keep the name decently short - SAdkins 4/18/16
 	$outfile =~ s/bwa\.prelim\.filtered\.//g;
 
     $cmd =
-        $cmd_line_args->{'bwa_path'} . " "
+	    $tmp_dir_env
+      . $cmd_line_args->{'bwa_path'} . " "
       . $algo . " "
       . $opts . " "
       . $ref . " "
@@ -333,8 +339,14 @@ sub align_then_BAM {
         $sam_opts = $cmd_line_args->{'samtools_params'};
     }
 
+	my $tmp_dir_env = '';
+    if ( exists( $cmd_line_args->{'tmp_dir'} ) ) {
+        $tmp_dir_env = 'TMP_DIR=' . $cmd_line_args->{'tmp_dir'} . ' ';
+	}
+
     $cmd =
-        $cmd_line_args->{'bwa_path'} . " "
+	    $tmp_dir_env
+      . $cmd_line_args->{'bwa_path'} . " "
       . $algo . " "
       . $opts . " "
       . $ref . " "
@@ -412,10 +424,9 @@ sub determine_format {
             set_query_to_file_type( $file_type, 'fastq', $file );
             $fastq_paired = 0;
         } elsif ( $ext =~ /\.pair/ ) {
-
 # My way of grouping paired FASTQ files is to use the basename in a .pair file
 # .pair is just to indicate the 2 paired-end fastq files exist in that directory
-            grab_files_from_dir( $dir_path, $file_type );
+            grab_files_from_dir( $dir_path, $file_type, $base );
         }
     } else {
 
@@ -427,8 +438,7 @@ sub determine_format {
 
 # Read through a directory to grab relevant fastq or bam files
 sub grab_files_from_dir {
-    my ( $dir, $file_type ) = @_;
-    my $file;
+    my ( $dir, $file_type, $basename ) = @_;
     my $sub_name = ( caller(0) )[3];
     opendir( DIR, $dir )
       or print_log_msg( $ERROR,
@@ -436,8 +446,12 @@ sub grab_files_from_dir {
       );
 
       # TODO: write merged bam files subroutine for directory globbing
-    while ( $file = readdir(DIR) ) {
+    while ( my $file = readdir(DIR) ) {
         my $path = $dir . "/" . $file;
+		# If a basename was passed in, only consider files matching that basename
+		if (defined $basename) {
+			next unless $file =~ /$basename/;
+		}
         if ( $file =~ /fastq$/ ) {
             if ( $file =~ /_1\./ ) {
                 set_query_to_file_type( $file_type, 'fastq_1', $path );
@@ -545,7 +559,7 @@ sub check_parameters {
 
 	# Check for empty file for input file
 	if (defined $opts->{'input_file'} && !-s $opts->{'input_file'}) {
-		print_log_msg( $ERROR, "ERROR : $sub_name :: Input file or list " . $opts->{'input_file'} . " appears to be empty" )
+		print_log_msg( $ERROR, "ERROR : $sub_name :: Input file or list " . $opts->{'input_file'} . " appears to be empty" ) unless $opts->{'input_file'} =~ /\.pair$/;
 	}
 
     # Delete SAM files once they are converted to BAM by default
@@ -642,6 +656,9 @@ B<--use_mem, -m>
 
 B<--bam_paired, -p>
 	If set to 1, this indicates the input BAM is from paired-end data
+
+B<--tmp_dir, -T>
+    If set, this will become the "TMP_DIR" environment variable value for the BWA aln/mem run
 
 B<--log, -l>
 	Path to writable log file
