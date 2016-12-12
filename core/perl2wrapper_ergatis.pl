@@ -12,22 +12,27 @@ sub get_perl_bins{
     my $instdir='';
 	my $workflowdocsdir='';
 	my $schemadocsdir='';
-	
+	my $fname = '';
+
     my $perl_path = $^X;  ## can be overwritten below
     
     foreach my $arg (@ARGV){
         if($arg =~ /INSTALL_BASE/){
             ($instdir) = ($arg =~ /INSTALL_BASE=(.*)/);
         }
-        if($arg =~ /WORKFLOW_DOCS_DIR/){
+        elsif($arg =~ /WORKFLOW_DOCS_DIR/){
             ($workflowdocsdir) = ($arg =~ /WORKFLOW_DOCS_DIR=(.*)/);
         }
-        if($arg =~ /SCHEMA_DOCS_DIR/){
+        elsif($arg =~ /SCHEMA_DOCS_DIR/){
             ($schemadocsdir) = ($arg =~ /SCHEMA_DOCS_DIR=(.*)/);
         }
-        if($arg =~ /PERL_PATH/){
+        elsif($arg =~ /PERL_PATH/){
             ($perl_path) = ($arg =~ /PERL_PATH=(.*)/);
         }
+		else {
+			$fname = $arg;
+			chomp $fname;
+		}
     }
 
     my $envbuffer;
@@ -39,6 +44,8 @@ sub get_perl_bins{
     foreach my $key (keys %$env_hash){
 	$envbuffer .= "if [ -z \"\$$key\" ]\nthen\n    $key=$env_hash->{$key}\nexport $key\nfi\n";
     }
+
+	my($strip_fname) = ($fname =~ /(.*)\.pl$/);
 
 	# Open wrapper for writing to.
 	open WRAPPER, "+>bin/$strip_fname" or die "Can't open file bin/$strip_fname\n";

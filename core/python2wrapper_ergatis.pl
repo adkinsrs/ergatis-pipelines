@@ -12,6 +12,7 @@ sub get_python_bins{
     my $instdir='';
 	my $workflowdocsdir='';
 	my $schemadocsdir='';
+	my $fname = '';
 
     my $python_path = `which python`;  ## can be overwritten below
     chomp $python_path;   
@@ -19,20 +20,20 @@ sub get_python_bins{
         if($arg =~ /INSTALL_BASE/){
             ($instdir) = ($arg =~ /INSTALL_BASE=(.*)/);
         }
-        if($arg =~ /WORKFLOW_DOCS_DIR/){
+        elsif($arg =~ /WORKFLOW_DOCS_DIR/){
             ($workflowdocsdir) = ($arg =~ /WORKFLOW_DOCS_DIR=(.*)/);
         }
-        if($arg =~ /SCHEMA_DOCS_DIR/){
+        elsif($arg =~ /SCHEMA_DOCS_DIR/){
             ($schemadocsdir) = ($arg =~ /SCHEMA_DOCS_DIR=(.*)/);
         }
-        if($arg =~ /PYTHON_PATH/){
+        elsif($arg =~ /PYTHON_PATH/){
             ($python_path) = ($arg =~ /PYTHON_PATH=(.*)/);
         }
+		else {
+			$fname = $arg;
+			chomp $fname;
+		}
     }
-
-    open FILE, 'MANIFEST' or die "MANIFEST is missing!\n";
-    open SYMS, "+>README.symlinks" or die "Can't save symlinks for silly sadmins";
-    print SYMS "#Copy or symlink the following shell scripts into a standard area\n";
 
     my $envbuffer;
     my $env_hash = {'WORKFLOW_DOCS_DIR' => "$workflowdocsdir",
@@ -44,7 +45,8 @@ sub get_python_bins{
 	$envbuffer .= "if [ -z \"\$$key\" ]\nthen\n    $key=$env_hash->{$key}\nexport $key\nfi\n";
     }
 
-
+    my($strip_fname) = ($fname =~ /(.*)\.py$/);
+	
 	# Open wrapper for writing to.
 	open WRAPPER, "+>bin/$strip_fname" or die "Can't open file bin/$strip_fname\n";
 	my ($shell_args)  = q/"$@"/;
