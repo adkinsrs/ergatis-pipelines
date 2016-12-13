@@ -79,4 +79,4 @@ _END_WRAPPER_
 }
 
 
-return 1;
+1;
