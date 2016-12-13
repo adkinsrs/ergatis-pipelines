@@ -7,8 +7,7 @@ script_dir=$(dirname "$0")
 
 
 for file in `ls -1 $1/bin`; do
-	fileext=${filename##*.}
-	echo $fileext
+	fileext=${file##*.}
 	case $fileext in
 		pl)
 			/usr/bin/perl ${script_dir}/perl2wrapper_ergatis.pl INSTALL_BASE=$1 $file
