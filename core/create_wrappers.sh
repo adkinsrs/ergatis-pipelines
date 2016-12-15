@@ -23,3 +23,6 @@ for file in `ls -1 $1/bin`; do
 			;;
 	esac
 done
+
+# give 555 permissions to wrappers and executables
+chmod 555 $1/bin/*
