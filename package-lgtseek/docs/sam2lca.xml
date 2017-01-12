@@ -50,7 +50,7 @@
 		        <value>$;TMP_DIR$;/replace_template_keys.stderr</value>
 		    </param>
 		</command>
-		<commandSet type="distributed-serial">
+		<commandSet type="remote-serial">
 			<state>incomplete</state>
 			<name>sam2lca distributed</name>
 			<fileName>$;WORKFLOW_REPOSITORY$;/sam2lca_distributed.xml.gz</fileName>
