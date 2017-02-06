@@ -81,6 +81,10 @@ B<--help,-h>
 
 =cut
 
+#TODO: Make Refseq/NT aligment optional for donor/host and Refseq optional for donor-only
+
+
+
 use strict;
 use warnings;
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);

@@ -23,18 +23,6 @@
 					</commandSet>
 					<commandSet type="parallel">
 						<state>incomplete</state>
-						<!-- BWA & LCA -->
-						<commandSet type="serial">
-							<state>incomplete</state>
-							<commandSet type="serial">
-								<state>incomplete</state>
-								<name>lgt_bwa.lgt</name>
-							</commandSet>
-							<commandSet type="serial">
-								<state>incomplete</state>
-								<name>sam2lca.lgt</name>
-							</commandSet>
-						</commandSet>
 						<!-- BLAST & LCA -->
 						<commandSet type="serial">
 							<state>incomplete</state>
