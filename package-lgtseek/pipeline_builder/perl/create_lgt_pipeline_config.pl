@@ -53,7 +53,7 @@ B<--output_directory, -o>
 B<--no_pipeline_ids, -p>
 	If the flag is enabled, do not add process IDs to the pipeline config and layout file names and just use whatever lgt.config and lgt.layout.
 
-B<--log,-l>
+B<--log>
     Logfile.
 
 B<--debug,-d>
@@ -131,7 +131,7 @@ sub main {
 						  "output_directory|o=s",
 						  "data_directory|O=s",
 						  "no_pipeline_id|p",
-						  "log|l=s",
+						  "log=s",
 						  "debug=i",
 						  "help"
 					);
@@ -246,8 +246,6 @@ sub main {
 		} else {
 			$config{"global"}->{'$;HOST_REFERENCE$;'} = $options{host_reference};
 		}
-		# The mpileup component needs the host reference to serve as a reference here too
-		$config{'lgt_mpileup lgt'}->{'$;FASTA_REFERENCE$;'} = $options{host_reference};
 	}
 
 	if ($host_only) {
@@ -257,6 +255,9 @@ sub main {
 		$config{"lgt_bwa_post_process default"}->{'$;SKIP_WF_COMMAND$;'} = 'create LGT host BAM file list,create microbiome BAM file list';
 		$config{"filter_dups_lc_seqs lgt"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
 		$config{"filter_dups_lc_seqs mb"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.no_map.bam.list';
+
+		# The mpileup component needs the host reference to serve as a reference here too
+		$config{'lgt_mpileup lgt'}->{'$;FASTA_REFERENCE$;'} = $options{host_reference};
 	} else {
 		# Only add donor-relevant info to config if we are aligning to a donor
 		if ($options{donor_reference} =~/list$/) {
@@ -268,20 +269,10 @@ sub main {
 
 	# If we are indexing references in the pipeline, we need to change some config inputs
 	if ($included_subpipelines{'indexing'}) {
-
-		# Change the Refseq reference for lgt_bwa
-		$config{'lgt_bwa lgt'}->{'$;INPUT_FILE$;'} = '';
-		$config{'lgt_bwa lgt'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_refseq/lgt_build_bwa_index.fsa.list';
 		unless ($donor_only) {
-			$config{'lgt_bwa mb'}->{'$;INPUT_FILE$;'} = '';
-			$config{'lgt_bwa mb'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_refseq/lgt_build_bwa_index.fsa.list';
-
 			# Change the host reference for lgt_bwa
 			$config{'lgt_bwa recipient'}->{'$;INPUT_FILE$;'} = '';
 			$config{'lgt_bwa recipient'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_recipient/lgt_build_bwa_index.fsa.list';
-
-			$config{'lgt_bwa validation'}->{'$;INPUT_FILE$;'} = '';
-			$config{'lgt_bwa validation'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_recipient/lgt_build_bwa_index.fsa.list';
 
 			# If a large host reference is used, change to "bwtsw" algorithm, otherwise use "is"
 			if ($options{'large_reference'}) {
@@ -291,8 +282,19 @@ sub main {
 			}
 		}
 
-		unless ($host_only) {
-			# Change the donor reference for lgt_bwa
+		# If host only, add microbiome alignment and post-NT blast alignment
+		if ($host_only) {
+			$config{'lgt_bwa validation'}->{'$;INPUT_FILE$;'} = '';
+			$config{'lgt_bwa validation'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_recipient/lgt_build_bwa_index.fsa.list';
+
+			$config{'lgt_bwa mb'}->{'$;INPUT_FILE$;'} = '';
+			$config{'lgt_bwa mb'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_refseq/lgt_build_bwa_index.fsa.list';
+
+			# Change the Refseq reference for lgt_bwa
+			$config{'lgt_bwa lgt'}->{'$;INPUT_FILE$;'} = '';
+			$config{'lgt_bwa lgt'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_refseq/lgt_build_bwa_index.fsa.list';
+		} else {
+			# Change the donor reference for lgt_bwa if not host-only run
 			$config{'lgt_bwa donor'}->{'$;INPUT_FILE$;'} = '';
 			$config{'lgt_bwa donor'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_donor/lgt_build_bwa_index.fsa.list';
 		}
