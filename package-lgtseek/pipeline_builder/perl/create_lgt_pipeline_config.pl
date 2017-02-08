@@ -98,7 +98,7 @@ my ($ERROR, $WARN, $DEBUG) = (1,2,3);
 my $logfh;
 
 my $outdir = ".";
-my $template_directory = "/local/projects/ergatis/package-latest/global_pipeline_templates";
+my $template_directory = "/local/projects/ergatis/package-lgtseek/pipeline_templates";
 my %included_subpipelines = ();
 my $donor_only = 0;
 my $host_only = 0;

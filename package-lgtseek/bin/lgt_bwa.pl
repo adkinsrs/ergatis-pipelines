@@ -207,7 +207,7 @@ foreach my $ref (@ref_files) {
                 $in = $options{'output_dir'} . "/" . $out . " " . $type{'fastq'};
             } elsif ( $file_count == 1 && exists( $type{'bam'} ) ) {
 				# Check to ensure BAM file has reads, and exit if it does not.
-				check_for_empty_bam( $type{'bam'};
+				check_for_empty_bam( \%options, $type{'bam'});
 		 		# Ensure file_base variable does not have .gz extension
 				(my $f_no_gz = $type{'bam'}) =~ s/\.gz//g;
                 ( $file_base, $file_dir, $file_ext ) =
@@ -555,6 +555,7 @@ sub check_for_single_sample {
 # NOTE: This is to help the LGT_Seek pipeline silently continue during later stages in cases where the upstream input BAM had no alignments found
 sub check_for_empty_bam {
     my $sub_name = ( caller(0) )[3];
+	my $cmd_line_args = shift;
 	my $bam_file = shift;
     $cmd = $cmd_line_args->{'samtools_path'} . " view $bam_file | wc -l";;
 	print_log_msg($DEBUG, "INFO : $sub_name - Running command '$cmd'");
