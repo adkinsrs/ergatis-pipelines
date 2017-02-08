@@ -1431,13 +1431,18 @@ sub _bwaPostProcessDonorHostPaired {
          my $microbiome_donor,
          "| $samtools view -S -b -o $output_dir/" . $prefix . ".microbiome.bam -"
      ) or die "Unable to open donor microbiome file for writing\n";
+     open(
+         my $recipient,
+         "| $samtools view -S -b -o $output_dir/" . $prefix . ".recipient.bam -"
+     ) or die "Unable to open donor microbiome file for writing\n";
 
      my $class_to_file = {
          'lgt_donor'                    => $lgtd,
          'lgt_host'                     => $lgth,
          'integration_site_donor_donor' => $int_site_donor_d,
          'integration_site_donor_host'  => $int_site_donor_h,
-         'microbiome_donor'             => $microbiome_donor
+         'microbiome_donor'             => $microbiome_donor,
+		 'host_host'					=> $recipient
      };
 
      my $donor_bam = $config->{donor_bam};

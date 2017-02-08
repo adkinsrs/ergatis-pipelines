@@ -83,6 +83,24 @@
         </command>
         <command>
             <type>RunUnixCommand</type>
+            <name>create recipient BAM file list</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/create_list_file</executable>
+            <param>
+                <key>--directory</key>
+                <value>$;OUTPUT_DIRECTORY$;</value>
+            </param>
+            <param>
+                <key>--regex</key>
+                <value>".*recipient\.bam"</value>
+            </param>
+            <param>
+                <key>--output_list</key>
+                <value>$;RECIPIENT_BAM_OUTPUT_LIST$;</value>
+            </param>
+        </command>
+        <command>
+            <type>RunUnixCommand</type>
             <name>create microbiome BAM file list</name>
             <state>incomplete</state>
             <executable>$;BIN_DIR$;/create_list_file</executable>
