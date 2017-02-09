@@ -201,14 +201,6 @@ sub main {
 		}
 	}
 
-	# Now do some global config modification
-	if ($options{refseq_reference} =~ /list$/) {
-		$config{"global"}->{'$;REFSEQ_LIST$;'} = $options{refseq_reference};
-		# Each individual genome is small enough to use 'is' instead of 'btwsw'
-		$config{"lgt_build_bwa_index refseq"}->{'$;ALGORITHM$;'} = "is";
-	} else {
-		$config{"global"}->{'$;REFSEQ_REFERENCE$;'} = $options{refseq_reference};
-	}
 
 	# If the starting point is BAM input, then use that.
 	# Default is to point lgt_bwa.recipient to use the sra2fastq output list
@@ -249,6 +241,12 @@ sub main {
 	}
 
 	if ($host_only) {
+		if ($options{refseq_reference} =~ /list$/) {
+			$config{"global"}->{'$;REFSEQ_LIST$;'} = $options{refseq_reference};
+		} else {
+			$config{"global"}->{'$;REFSEQ_REFERENCE$;'} = $options{refseq_reference};
+		}
+
 		$config{"lgt_bwa_post_process default"}->{'$;DONOR_FILE_LIST$;'} = '';
 		$config{"lgt_bwa_post_process default"}->{'$;SKIP_WF_COMMAND$;'} = 'create LGT host BAM file list,create recipient BAM file,create microbiome BAM file list';
 		$config{"filter_dups_lc_seqs lgt"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
@@ -282,6 +280,9 @@ sub main {
 
 		# If host only, add microbiome alignment and post-NT blast alignment
 		if ($host_only) {
+			# Each individual genome is small enough to use 'is' instead of 'btwsw'
+			$config{"lgt_build_bwa_index refseq"}->{'$;ALGORITHM$;'} = "is";
+
 			$config{'lgt_bwa validation'}->{'$;INPUT_FILE$;'} = '';
 			$config{'lgt_bwa validation'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_recipient/lgt_build_bwa_index.fsa.list';
 
@@ -296,10 +297,6 @@ sub main {
 			$config{'lgt_bwa donor'}->{'$;INPUT_FILE$;'} = '';
 			$config{'lgt_bwa donor'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_donor/lgt_build_bwa_index.fsa.list';
 		}
-
-	} else {
-		# If not building indexes, delete reference to lgt_build_bwa_index config
-		delete $config{"lgt_build_bwa_index refseq"};
 	}
 
 # If we are passing a directory to store important output files, then change a few parameters
