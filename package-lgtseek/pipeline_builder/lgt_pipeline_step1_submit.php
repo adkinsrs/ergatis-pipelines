@@ -1,9 +1,10 @@
 <?php
 	ini_set('display_errors', 'On');
 	error_reporting(E_ALL | E_STRICT);
-
-	$formFieldsArr = Array("output_dir" => "Output directory", "log_file" => "Log file", "rinput" => "Input type", "trefseq" => "Refseq file");
-	$args = "--build_indexes ";	# Want to build indexes in pipeline by default
+	
+	$formFieldsArr = Array("output_dir" => "Output directory", "log_file" => "Log file", "r_input" => "Input File");
+	
+	$args = '';
 	$args .= "--data_directory=/mnt/output_data "; # By default gather output for use in LGTView
 	$local_dir = "/usr/local/scratch/pipeline_dir";
 	$ergatis_config = "/var/www/html/ergatis/cgi/ergatis.ini";
@@ -14,7 +15,6 @@
 
 # The first thing to do is to create the config and layout files for the pipeline
 	if (isset($_POST['bsubmit'])) {
-
 		$dir = create_pipeline_dir($local_dir);
 		$formValuesArr['output_dir']['default'] = $dir;
 		$formValuesArr['output_dir']['error'] = 0;
@@ -31,46 +31,66 @@
 			$formValuesArr['log_file']['msg'] = "Could not create log file";
 		}
 
-		if ( trim($_POST['rinput'])=='sra' && ! empty($_POST['tsra']) ) {
+		if ( isset($_POST['tsra']) && ! empty($_POST['tsra']) ) {
 			$args .= "--sra_id " . trim($_POST['tsra']) . " ";
-			$formValuesArr['rinput']['error'] = 0;
-		} elseif ( trim($_POST['rinput'])=='bam' && ! empty($_POST['tbam']) ) {
+			$formValuesArr['r_input']['error'] = 0;
+		} elseif ( isset($_POST['tbam']) && ! empty($_POST['tbam']) ) {
 			$bam = trim($_POST['tbam']);
 			$bam = adjust_paths($bam, $dir, "/mnt/input_data");
 			$args .= "--bam_input $bam ";
-			$formValuesArr['rinput']['error'] = 0;
+			$formValuesArr['r_input']['error'] = 0;
+		} elseif ( isset($_POST['tfastq']) && ! empty($_POST['tfastq']) ) {
+			$fastq = trim($_POST['tfastq']);
+			$fastq = adjust_paths($bam, $dir, "/mnt/input_data");
+			$args .= "--fastq_input $fastq ";
+			$formValuesArr['r_input']['error'] = 0;
 		} else {
 			$errFlag++;
-			$formValuesArr['rinput']['error'] = $errFlag;
-			$formValuesArr['rinput']['msg'] = "An SRA ID or BAM input path is required.";
+			$formValuesArr['r_input']['error'] = $errFlag;
+			$formValuesArr['r_input']['msg'] = "An SRA ID, FASTQ input path, or BAM input path is required.";
 		}
+
 		if ( isset($_POST['tdonor']) && ! empty($_POST['tdonor']) ) {
 			$donor = trim($_POST['tdonor']);
 			$donor = adjust_paths($donor, $dir, "/mnt/input_data/donor_ref");
 			$args .= "--donor_reference $donor ";
+		} else {
+			if ( trim($_POST['r_usecase']) == 'case1' || trim($_POST['r_usecase']) == 'case2' ){
+				$errFlag++;
+				$formValuesArr['r_input']['error'] = $errFlag;
+				$formValuesArr['r_input']['msg'] = "No donor input file found.";
+			}
 		}
 		if ( isset($_POST['thost']) && ! empty($_POST['thost']) ) {
 			$host = trim($_POST['thost']);
 			$host = adjust_paths($host, $dir, "/mnt/input_data/host_ref");
 			$args .= "--host_reference $host ";
-
+		} else {
+			if ( trim($_POST['r_usecase']) == 'case1' || trim($_POST['r_usecase']) == 'case3' ){
+				$errFlag++;
+				$formValuesArr['r_input']['error'] = $errFlag;
+				$formValuesArr['r_input']['msg'] = "No host input file found.";
+			}
 		}
-		if ( isset($_POST['trefseq']) ) {
+		if ( isset($_POST['trefseq']) && ! empty($_POST['trnaseq']) ) {
 			$refseq = trim($_POST['trefseq']);
 			$refseq = adjust_paths($refseq, $dir, "/mnt/input_data/refseq_ref");
 			$args .= "--refseq_reference $refseq ";
-			$formValuesArr['trefseq']['error'] = 0;
 		} else {
-			$errFlag++;
-			$formValuesArr['trefseq']['error'] = $errFlag;
-			$formValuesArr['trefseq']['msg'] = "A reference of refseq data information is required.";
+			if ( trim($_POST['r_usecase']) == 'case3' ){
+				$errFlag++;
+				$formValuesArr['r_input']['error'] = $errFlag;
+				$formValuesArr['r_input']['msg'] = "No RefSeq input file found.";
+			}
 		}
 
+		if (isset($_POST['c_build']) && $_POST['c_build'] == 1) {
+			$args = "--build_indexes ";
+		}
 	}
 
 	if ($errFlag == 0) {
 		exec("/usr/bin/perl ./perl/create_lgt_pipeline_config.pl $args --template_directory /opt/ergatis/pipeline_templates", $exec_output, $exit_status);
-		#echo "/usr/bin/perl ./perl/create_lgt_pipeline_config.pl $args --template_directory /opt/ergatis/pipeline_templates";
 
 		if ($exit_status > 0) {
 			$output_string = implode("\n", $exec_output);

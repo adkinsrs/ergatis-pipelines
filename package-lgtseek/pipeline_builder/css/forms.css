@@ -1,8 +1,11 @@
-div.form_row {
-    margin-bottom: 5px;
-}
-label {
-    float: left;
+label{
     width: 130px;
     font-weight: bold;
+}
+legend{
+	font-weight: bold;
+}
+
+.textbox{
+	width: 400px;
 }

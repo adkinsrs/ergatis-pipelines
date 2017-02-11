@@ -24,13 +24,13 @@ include_once('header.php');
 						The reference files include:
 						<ul>
 							<li>
-								Donor genome reference - Either a single fasta sequence or a list file (ending in .list) consisting of paths to fasta references is accepted.  If passing a list file, the references must all be in the same directory as the list file.  If the field is left blank, then the pipeline is assumed to have a good host but an uncharacterized donor reference
+								Donor genome reference - Either a single fasta sequence or a list file (ending in .list) consisting of paths to fasta references is accepted.  If passing a list file, the references must all be in the same directory as the list file.  If the "Build BWA Indexes" checkbox is checked, then a path to the reference index files, including the index prefix must be passed.  This reference is required for Use Cases 1 or 2.
 							</li>
 							<li>
-								Host/recipient genome reference - Either a single fasta sequence or a list file (ending in .list) consisting of paths to fasta references is accepted.  If passing a list file, the references must all be in the same directory as the list file.  If the field is left blank , then the pipeline is assumed to have a good donor but an uncharacterized host reference
+								Host/recipient genome reference - Either a single fasta sequence or a list file (ending in .list) consisting of paths to fasta references is accepted.  If passing a list file, the references must all be in the same directory as the list file.  If the "Build BWA Indexes" checkbox is checked, then a path to the reference index files, including the index prefix must be passed. This reference is required for Use Cases 1 or 3.
 							</li>
 							<li>
-								RefSeq reference - <strong>Required</strong>.  A list of annotated nucleotide sequences located within the NCBI Reference Sequence database
+								RefSeq reference - A list of annotated nucleotide sequences located within the NCBI Reference Sequence database. If the "Build BWA Indexes" checkbox is checked, then a path to the reference index files, including the index prefix must be passed.  This reference is required for Use Case 3.
 							</li>
 						</ul>
 					</li>
@@ -45,7 +45,21 @@ include_once('header.php');
 								<li>SRX - Experiment ID</li>
 							</ul>
 							</li>
-							<li>A BAM input file</li>
+							<li>
+							A FASTQ input file for a single sample.  Passed in one of the following ways:
+							<ul>
+								<li>FASTQ file path for a single-end read.  Can be compressed with GZIP</li>
+								<li>A file with the extension ".pair", which will find the two paired-end files with the same basename located in the same directory as the ".pair" file.</li>
+								<li>A list file containing a single file path to either of the previously mentioned files, or two file paths for each mate of a paired-end FASTQ set.  These files should end in "_1.fastq"/"_2.fastq" or "R1.fastq"/"R2.fastq".  In the case of the single-end or paired-end FASTQ paths, they can be compressed with GZIP.</li>
+							</ul>
+							</li>
+							<li>
+							A BAM input file. Passed in one of the following ways:
+							<ul>
+								<li>One BAM input file. Can be compressed with GZIP.</li>
+								<li>A list file containing the file paths of one or more BAM files. If multiple BAM files are in the list file, then all BAM files will be merged prior to performing the first BWA alignment.  BAM files can be compressed with GZIP.
+							</ul>
+							</li>
 						</ul>
 					</li>
 					<li>Click Submit when ready</li>
