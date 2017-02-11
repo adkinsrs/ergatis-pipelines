@@ -41,7 +41,7 @@
 			$formValuesArr['r_input']['error'] = 0;
 		} elseif ( isset($_POST['tfastq']) && ! empty($_POST['tfastq']) ) {
 			$fastq = trim($_POST['tfastq']);
-			$fastq = adjust_paths($bam, $dir, "/mnt/input_data");
+			$fastq = adjust_paths($fastq, $dir, "/mnt/input_data");
 			$args .= "--fastq_input $fastq ";
 			$formValuesArr['r_input']['error'] = 0;
 		} else {
