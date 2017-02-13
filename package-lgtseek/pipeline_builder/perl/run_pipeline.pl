@@ -42,7 +42,7 @@ sub make_pipeline {
     my ($pipeline_layout, $repository_root, $id_repo, $config, $ergatis_config) = @_;
     my $template = new Ergatis::SavedPipeline( 'template' => $pipeline_layout );
     $template->configure_saved_pipeline( $config, $repository_root, $id_repo );
-    my $pipeline_id = $template->pipeline_id();    
+    my $pipeline_id = $template->pipeline_id();
     if( $ergatis_config ) {
         my $xml = $repository_root."/workflow/runtime/pipeline/$pipeline_id/pipeline.xml";
         my $pipeline = new Ergatis::Pipeline( id => $pipeline_id,

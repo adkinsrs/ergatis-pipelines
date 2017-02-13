@@ -86,7 +86,7 @@
 		}
 
 		if ( $_POST['c_build'] == 1 ) {
-			$args = "--build_indexes ";
+			$args .= "--build_indexes ";
 		}
 	}
 
