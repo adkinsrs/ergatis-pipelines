@@ -36,12 +36,12 @@
 			$formValuesArr['r_input']['error'] = 0;
 		} elseif ( isset($_POST['tbam']) && ! empty($_POST['tbam']) ) {
 			$bam = trim($_POST['tbam']);
-			$bam = adjust_paths($bam, $dir, "/mnt/input_data");
+			$bam = adjust_paths($bam, $dir, "/mnt/input_data/input_source");
 			$args .= "--bam_input $bam ";
 			$formValuesArr['r_input']['error'] = 0;
 		} elseif ( isset($_POST['tfastq']) && ! empty($_POST['tfastq']) ) {
 			$fastq = trim($_POST['tfastq']);
-			$fastq = adjust_paths($fastq, $dir, "/mnt/input_data");
+			$fastq = adjust_paths($fastq, $dir, "/mnt/input_data/input_source");
 			$args .= "--fastq_input $fastq ";
 			$formValuesArr['r_input']['error'] = 0;
 		} else {
