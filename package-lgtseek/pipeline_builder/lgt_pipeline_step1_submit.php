@@ -2,6 +2,7 @@
 	ini_set('display_errors', 'On');
 	error_reporting(E_ALL | E_STRICT);
 	
+
 	$formFieldsArr = Array("output_dir" => "Output directory", "log_file" => "Log file", "r_input" => "Input File");
 	
 	$args = '';
@@ -31,15 +32,15 @@
 			$formValuesArr['log_file']['msg'] = "Could not create log file";
 		}
 
-		if ( isset($_POST['tsra']) && ! empty($_POST['tsra']) ) {
+		if ( !empty($_POST['tsra']) ) {
 			$args .= "--sra_id " . trim($_POST['tsra']) . " ";
 			$formValuesArr['r_input']['error'] = 0;
-		} elseif ( isset($_POST['tbam']) && ! empty($_POST['tbam']) ) {
+		} elseif ( !empty($_POST['tbam']) ) {
 			$bam = trim($_POST['tbam']);
 			$bam = adjust_paths($bam, $dir, "/mnt/input_data/input_source");
 			$args .= "--bam_input $bam ";
 			$formValuesArr['r_input']['error'] = 0;
-		} elseif ( isset($_POST['tfastq']) && ! empty($_POST['tfastq']) ) {
+		} elseif ( !empty($_POST['tfastq']) ) {
 			$fastq = trim($_POST['tfastq']);
 			$fastq = adjust_paths($fastq, $dir, "/mnt/input_data/input_source");
 			$args .= "--fastq_input $fastq ";
@@ -50,7 +51,7 @@
 			$formValuesArr['r_input']['msg'] = "An SRA ID, FASTQ input path, or BAM input path is required.";
 		}
 
-		if ( isset($_POST['tdonor']) && ! empty($_POST['tdonor']) ) {
+		if ( !empty($_POST['tdonor']) ) {
 			$donor = trim($_POST['tdonor']);
 			$donor = adjust_paths($donor, $dir, "/mnt/input_data/donor_ref");
 			$args .= "--donor_reference $donor ";
@@ -61,7 +62,7 @@
 				$formValuesArr['r_input']['msg'] = "No donor input file found.";
 			}
 		}
-		if ( isset($_POST['thost']) && ! empty($_POST['thost']) ) {
+		if ( !empty($_POST['thost']) ) {
 			$host = trim($_POST['thost']);
 			$host = adjust_paths($host, $dir, "/mnt/input_data/host_ref");
 			$args .= "--host_reference $host ";
@@ -72,7 +73,7 @@
 				$formValuesArr['r_input']['msg'] = "No host input file found.";
 			}
 		}
-		if ( isset($_POST['trefseq']) && ! empty($_POST['trnaseq']) ) {
+		if ( !empty($_POST['trnaseq']) ) {
 			$refseq = trim($_POST['trefseq']);
 			$refseq = adjust_paths($refseq, $dir, "/mnt/input_data/refseq_ref");
 			$args .= "--refseq_reference $refseq ";
@@ -84,13 +85,14 @@
 			}
 		}
 
-		if (isset($_POST['c_build']) && $_POST['c_build'] == 1) {
+		if ( $_POST['c_build'] == 1 ) {
 			$args = "--build_indexes ";
 		}
 	}
 
 	if ($errFlag == 0) {
 		exec("/usr/bin/perl ./perl/create_lgt_pipeline_config.pl $args --template_directory /opt/ergatis/pipeline_templates", $exec_output, $exit_status);
+		#echo "/usr/bin/perl ./perl/create_lgt_pipeline_config.pl $args --template_directory /opt/ergatis/pipeline_templates";;
 
 		if ($exit_status > 0) {
 			$output_string = implode("\n", $exec_output);
