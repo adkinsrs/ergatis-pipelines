@@ -73,7 +73,7 @@
 				$formValuesArr['r_input']['msg'] = "No host input file found.";
 			}
 		}
-		if ( !empty($_POST['trnaseq']) ) {
+		if ( !empty($_POST['trefseq']) ) {
 			$refseq = trim($_POST['trefseq']);
 			$refseq = adjust_paths($refseq, $dir, "/mnt/input_data/refseq_ref");
 			$args .= "--refseq_reference $refseq ";
