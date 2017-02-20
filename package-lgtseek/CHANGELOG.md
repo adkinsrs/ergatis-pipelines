@@ -1,5 +1,11 @@
 # CHANGELOG
 
+2/20/17
+* Going to provide path for components that use taxonomy dumps in MongoDB to do so.
+* Refining the good donor/host use case to not run Refseq and Blast steps
+* Run filter_dups_lc_seqs after post-processing regardless of use-case
+* Removed algorithm default from bwa index config file params.  BWA Indexing chooses the right algo anyways
+
 12/8/16
 * Corrected option typo in blast2lca.pl
 * Added option 'tmp\_dir' to change the TMP\_DIR env variable in lgt\_bwa.pl
