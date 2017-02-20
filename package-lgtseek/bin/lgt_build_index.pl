@@ -92,6 +92,8 @@ if ( ( -e $hCmdLineArgs{'reference'} ) && ( -r $hCmdLineArgs{'reference'} ) ) {
 	            "ERROR : Symlink to reference file $ref could not be created"
 	        );
 	    }
+
+            # If algorithm is not provided then 'bwa index' will auto-select algorithm based on reference size
 	    if ( !exists( $hCmdLineArgs{'algo'} ) ) {
 	        $sCmd =
 	            $hCmdLineArgs{'bwa_path'}
