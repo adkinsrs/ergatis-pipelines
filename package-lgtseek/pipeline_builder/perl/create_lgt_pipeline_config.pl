@@ -22,7 +22,7 @@ B<--sra_id,-s>
 	Valid ID from the Sequence Read Archive
 
 B<--bam_input,-b>
-	Valid path to a BAM input file.  Either this or the SRA ID must be provided
+	Valid path to a BAM input file.  Either this, the fastq input, or the SRA ID must be provided
 
 B<--fastq_input,-f>
 	Valid path to paired FASTQ input files.  If single-paired, provide full pathname.
@@ -97,6 +97,7 @@ my $logfh;
 my $outdir = ".";
 my $template_directory = "/local/projects/ergatis/package-lgtseek/pipeline_templates";
 my %included_subpipelines = ();
+my @gather_output_skip;	# array to keep track of which steps to skip if Post-Analysis components are enabled
 my $donor_only = 0;
 my $host_only = 0;
 ####################################################
@@ -208,6 +209,10 @@ sub main {
 	} else {
 		$config{"global"}->{'$;SRA_RUN_ID$;'} = $options{sra_id};
 	}
+
+	# If SRA ID was not input type, then remove that step from array
+	push @gather_output_skip, 'move SRA metadata output' unless $options{sra_id};
+
 	# Default use case (good donor and good host), we just want two specific list files.  For donor and host-only cases, we want other specific list files
 	$config{"lgt_bwa_post_process default"}->{'$;SKIP_WF_COMMAND$;'} = 'create single-map BAM file list,create no-map BAM file list';
 
@@ -227,6 +232,9 @@ sub main {
 		$config{"lgt_bwa_post_process default"}->{'$;RECIPIENT_FILE_LIST$;'} = '';
 		$config{"lgt_bwa_post_process default"}->{'$;SKIP_WF_COMMAND$;'} = 'create LGT host BAM file list,create recipient BAM file,create microbiome BAM file list,create no-map BAM file list';
 		$config{"filter_dups_lc_seqs lgt"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
+		push @gather_output_skip, 'move recipient BAM';
+		push @gather_output_skip, 'move microbiome BAM';
+
 	} else {
 		# Only add host-relevant info to config if we are aligning to a host
 		if ($options{host_reference} =~ /list$/) {
@@ -257,6 +265,12 @@ sub main {
 		} else {
 			$config{"global"}->{'$;DONOR_REFERENCE$;'} = $options{donor_reference};
 		}
+	}
+
+	# If we have a use case where there is a good donor and good reference, skip BLAST output
+	if (! ($donor_only || $host_only) ) {
+		push @gather_output_skip, 'move m8 output';
+		push @gather_output_skip, 'move clone output';
 	}
 
 	# If we are indexing references in the pipeline, we need to change some config inputs
@@ -291,6 +305,7 @@ sub main {
 # If we are passing a directory to store important output files, then change a few parameters
 if ($included_subpipelines{'post'}){
 	$config{'global'}->{'$;DATA_DIR$;'} = $options{data_directory};
+	$config{"gather_lgtview_files default"}->{'$;SKIP_WF_COMMAND$;'} = join ',', @gather_output_skip;
 }
 
 	# open config file for writing
@@ -423,12 +438,14 @@ sub check_options {
 
 	if ($opts->{'sra_id'}) {
    		$included_subpipelines{sra} = 1;
-		$included_subpipelines{post} = 1 if $opts->{'data_directory'};
 	}
 	if ($opts->{'bam_input'} || $opts->{'fastq_input'}) {
 		$included_subpipelines{sra} = 0;
 	}
 
+	# If a data_dir is specified (like in Docker container), add post-analysis components
+	$included_subpipelines{post} = 1 if $opts->{'data_directory'};
+	
 	# If donor reference is not present, then we have a host-only run
 	$host_only = 1 unless ($opts->{'donor_reference'});
 

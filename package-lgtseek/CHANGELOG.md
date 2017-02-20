@@ -5,6 +5,7 @@
 * Refining the good donor/host use case to not run Refseq and Blast steps
 * Run filter_dups_lc_seqs after post-processing regardless of use-case
 * Removed algorithm default from bwa index config file params.  BWA Indexing chooses the right algo anyways
+* Expanded the data that is output from the gather_lgtview_files component
 
 12/8/16
 * Corrected option typo in blast2lca.pl
