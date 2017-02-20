@@ -29,11 +29,11 @@
 			</commandSet>
 			<commandSet type="serial">
 				<state>incomplete</state>
-				<name>lgt_mpileup.lgt</name>
+				<name>filter_dups_lc_seqs.mb</name>
 			</commandSet>
 			<commandSet type="serial">
 				<state>incomplete</state>
-				<name>filter_dups_lc_seqs.mb</name>
+				<name>lgt_mpileup.lgt</name>
 			</commandSet>
 		</commandSet>
 	</commandSet>
