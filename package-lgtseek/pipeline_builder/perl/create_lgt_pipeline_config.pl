@@ -242,6 +242,9 @@ sub main {
 		} else {
 			$config{"global"}->{'$;HOST_REFERENCE$;'} = $options{host_reference};
 		}
+
+		# The mpileup component needs the host reference to serve as a reference here too
+		$config{'lgt_mpileup lgt'}->{'$;FASTA_REFERENCE$;'} = $options{host_reference};
 	}
 
 	if ($host_only) {
@@ -256,8 +259,6 @@ sub main {
 		$config{"filter_dups_lc_seqs lgt"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
 		$config{"filter_dups_lc_seqs mb"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.no_map.bam.list';
 
-		# The mpileup component needs the host reference to serve as a reference here too
-		$config{'lgt_mpileup lgt'}->{'$;FASTA_REFERENCE$;'} = $options{host_reference};
 	} else {
 		# Only add donor-relevant info to config if we are aligning to a donor
 		if ($options{donor_reference} =~/list$/) {
