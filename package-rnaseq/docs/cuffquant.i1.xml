@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
+    <commandSet type="serial">
+        <name>cuffquant</name>
+		<command>
+            <type>RunUnixCommand</type>
+            <name>cuffquant</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/cuffquant</executable>
+            <param>
+                <key>--samfile</key>
+                <value>$;INPUT_FILE_1$;</value>
+            </param>
+            <param>
+                <key>--gtffile</key>
+                <value>$;INPUT_FILE_2$;</value>
+            </param>
+            <param>
+                <key>--num-threads</key>
+                <value>$;NUM_THREADS$;</value>
+            </param>
+            <param>
+                <key>--fdr</key>
+                <value>$;FDR$;</value>
+            </param>
+            <param>
+                <key>--library-type</key>
+                <value>$;LIBRARY_TYPE$;</value>
+            </param>
+            <param>
+                <key>--max-mle-iterations</key>
+                <value>$;MAX_MLE_ITERATIONS$;</value>
+            </param>
+            <param>
+                <key>--max-bundle-frags</key>
+                <value>$;MAX_BUNDLE_FRAGS$;</value>
+            </param>
+            <param>
+                <key>--outdir</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;</value>
+            </param>
+            <param>
+                <key>--cufflinks_bin_dir</key>
+                <value>$;CUFFLINKS_BIN_DIR$;</value>
+            </param>
+            <param>
+                <key>--args</key>
+                <value>'$;OTHER_PARAMS$;'</value>
+            </param>
+            <param>
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.cuffquant.stdout</value>
+            </param>
+            <param>
+                <key>stderr</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.cuffquant.stderr</value>
+            </param>
+            <arg>$;OTHER_ARGS$;</arg>
+        </command>
+    </commandSet>
+</commandSetRoot>

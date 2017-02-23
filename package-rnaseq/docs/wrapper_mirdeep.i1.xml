@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
+    <commandSet type="serial">
+        <name>wrapper_mirdeep</name>
+		<command>
+            <type>RunUnixCommand</type>
+            <name>wrapper_mirdeep</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/wrapper_mirdeep</executable>            
+            <param>
+                <key>--RNAfold_path</key>
+                <value>$;RnaFoldPath$;</value>
+            </param>
+            <param>
+                <key>--randfold_path</key>
+                <value>$;RandFoldPath$;</value>
+            </param>
+
+           <param>
+                <key>--Bin_Dir</key>
+                <value>$;BinDir$;</value>
+            </param>
+
+            <param>
+                <key>--bedtools_bin_dir</key>
+                <value>$;BedtoolsBinDir$;</value>
+            </param>
+
+             <param>
+                <key>--infile</key>
+                <value>$;I_FILE_PATH$;</value>
+            </param>
+ 
+           <param>
+                <key>--index</key>
+                <value>$;INDEX$;</value>
+            </param>
+
+            <param>
+                <key>--Precursors_ref</key>
+                <value>$;PrecursorRef$;</value>
+            </param>
+            <param>
+                <key>--mature_ref_t</key>
+                <value>$;MatureRefThisSpecies$;</value>
+            </param>
+            <param>
+                <key>--mature_ref_o</key>
+                <value>$;MatureRefOtherSpecies$;</value>
+            </param>
+            <param>
+                <key>--output_read_file</key>
+                <value>$;OutputReadFile$;</value>
+            </param>
+            <param>
+                <key>--Rfam_file</key>
+                <value>$;RfamFile$;</value>
+            </param>
+            <param>
+                <key>--output_mapping</key>
+                <value>$;OutputMapping$;</value>
+            </param>
+            <param>
+                <key>--ref_genome</key>
+                <value>$;RefGenome$;</value>
+            </param>
+            
+            <param>
+                <key>--Input_option</key>
+                <value>$;InputOption$;</value>
+            </param>
+            
+            <param>
+                <key>--Adaptor</key>
+                <value>$;ADAPTOR$;</value>
+            </param>
+        
+             <param>
+                <key>--bowtie_bin</key>
+                <value>$;BowtieBin$;</value>
+            </param>
+            <param>
+                <key>--other_args_mapper</key>
+                <value>$;OtherArgsMapper$;</value>
+            </param>
+            <param>
+                <key>--other_args_quantifier</key>
+                <value>$;OtherArgsQuantifier$;</value>
+            </param>
+            <param>
+                <key>--other_args_mirdeep</key>
+                <value>$;OtherArgsMirdeep$;</value>
+            </param>
+             <param>
+                <key>--annotation</key>
+                <value>$;Annotation$;</value>
+            </param>           
+            <param>
+                <key>--annotation_format</key>
+                <value>$;AnnotationFormat$;</value>
+            </param>
+            <param>
+                <key>--feature</key>
+                <value>$;Feature$;</value>
+            </param>
+            <param>
+                <key>--attribute</key>
+                <value>$;Attribute$;</value>
+            </param>
+            <param>
+                <key>--score</key>
+                <value>$;Score$;</value>
+            </param>
+            <param>
+                <key>--depth</key>
+                <value>$;Depth$;</value>
+            </param>
+                      
+           <param>
+                <key>--outdir</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;</value>
+            </param>
+            <param>
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/wrapper_mirdeep.stdout</value>
+            </param>
+            <param>
+                <key>stderr</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/wrapper_mirdeep.stderr</value>
+            </param>
+         <arg>$;OTHER_ARGS$;</arg>
+        </command>
+    </commandSet>
+</commandSetRoot>
