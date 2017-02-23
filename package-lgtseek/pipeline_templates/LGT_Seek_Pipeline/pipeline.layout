@@ -21,7 +21,14 @@
 			<state>incomplete</state>
 			<commandSet type="serial">
 				<state>incomplete</state>
-				<name>filter_dups_lc_seqs.lgt</name>
+				<commandSet type="serial">
+					<state>incomplete</state>
+					<name>filter_dups_lc_seqs.lgt</name>
+				</commandSet>
+				<commandSet type="serial">
+					<state>incomplete</state>
+					<name>lgt_mpileup.lgt</name>
+				</commandSet>
 			</commandSet>
 			<commandSet type="serial">
 				<state>incomplete</state>
@@ -30,10 +37,6 @@
 			<commandSet type="serial">
 				<state>incomplete</state>
 				<name>filter_dups_lc_seqs.mb</name>
-			</commandSet>
-			<commandSet type="serial">
-				<state>incomplete</state>
-				<name>lgt_mpileup.lgt</name>
 			</commandSet>
 		</commandSet>
 	</commandSet>
