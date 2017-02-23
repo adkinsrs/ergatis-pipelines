@@ -106,7 +106,7 @@ sub process_child {
                 my $end     = $e->first_child_text('endTime') if $e->has_child('endTime');
                 if (defined $start && defined $end) {
                     my $elapsed_str = get_elapsed_time( $start, $end );
-                    $component_list{$component}{'Wall'} = $elapsed_str;
+                    $component_list{$component}{'wall'} = $elapsed_str;
                 }
                 $component_list{$component}{'order'} = $order++;
 				$component_list{$component}{'state'} = $state;
@@ -217,7 +217,9 @@ sub get_failed_stderr {
 sub handle_component_status_changes {
     my ($component_href, $prev_states) = @_;
 
-    foreach my $component (keys %$prev_states) {
+    foreach my $component (
+		sort { $component_href->$a->{'order'} <=> $component_href->$b->{'order'} } keys %$component_href
+	) {
         my $old_state = $prev_states->{$component};
         my $new_state = $component_href->{$component}->{'state'};
         next if ( $old_state eq "complete" ); # Complete components do not change
@@ -226,10 +228,16 @@ sub handle_component_status_changes {
         my $printed;
         ($printed = $new_state) =~ s/([\w']+)/\u\L$1/g;
         # Handle the various updated component states
+
+		# First a special case, where the component started and finished before the next sleep cycle
+		if ($old_state eq "incomplete" && $new_state =~ /^(complete|error|failed)/) {
+            print STDOUT "== Running: $component\n";
+		}
+
         if ($new_state eq "running") {
             print STDOUT "== $printed: $component\n";
         } elsif ($new_state =~ /^(complete|error|failed)/) {
-            my $elapsed = $component_href->{$component}->{'Wall'};
+            my $elapsed = $component_href->{$component}->{'wall'};
             print STDOUT "==== $printed: $component $elapsed\n\n";
         }
     }
