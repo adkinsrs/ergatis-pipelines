@@ -61,6 +61,18 @@
 						</commandSet>
 					</commandSet>
 				</commandSet>
+				<!-- DONOR side --> 
+				<commandSet type="serial">
+					<state>incomplete</state>
+					<commandSet type="serial">
+						<state>incomplete</state>
+						<name>filter_dups_lc_seqs.donor</name>
+					</commandSet>
+					<commandSet type="serial">
+						<state>incomplete</state>
+						<name>lgt_mpileup.donor_donor</name>
+					</commandSet>
+				</commandSet>
 			</commandSet>
         </commandSet>
     </commandSet>

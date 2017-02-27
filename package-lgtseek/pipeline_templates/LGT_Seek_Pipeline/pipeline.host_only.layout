@@ -25,7 +25,7 @@
 						<state>incomplete</state>
 						<commandSet type="serial">
 							<state>incomplete</state>
-							<name>lgt_mpileup.lgt_host</name>
+							<name>lgt_mpileup.lgt_recipient</name>
 						</commandSet>
 						<!-- BWA & LCA -->
 						<commandSet type="serial">
@@ -77,12 +77,12 @@
 						</commandSet>
 					</commandSet>
 				</commandSet>
-                <!-- Microbiome side -->
+                <!-- RECIPIENT side -->
                 <commandSet type="serial">
                     <state>incomplete</state>
                     <commandSet type="serial">
                         <state>incomplete</state>
-                        <name>filter_dups_lc_seqs.mb</name>
+                        <name>filter_dups_lc_seqs.donor</name>
                     </commandSet>
                     <commandSet type="serial">
                         <state>incomplete</state>
@@ -90,7 +90,7 @@
                     </commandSet>
                     <commandSet type="serial">
                         <state>incomplete</state>
-                        <name>sam2lca.mb</name>
+                        <name>sam2lca.donor</name>
                     </commandSet>
                 </commandSet>
 			</commandSet>           

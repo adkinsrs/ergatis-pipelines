@@ -37,7 +37,7 @@ include_once('header.php');
 <input type="text" name="tdonor" id="tdonor" class="textbox" value=''><br><br>
 </div>
 <div id="dhost">
-<label for="thost">Host reference/list/index</label><br>
+<label for="thost">Recipient reference/list/index</label><br>
 <input type="text" name="thost" id="thost" class="textbox" value=''><br><br>
 </div>
 <div id="drefseq">

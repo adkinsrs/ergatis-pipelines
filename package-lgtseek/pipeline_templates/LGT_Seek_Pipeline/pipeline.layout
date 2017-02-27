@@ -19,6 +19,7 @@
 		</commandSet>
 		<commandSet type="parallel">
 			<state>incomplete</state>
+			<!-- LGT side -->
 			<commandSet type="serial">
 				<state>incomplete</state>
 				<commandSet type="serial">
@@ -31,16 +32,34 @@
 				</commandSet>
 				<commandSet type="serial">
 					<state>incomplete</state>
-					<name>lgt_mpileup.lgt_host</name>
+					<name>lgt_mpileup.lgt_recipient</name>
 				</commandSet>
 			</commandSet>
+			<!-- DONOR side -->
+			<commandSet type="serial">
 			<commandSet type="serial">
 				<state>incomplete</state>
-				<name>filter_dups_lc_seqs.host</name>
+				<commandSet type="serial">
+					<state>incomplete</state>
+					<name>filter_dups_lc_seqs.donor</name>
+				</commandSet>
+				<commandSet type="serial">
+					<state>incomplete</state>
+					<name>lgt_mpileup.donor_donor</name>
+				</commandSet>
 			</commandSet>
+			<!-- RECIPIENT side -->
+			<commandSet type="serial">
 			<commandSet type="serial">
 				<state>incomplete</state>
-				<name>filter_dups_lc_seqs.mb</name>
+				<commandSet type="serial">
+					<state>incomplete</state>
+					<name>filter_dups_lc_seqs.recipient</name>
+				</commandSet>
+				<commandSet type="serial">
+					<state>incomplete</state>
+					<name>lgt_mpileup.rec_rec</name>
+				</commandSet>
 			</commandSet>
 		</commandSet>
 	</commandSet>
