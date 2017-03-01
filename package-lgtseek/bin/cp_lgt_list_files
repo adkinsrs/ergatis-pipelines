@@ -1,0 +1,13 @@
+#!/bin/bash
+
+output_dir=$1
+bam_list=$2
+
+mkdir -p -m 777 $output_dir
+
+for i in `cat $bam_list`
+do
+	cp $i $output_dir
+done
+
+exit 0

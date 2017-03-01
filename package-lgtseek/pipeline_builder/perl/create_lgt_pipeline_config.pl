@@ -233,7 +233,7 @@ sub main {
 		$config{"lgt_bwa_post_process default"}->{'$;SKIP_WF_COMMAND$;'} = 'create LGT host BAM file list,create recipient BAM file,create microbiome BAM file list,create no-map BAM file list';
 		$config{"filter_dups_lc_seqs lgt"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
 		push @gather_output_skip, 'move recipient BAM';
-		push @gather_output_skip, 'move microbiome BAM';
+		push @gather_output_skip, 'move donor BAM';
 
 	} else {
 		# Only add host-relevant info to config if we are aligning to a host

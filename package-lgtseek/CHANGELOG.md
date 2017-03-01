@@ -1,4 +1,7 @@
 # CHANGELOG
+2/27/17
+* Adding more lgt_mpileup components and filter_dups_lc_seqs components per use case
+* Renaming many outputs from 'host' to 'recipient' and from 'microbiome' to 'donor'
 
 2/20/17
 * Going to provide path for components that use taxonomy dumps in MongoDB to do so.
