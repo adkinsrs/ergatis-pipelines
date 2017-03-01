@@ -37,7 +37,6 @@
 			</commandSet>
 			<!-- DONOR side -->
 			<commandSet type="serial">
-			<commandSet type="serial">
 				<state>incomplete</state>
 				<commandSet type="serial">
 					<state>incomplete</state>
@@ -49,7 +48,6 @@
 				</commandSet>
 			</commandSet>
 			<!-- RECIPIENT side -->
-			<commandSet type="serial">
 			<commandSet type="serial">
 				<state>incomplete</state>
 				<commandSet type="serial">
