@@ -65,7 +65,7 @@
 	<!--Iterator Done-->
         <command>
             <type>RunUnixCommand</type>
-            <name>create LGT host BAM file list</name>
+            <name>create LGT recipient BAM file list</name>
             <state>incomplete</state>
             <executable>$;BIN_DIR$;/create_list_file</executable>
             <param>
@@ -101,7 +101,7 @@
         </command>
         <command>
             <type>RunUnixCommand</type>
-            <name>create microbiome BAM file list</name>
+            <name>create donor BAM file list</name>
             <state>incomplete</state>
             <executable>$;BIN_DIR$;/create_list_file</executable>
             <param>

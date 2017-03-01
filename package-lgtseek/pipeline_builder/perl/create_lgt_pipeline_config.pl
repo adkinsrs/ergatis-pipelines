@@ -160,8 +160,8 @@ sub main {
    			&write_include($writer, $pipelines->{'indexing'}, "pipeline.donor_only.layout") if( $included_subpipelines{'indexing'} );
    			&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.donor_only.layout") if( $included_subpipelines{'lgtseek'} );
 		} elsif ($host_only) {
-   			&write_include($writer, $pipelines->{'indexing'}, "pipeline.host_only.layout") if( $included_subpipelines{'indexing'} );
-   			&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.host_only.layout") if( $included_subpipelines{'lgtseek'} );
+   			&write_include($writer, $pipelines->{'indexing'}, "pipeline.recipient_only.layout") if( $included_subpipelines{'indexing'} );
+   			&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.recipient_only.layout") if( $included_subpipelines{'lgtseek'} );
 		} else {
    			&write_include($writer, $pipelines->{'indexing'}) if( $included_subpipelines{'indexing'} );
    			&write_include($writer, $pipelines->{'lgtseek'}) if( $included_subpipelines{'lgtseek'} );
@@ -180,7 +180,7 @@ sub main {
 			if ($donor_only) {
 			    &add_config( \%config, $pipelines->{ $sp }, "pipeline.donor_only.config");
 			} elsif ($host_only) {
-			    &add_config( \%config, $pipelines->{ $sp }, "pipeline.host_only.config");
+			    &add_config( \%config, $pipelines->{ $sp }, "pipeline.recipient_only.config");
 			} else {
 			    &add_config( \%config, $pipelines->{ $sp } );
 			}
@@ -188,7 +188,7 @@ sub main {
 			if ($donor_only) {
    				&add_config(\%config, $pipelines->{$sp}, "pipeline.donor_only.config");
 			} elsif ($host_only) {
-				&add_config(\%config, $pipelines->{$sp}, "pipeline.host_only.config");
+				&add_config(\%config, $pipelines->{$sp}, "pipeline.recipient_only.config");
 			} else {
 				&add_config(\%config, $pipelines->{$sp} );
 
@@ -217,7 +217,7 @@ sub main {
 	$config{"lgt_bwa_post_process default"}->{'$;SKIP_WF_COMMAND$;'} = 'create single-map BAM file list,create no-map BAM file list';
 
 	if ($donor_only) {
-		# In donor-only alignment cases, we do not keep the 'MM' matches, so no microbiome run
+		# In donor-only alignment cases, we do not keep the 'MM' matches
 
 		if ($options{bam_input}) {
 			# If starting from BAM instead of SRA, then change QUERY_FILE to use BAM input
@@ -230,7 +230,7 @@ sub main {
             $config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = '$;REPOSITORY_ROOT$;/output_repository/sra2fastq/$;PIPELINEID$;_default/sra2fastq.list';
 		}
 		$config{"lgt_bwa_post_process default"}->{'$;RECIPIENT_FILE_LIST$;'} = '';
-		$config{"lgt_bwa_post_process default"}->{'$;SKIP_WF_COMMAND$;'} = 'create LGT host BAM file list,create recipient BAM file,create microbiome BAM file list,create no-map BAM file list';
+		$config{"lgt_bwa_post_process default"}->{'$;SKIP_WF_COMMAND$;'} = 'create LGT host BAM file list,create recipient BAM file,create donor BAM file list,create no-map BAM file list';
 		$config{"filter_dups_lc_seqs lgt"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
 		push @gather_output_skip, 'move recipient BAM';
 		push @gather_output_skip, 'move donor BAM';
@@ -243,8 +243,8 @@ sub main {
 			$config{"global"}->{'$;HOST_REFERENCE$;'} = $options{host_reference};
 		}
 
-		# The mpileup component needs the host reference to serve as a reference here too
-		$config{'lgt_mpileup lgt_host'}->{'$;FASTA_REFERENCE$;'} = $options{host_reference};
+		# The mpileup component needs the recipient reference to serve as a reference here too
+		$config{'lgt_mpileup lgt_recipient'}->{'$;FASTA_REFERENCE$;'} = $options{host_reference};
 	}
 
 	if ($host_only) {
@@ -255,7 +255,7 @@ sub main {
 		}
 
 		$config{"lgt_bwa_post_process default"}->{'$;DONOR_FILE_LIST$;'} = '';
-		$config{"lgt_bwa_post_process default"}->{'$;SKIP_WF_COMMAND$;'} = 'create LGT host BAM file list,create recipient BAM file,create microbiome BAM file list';
+		$config{"lgt_bwa_post_process default"}->{'$;SKIP_WF_COMMAND$;'} = 'create LGT host BAM file list,create recipient BAM file,create donor BAM file list';
 		$config{"filter_dups_lc_seqs lgt"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
 		$config{"filter_dups_lc_seqs donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.no_map.bam.list';
 	} else {
@@ -284,7 +284,7 @@ sub main {
 			$config{'lgt_bwa recipient'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_recipient/lgt_build_bwa_index.fsa.list';
 		}
 
-		# If host only, add microbiome alignment and post-NT blast alignment
+		# If host only, add no-mapped alignment and post-NT blast alignment
 		if ($host_only) {
 			# Each individual genome is small enough to use 'is' instead of 'btwsw'
 			$config{"lgt_build_bwa_index refseq"}->{'$;ALGORITHM$;'} = "is";
