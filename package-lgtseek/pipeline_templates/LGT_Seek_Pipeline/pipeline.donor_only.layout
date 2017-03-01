@@ -70,7 +70,7 @@
 					</commandSet>
 					<commandSet type="serial">
 						<state>incomplete</state>
-						<name>lgt_mpileup.donor_donor</name>
+						<name>lgt_mpileup.all_donor</name>
 					</commandSet>
 				</commandSet>
 			</commandSet>
