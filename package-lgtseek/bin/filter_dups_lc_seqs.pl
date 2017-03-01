@@ -120,13 +120,12 @@ my $results = GetOptions (\%options,
 
 &check_options(\%options);
 
+my $tmp_dir = (defined $options{'tmp_dir'}) ? $options{'tmp_dir'} : $options{'output_dir'} . "/tmp";
 my $count = check_empty_file();
 if ($count == 0) {
 	print STDERR "Input file $options{'input_file'} has no alignments.  Exiting and not creating output.\n";
 	exit(0);
 }
-
-my $tmp_dir = (defined $options{'tmp_dir'}) ? $options{'tmp_dir'} : $options{'output_dir'} . "/tmp";
 
 my $lc_method = defined $options{'lc_method'} ? $options{'lc_method'} : $DEFAULT_LC_METHOD;
 my $lc_threshold = defined $options{'lc_threshold'} ? $options{'lc_threshold'} : $DEFAULT_LC_THRESHOLD;
