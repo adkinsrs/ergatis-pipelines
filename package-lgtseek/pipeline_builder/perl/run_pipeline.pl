@@ -9,7 +9,7 @@ use Ergatis::SavedPipeline;
 use Ergatis::ConfigFile;
 
 # If on a Docker container being run on Docker-Machine, get IP of Docker Host
-my $host = 'localhost'
+my $host = 'localhost';
 $host = $ENV{'DOCKER_HOST'} if (defined $ENV{'DOCKER_HOST'});
 
 
