@@ -8,6 +8,11 @@ use Ergatis::Pipeline;
 use Ergatis::SavedPipeline;
 use Ergatis::ConfigFile;
 
+# If on a Docker container being run on Docker-Machine, get IP of Docker Host
+my $host = 'localhost'
+$host = $ENV{'DOCKER_HOST'} if (defined $ENV{'DOCKER_HOST'});
+
+
 my %options;
 my $results = GetOptions (\%options,
                           "layout|l=s",
@@ -35,7 +40,7 @@ my $id = &make_pipeline( $layout, $repo_root, $id_repo, $config, $ergatis_config
 #Label the pipeline.
 &label_pipeline( $repo_root, $id);
 
-my $url = "http://localhost:8080/ergatis/cgi/view_pipeline.cgi?instance=$repo_root/workflow/runtime/pipeline/$id/pipeline.xml";
+my $url = "http://${host}:8080/ergatis/cgi/view_pipeline.cgi?instance=$repo_root/workflow/runtime/pipeline/$id/pipeline.xml";
 print "pipeline_id -> $id | pipeline_url -> $url\n";
 
 sub make_pipeline {
