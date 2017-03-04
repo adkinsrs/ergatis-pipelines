@@ -38,7 +38,7 @@
 			</param>
 			<param>
 				<key>--output_dir</key>
-				<value>$;OUTPUT_DIRECTORY$;</value>
+				<value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;</value>
 			</param>
 			<param>
             	<key>stdout</key>

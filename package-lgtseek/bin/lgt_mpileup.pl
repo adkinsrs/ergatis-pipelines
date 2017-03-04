@@ -92,7 +92,8 @@ foreach my $ref (@ref_files){
 	my($filename, $dirs, $suffix) = fileparse($ref);
 	my $base = $filename . $suffix;
 	my $new_ref = "${output_dir}/${base}";
-	symlink($ref, $output_dir);
+print STDOUT "Symlink $ref to $new_ref\n";
+	symlink($ref, $new_ref);
 	my $mpilup_output = $lgt_obj->mpileup( {
 		    'input'      => $options{input_file},
 	        'output_dir' => $output_dir,
