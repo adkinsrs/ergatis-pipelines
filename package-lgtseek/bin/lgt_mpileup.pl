@@ -71,8 +71,8 @@ my $count_id = 0;
 my @ref_files;
 
 my $results = GetOptions (\%options,
-					 "input_file|i=s",
-					 "fasta_ref|f=s",
+                     "input_file|i=s",
+                     "fasta_ref|f=s",
                      "samtools_path|s=s",
                      "output_dir|o=s",
                      "log|l=s",
@@ -89,10 +89,14 @@ my $lgt_obj = LGT::LGTSeek->new( {
 
 foreach my $ref (@ref_files){
 	chomp $ref;
+	my($filename, $dirs, $suffix) = fileparse($ref);
+	my $base = $filename . $suffix;
+	my $new_ref = "${output_dir}/${base}";
+	symlink($ref, $output_dir);
 	my $mpilup_output = $lgt_obj->mpileup( {
 		    'input'      => $options{input_file},
 	        'output_dir' => $output_dir,
-	        'ref'        => $ref
+	        'ref'        => $new_ref
 	    }
 	);
 }
