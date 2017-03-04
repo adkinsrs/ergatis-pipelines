@@ -274,12 +274,15 @@ sub main {
 
 		# The mpileup component needs the donor reference to serve as a reference here too
 		$config{'lgt_mpileup lgt_donor'}->{'$;FASTA_REFERENCE$;'} = $options{donor_reference};
+		$config{'lgt_mpileup all_donor'}->{'$;FASTA_REFERENCE$;'} = $options{donor_reference};
 	}
 
 	# If we have a use case where there is a good donor and good reference, skip BLAST output
 	if (! ($donor_only || $host_only) ) {
 		push @gather_output_skip, 'move m8 output';
 		push @gather_output_skip, 'move clone output';
+
+		$config{'lgt_mpileup all_recipient'}->{'$;FASTA_REFERENCE$;'} = $options{host_reference};
 	}
 
 	# If we are indexing references in the pipeline, we need to change some config inputs
