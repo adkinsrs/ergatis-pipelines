@@ -74,7 +74,7 @@
             </param>
             <param>
                 <key>--regex</key>
-                <value>".*lgt_(recipient)\.bam"</value>
+                <value>".*$;LGT_TOKEN$;\.bam"</value>
             </param>
             <param>
                 <key>--output_list</key>
@@ -92,7 +92,7 @@
             </param>
             <param>
                 <key>--regex</key>
-                <value>".*all_recipient\.bam"</value>
+                <value>".*$;ALL_RECIPIENT_TOKEN$;\.bam"</value>
             </param>
             <param>
                 <key>--output_list</key>
@@ -110,7 +110,7 @@
             </param>
             <param>
                 <key>--regex</key>
-                <value>".*all_donor\.bam"</value>
+                <value>".*$;ALL_DONOR_TOKEN$;\.bam"</value>
             </param>
             <param>
                 <key>--output_list</key>
