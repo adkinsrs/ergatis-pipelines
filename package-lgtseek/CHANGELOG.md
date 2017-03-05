@@ -1,4 +1,7 @@
 # CHANGELOG
+3/5/17
+* Lots of renaming and rearranging in lgt_bwa_post_process component
+
 2/27/17
 * Adding more lgt_mpileup components and filter_dups_lc_seqs components per use case
 * Renaming many outputs from 'host' to 'recipient' and from 'microbiome' to 'donor'

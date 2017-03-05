@@ -230,9 +230,9 @@ if ($options{bam_input}) {
 		# In donor-only alignment cases, we do not keep the 'MM' matches
 
 		$config{"lgt_bwa_post_process default"}->{'$;RECIPIENT_FILE_LIST$;'} = '';
-		$config{"lgt_bwa-post_process default"}->{'$;LGT_BAM_OUTPUT_LIST$;'} = '$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.single_map.bam.list';
-		$config{"lgt_bwa-post_process default"}->{'$;ALL_DONOR_BAM_OUTPUT_LIST$;'} = '$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.all_map.bam.list';
-		$config{"lgt_bwa-post_process default"}->{'$;ALL_RECIPIENT_BAM_OUTPUT_LIST$;'} = '$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.no_map.bam.list';
+		$config{"lgt_bwa_post_process default"}->{'$;LGT_BAM_OUTPUT_LIST$;'} = '$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.single_map.bam.list';
+		$config{"lgt_bwa_post_process default"}->{'$;ALL_DONOR_BAM_OUTPUT_LIST$;'} = '$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.all_map.bam.list';
+		$config{"lgt_bwa_post_process default"}->{'$;ALL_RECIPIENT_BAM_OUTPUT_LIST$;'} = '$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.no_map.bam.list';
 
 		$config{"filter_dups_lc_seqs lgt"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
 		$config{"filter_dups_lc_seqs donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.all_map.bam.list';
@@ -262,9 +262,9 @@ if ($options{bam_input}) {
 		}
 
 		$config{"lgt_bwa_post_process default"}->{'$;DONOR_FILE_LIST$;'} = '';
-		$config{"lgt_bwa-post_process default"}->{'$;LGT_BAM_OUTPUT_LIST$;'} = '$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.single_map.bam.list';
-		$config{"lgt_bwa-post_process default"}->{'$;ALL_DONOR_BAM_OUTPUT_LIST$;'} = '$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.no_map.bam.list';
-		$config{"lgt_bwa-post_process default"}->{'$;ALL_RECIPIENT_BAM_OUTPUT_LIST$;'} = '$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.all_map.bam.list';
+		$config{"lgt_bwa_post_process default"}->{'$;LGT_BAM_OUTPUT_LIST$;'} = '$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.single_map.bam.list';
+		$config{"lgt_bwa_post_process default"}->{'$;ALL_DONOR_BAM_OUTPUT_LIST$;'} = '$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.no_map.bam.list';
+		$config{"lgt_bwa_post_process default"}->{'$;ALL_RECIPIENT_BAM_OUTPUT_LIST$;'} = '$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.all_map.bam.list';
 
 		$config{"filter_dups_lc_seqs lgt"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
 		
