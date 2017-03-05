@@ -201,14 +201,27 @@ sub main {
 
 	# If the starting point is BAM input, then use that.
 	# Default is to point lgt_bwa.recipient to use the sra2fastq output list
-	if ($options{bam_input}) {
+
+if ($options{bam_input}) {
+	# If starting from BAM instead of SRA, then change QUERY_FILE to use BAM input
+	if (! $donor_only) {
 		$config{"lgt_bwa recipient"}->{'$;QUERY_FILE$;'} = $options{bam_input};
 		$config{"lgt_bwa recipient"}->{'$;PAIRED$;'} = 1;
-	} elsif ($options{fastq_input}) { 
+	} else {
+		$config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = $options{bam_input};
+		$config{"lgt_bwa donor"}->{'$;PAIRED$;'} = 1;
+	}
+} elsif ($options{fastq_input}) { 
+	# If starting from FASTQ then change QUERY_FILE to use FASTQ input
+	if (! $donor_only) {
 		$config{"lgt_bwa recipient"}->{'$;QUERY_FILE$;'} = $options{fastq_input};
 	} else {
-		$config{"global"}->{'$;SRA_RUN_ID$;'} = $options{sra_id};
+		$config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = $options{fastq_input};
 	}
+} else {
+	$config{"global"}->{'$;SRA_RUN_ID$;'} = $options{sra_id};
+	$config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = '$;REPOSITORY_ROOT$;/output_repository/sra2fastq/$;PIPELINEID$;_default/sra2fastq.list' if $donor_only;
+}
 
 	# If SRA ID was not input type, then remove that step from array
 	push @gather_output_skip, 'move SRA metadata output' unless $options{sra_id};
@@ -219,17 +232,6 @@ sub main {
 	if ($donor_only) {
 		# In donor-only alignment cases, we do not keep the 'MM' matches
 
-		if ($options{bam_input}) {
-			# If starting from BAM instead of SRA, then change QUERY_FILE to use BAM input
-			delete $config{"lgt_bwa recipient"};
-			$config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = $options{bam_input};
-			$config{"lgt_bwa donor"}->{'$;PAIRED$;'} = 1;
-		} elsif ($options{fastq_input}) {
-			# If starting from FASTQ then change QUERY_FILE to use FASTQ input
-			$config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = $options{fastq_input};
-		} else {
-			$config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = '$;REPOSITORY_ROOT$;/output_repository/sra2fastq/$;PIPELINEID$;_default/sra2fastq.list';
-		}
 		$config{"lgt_bwa_post_process default"}->{'$;RECIPIENT_FILE_LIST$;'} = '';
 		$config{"lgt_bwa_post_process default"}->{'$;SKIP_WF_COMMAND$;'} = 'create LGT host BAM file list,create recipient BAM file,create donor BAM file list,create no-map BAM file list';
 		$config{"filter_dups_lc_seqs lgt"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
