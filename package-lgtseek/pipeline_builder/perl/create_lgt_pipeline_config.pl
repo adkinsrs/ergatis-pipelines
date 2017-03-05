@@ -226,15 +226,17 @@ if ($options{bam_input}) {
 	# If SRA ID was not input type, then remove that step from array
 	push @gather_output_skip, 'move SRA metadata output' unless $options{sra_id};
 
-	# Default use case (good donor and good host), we just want two specific list files.  For donor and host-only cases, we want other specific list files
-	$config{"lgt_bwa_post_process default"}->{'$;SKIP_WF_COMMAND$;'} = 'create single-map BAM file list,create no-map BAM file list';
-
 	if ($donor_only) {
 		# In donor-only alignment cases, we do not keep the 'MM' matches
 
 		$config{"lgt_bwa_post_process default"}->{'$;RECIPIENT_FILE_LIST$;'} = '';
-		$config{"lgt_bwa_post_process default"}->{'$;SKIP_WF_COMMAND$;'} = 'create LGT host BAM file list,create recipient BAM file,create donor BAM file list,create no-map BAM file list';
+		$config{"lgt_bwa-post_process default"}->{'$;LGT_BAM_OUTPUT_LIST$;'} = '$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.single_map.bam.list';
+		$config{"lgt_bwa-post_process default"}->{'$;ALL_DONOR_BAM_OUTPUT_LIST$;'} = '$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.all_map.bam.list';
+		$config{"lgt_bwa-post_process default"}->{'$;ALL_RECIPIENT_BAM_OUTPUT_LIST$;'} = '$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.no_map.bam.list';
+
 		$config{"filter_dups_lc_seqs lgt"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
+		$config{"filter_dups_lc_seqs donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.all_map.bam.list';
+
 		push @gather_output_skip, 'move recipient BAM';
 		push @gather_output_skip, 'move donor BAM';
 		push @gather_output_skip, 'move all recipient mpileup';
@@ -260,12 +262,14 @@ if ($options{bam_input}) {
 		}
 
 		$config{"lgt_bwa_post_process default"}->{'$;DONOR_FILE_LIST$;'} = '';
-		$config{"lgt_bwa_post_process default"}->{'$;SKIP_WF_COMMAND$;'} = 'create LGT host BAM file list,create recipient BAM file,create donor BAM file list';
+		$config{"lgt_bwa-post_process default"}->{'$;LGT_BAM_OUTPUT_LIST$;'} = '$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.single_map.bam.list';
+		$config{"lgt_bwa-post_process default"}->{'$;ALL_DONOR_BAM_OUTPUT_LIST$;'} = '$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.no_map.bam.list';
+		$config{"lgt_bwa-post_process default"}->{'$;ALL_RECIPIENT_BAM_OUTPUT_LIST$;'} = '$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.all_map.bam.list';
+
 		$config{"filter_dups_lc_seqs lgt"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
-		$config{"filter_dups_lc_seqs donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.no_map.bam.list';
 		
 		push @gather_output_skip, 'move lgt donor mpileup';
-		push @gather_output_skip, 'move lgt recipient mpileup';
+		push @gather_output_skip, 'move all donor mpileup';
 		push @gather_output_skip, 'move all recipient mpileup';
 	} else {
 		# Only add donor-relevant info to config if we are aligning to a donor
@@ -291,7 +295,11 @@ if ($options{bam_input}) {
 
 	# If we are indexing references in the pipeline, we need to change some config inputs
 	if ($included_subpipelines{'indexing'}) {
-		unless ($donor_only) {
+
+		if ($donor_only){
+			$config{'lgt_bwa validation'}->{'$;INPUT_FILE$;'} = '';
+			$config{'lgt_bwa validation'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_donor/lgt_build_bwa_index.fsa.list';
+		} else {
 			# Change the host reference for lgt_bwa
 			$config{'lgt_bwa recipient'}->{'$;INPUT_FILE$;'} = '';
 			$config{'lgt_bwa recipient'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_recipient/lgt_build_bwa_index.fsa.list';
@@ -304,9 +312,6 @@ if ($options{bam_input}) {
 
 			$config{'lgt_bwa validation'}->{'$;INPUT_FILE$;'} = '';
 			$config{'lgt_bwa validation'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_recipient/lgt_build_bwa_index.fsa.list';
-
-			$config{'lgt_bwa mb'}->{'$;INPUT_FILE$;'} = '';
-			$config{'lgt_bwa mb'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_refseq/lgt_build_bwa_index.fsa.list';
 
 			# Change the Refseq reference for lgt_bwa
 			$config{'lgt_bwa lgt'}->{'$;INPUT_FILE$;'} = '';

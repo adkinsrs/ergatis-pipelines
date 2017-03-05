@@ -24,7 +24,6 @@ sam2fasta.pl
 
 use strict;
 use warnings;
-use DBI;
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev);
 use Pod::Usage;
 use File::Basename;

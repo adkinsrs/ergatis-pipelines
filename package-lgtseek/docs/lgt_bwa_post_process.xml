@@ -65,7 +65,7 @@
 	<!--Iterator Done-->
         <command>
             <type>RunUnixCommand</type>
-            <name>create LGT recipient BAM file list</name>
+            <name>create LGT-recipient BAM file list</name>
             <state>incomplete</state>
             <executable>$;BIN_DIR$;/create_list_file</executable>
             <param>
@@ -74,16 +74,16 @@
             </param>
             <param>
                 <key>--regex</key>
-                <value>".*lgt_(recipient|host)\.bam"</value>
+                <value>".*lgt_(recipient)\.bam"</value>
             </param>
             <param>
                 <key>--output_list</key>
-                <value>$;LGT_H_BAM_OUTPUT_LIST$;</value>
+                <value>$;LGT_BAM_OUTPUT_LIST$;</value>
             </param>
         </command>
         <command>
             <type>RunUnixCommand</type>
-            <name>create recipient BAM file list</name>
+            <name>create all-recipient BAM file list</name>
             <state>incomplete</state>
             <executable>$;BIN_DIR$;/create_list_file</executable>
             <param>
@@ -92,16 +92,16 @@
             </param>
             <param>
                 <key>--regex</key>
-                <value>".*recipient\.bam"</value>
+                <value>".*all_recipient\.bam"</value>
             </param>
             <param>
                 <key>--output_list</key>
-                <value>$;RECIPIENT_BAM_OUTPUT_LIST$;</value>
+                <value>$;ALL_RECIPIENT_BAM_OUTPUT_LIST$;</value>
             </param>
         </command>
         <command>
             <type>RunUnixCommand</type>
-            <name>create donor BAM file list</name>
+            <name>create all-donor BAM file list</name>
             <state>incomplete</state>
             <executable>$;BIN_DIR$;/create_list_file</executable>
             <param>
@@ -110,66 +110,12 @@
             </param>
             <param>
                 <key>--regex</key>
-                <value>".*microbiome\.bam"</value>
+                <value>".*all_donor\.bam"</value>
             </param>
             <param>
                 <key>--output_list</key>
-                <value>$;MB_BAM_OUTPUT_LIST$;</value>
+                <value>$;ALL_DONOR_BAM_OUTPUT_LIST$;</value>
             </param>
         </command>
-        <command>
-            <type>RunUnixCommand</type>
-            <name>create single-map BAM file list</name>
-            <state>incomplete</state>
-            <executable>$;BIN_DIR$;/create_list_file</executable>
-            <param>
-                <key>--directory</key>
-                <value>$;OUTPUT_DIRECTORY$;</value>
-            </param>
-            <param>
-                <key>--regex</key>
-                <value>".*single_map\.bam"</value>
-            </param>
-            <param>
-                <key>--output_list</key>
-                <value>$;SINGLE_BAM_OUTPUT_LIST$;</value>
-            </param>
-		</command>
-        <command>
-            <type>RunUnixCommand</type>
-			<name>create single/paired-map BAM file list</name>
-            <state>incomplete</state>
-            <executable>$;BIN_DIR$;/create_list_file</executable>
-            <param>
-                <key>--directory</key>
-                <value>$;OUTPUT_DIRECTORY$;</value>
-            </param>
-            <param>
-                <key>--regex</key>
-                <value>".*single_paired_map\.bam"</value>
-            </param>
-            <param>
-                <key>--output_list</key>
-                <value>$;SINGLE_PAIRED_BAM_OUTPUT_LIST$;</value>
-            </param>
-		</command>
-        <command>
-            <type>RunUnixCommand</type>
-            <name>create no-map BAM file list</name>
-            <state>incomplete</state>
-            <executable>$;BIN_DIR$;/create_list_file</executable>
-            <param>
-                <key>--directory</key>
-                <value>$;OUTPUT_DIRECTORY$;</value>
-            </param>
-            <param>
-                <key>--regex</key>
-                <value>".*no_map\.bam"</value>
-            </param>
-            <param>
-                <key>--output_list</key>
-                <value>$;NO_MAP_BAM_OUTPUT_LIST$;</value>
-            </param>
-		</command>
     </commandSet>
 </commandSetRoot>

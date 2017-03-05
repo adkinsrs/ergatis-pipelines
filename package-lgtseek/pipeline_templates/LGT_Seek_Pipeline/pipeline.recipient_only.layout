@@ -1,9 +1,9 @@
 <commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="commandSet.xsd" type="instance">
-    <commandSet type="serial">
-        <state>incomplete</state>
-        <name>start</name>
-        <commandSet type="serial">
-            <state>incomplete</state>
+	<commandSet type="serial">
+		<state>incomplete</state>
+		<name>start</name>
+		<commandSet type="serial">
+			<state>incomplete</state>
 			<commandSet type="serial">
 				<state>incomplete</state>
 				<name>lgt_bwa.recipient</name>
@@ -77,23 +77,7 @@
 						</commandSet>
 					</commandSet>
 				</commandSet>
-                <!-- RECIPIENT side -->
-                <commandSet type="serial">
-                    <state>incomplete</state>
-                    <commandSet type="serial">
-                        <state>incomplete</state>
-                        <name>filter_dups_lc_seqs.donor</name>
-                    </commandSet>
-                    <commandSet type="serial">
-                        <state>incomplete</state>
-                        <name>lgt_bwa.mb</name>
-                    </commandSet>
-                    <commandSet type="serial">
-                        <state>incomplete</state>
-                        <name>sam2lca.donor</name>
-                    </commandSet>
-                </commandSet>
 			</commandSet>           
-        </commandSet>
-    </commandSet>
+		</commandSet>
+	</commandSet>
 </commandSetRoot>
