@@ -1431,7 +1431,7 @@ sub _bwaPostProcessDonorHostPaired {
          "| $samtools view -S -b -o $output_dir/" . $prefix . ".all_donor.bam -"
      ) or die "Unable to open donor microbiome file for writing\n";
      open(
-         my $all_host_h_fht,
+         my $all_host_h_fh,
          "| $samtools view -S -b -o $output_dir/" . $prefix . ".all_recipient.bam -"
      ) or die "Unable to open donor microbiome file for writing\n";
 
