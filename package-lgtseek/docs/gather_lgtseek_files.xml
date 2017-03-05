@@ -3,83 +3,97 @@
 <commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
     <commandSet type="serial">
         <state>incomplete</state>
-        <name>gather lgtview workflow</name>
+        <name>gather lgtseek workflow</name>
         <command>
             <type>RunUnixCommand</type>
             <name>create pipeline directory</name>
             <state>incomplete</state>
             <executable>mkdir</executable>
-			<arg>-p -m 777 /mnt/output_data/$;PIPELINEID$;</arg>
-		</command>
+            <arg>-p -m 777 /mnt/output_data/$;PIPELINEID$;</arg>
+        </command>
         <command>
             <type>RunUnixCommand</type>
             <name>move LGT BAM</name>
             <state>incomplete</state>
-			<executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
-			<arg>/mnt/output_data/$;PIPELINEID$;/lgt_bam $;LGT_BAM_OUT$;</arg>
+            <executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
+            <arg>/mnt/output_data/$;PIPELINEID$;/lgt_bam $;LGT_BAM_OUT$;</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>
             <name>move recipient BAM</name>
             <state>incomplete</state>
-			<executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
-			<arg>/mnt/output_data/$;PIPELINEID$;/recipient_bam $;RECIPIENT_BAM_OUT$;</arg>
+            <executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
+            <arg>/mnt/output_data/$;PIPELINEID$;/recipient_bam $;RECIPIENT_BAM_OUT$;</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>
             <name>move donor BAM</name>
             <state>incomplete</state>
-			<executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
-			<arg>/mnt/output_data/$;PIPELINEID$;/donor_bam $;DONOR_BAM_OUT$;</arg>
+            <executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
+            <arg>/mnt/output_data/$;PIPELINEID$;/donor_bam $;DONOR_BAM_OUT$;</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>
             <name>move LGT donor mpileup</name>
             <state>incomplete</state>
-			<executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
-			<arg>/mnt/output_data/$;PIPELINEID$;/lgt_donor_mpileup $;LGT_DONOR_MPILEUP$;</arg>
+            <executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
+            <arg>/mnt/output_data/$;PIPELINEID$;/lgt_donor_mpileup $;LGT_DONOR_MPILEUP$;</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>
             <name>move LGT recipient mpileup</name>
             <state>incomplete</state>
-			<executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
-			<arg>/mnt/output_data/$;PIPELINEID$;/lgt_recipient_mpileup $;LGT_RECIPIENT_MPILEUP$;</arg>
+            <executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
+            <arg>/mnt/output_data/$;PIPELINEID$;/lgt_recipient_mpileup $;LGT_RECIPIENT_MPILEUP$;</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>
             <name>move all donor mpileup</name>
             <state>incomplete</state>
-			<executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
-			<arg>/mnt/output_data/$;PIPELINEID$;/all_donor_mpileup $;ALL_DONOR_MPILEUP$;</arg>
+            <executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
+            <arg>/mnt/output_data/$;PIPELINEID$;/all_donor_mpileup $;ALL_DONOR_MPILEUP$;</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>
             <name>move all recipient mpileup</name>
             <state>incomplete</state>
-			<executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
-			<arg>/mnt/output_data/$;PIPELINEID$;/all_recipient_mpileup $;ALL_RECIPIENT_MPILEUP$;</arg>
+            <executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
+            <arg>/mnt/output_data/$;PIPELINEID$;/all_recipient_mpileup $;ALL_RECIPIENT_MPILEUP$;</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>
             <name>move SRA metadata output</name>
             <state>incomplete</state>
             <executable>/bin/cp</executable>
-			<arg>$;METADATA_FILE$; /mnt/output_data/$;PIPELINEID$;/</arg>
+            <arg>$;METADATA_FILE$; /mnt/output_data/$;PIPELINEID$;/</arg>
+        </command>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>move blast-validated BAM</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
+            <arg>/mnt/output_data/$;PIPELINEID$;/blast_validated_lgt $;BLAST_LGT_BAM_OUT$;</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>
             <name>move m8 output</name>
             <state>incomplete</state>
             <executable>/bin/cp</executable>
-			<arg>$;BLAST_M8_OUT$; /mnt/output_data/$;PIPELINEID$;/</arg>
+            <arg>$;BLAST_M8_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>
             <name>move clone output</name>
             <state>incomplete</state>
             <executable>/bin/cp</executable>
-			<arg>$;LGT_CLONE_OUT$; /mnt/output_data/$;PIPELINEID$;/</arg>
+            <arg>$;LGT_CLONE_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt</arg>
+        </command>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>archive output</name>
+            <state>incomplete</state>
+            <executable>/bin/tar</executable>
+            <arg>-C /mnt/output_data -czvf $;PIPELINEID$;_output.tgz /mnt/output_data/$;PIPELINEID$;</arg>
         </command>
     </commandSet>
 </commandSetRoot>

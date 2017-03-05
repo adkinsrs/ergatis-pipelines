@@ -281,6 +281,7 @@ sub main {
 	if (! ($donor_only || $host_only) ) {
 		push @gather_output_skip, 'move m8 output';
 		push @gather_output_skip, 'move clone output';
+		push @gather_output_skip, 'move blast-validated BAM';
 
 		$config{'lgt_mpileup all_recipient'}->{'$;FASTA_REFERENCE$;'} = $options{host_reference};
 	}
@@ -317,7 +318,7 @@ sub main {
 # If we are passing a directory to store important output files, then change a few parameters
 if ($included_subpipelines{'post'}){
 	$config{'global'}->{'$;DATA_DIR$;'} = $options{data_directory};
-	$config{"gather_lgtview_files default"}->{'$;SKIP_WF_COMMAND$;'} = join ',', @gather_output_skip;
+	$config{"gather_lgtseek_files default"}->{'$;SKIP_WF_COMMAND$;'} = join ',', @gather_output_skip;
 }
 
 	# open config file for writing

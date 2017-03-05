@@ -58,6 +58,10 @@
 								<state>incomplete</state>
 								<name>lgt_create_validated_bam.lgt</name>
 							</commandSet>
+							<commandSet type="serial">
+								<state>incomplete</state>
+								<name>lgt_bwa.validation</name>
+							</commandSet>
 						</commandSet>
 					</commandSet>
 				</commandSet>
