@@ -186,7 +186,7 @@ sub main {
 			}
 		} elsif ($sp eq 'indexing') {
 			if ($donor_only) {
-   				&add_config(\%config, $pipelines->{$sp}, "pipeline.donor_only.config");
+			    &add_config(\%config, $pipelines->{$sp}, "pipeline.donor_only.config");
 			} elsif ($host_only) {
 				&add_config(\%config, $pipelines->{$sp}, "pipeline.recipient_only.config");
 			} else {
@@ -221,13 +221,14 @@ sub main {
 
 		if ($options{bam_input}) {
 			# If starting from BAM instead of SRA, then change QUERY_FILE to use BAM input
+			delete $config{"lgt_bwa recipient"};
 			$config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = $options{bam_input};
 			$config{"lgt_bwa donor"}->{'$;PAIRED$;'} = 1;
 		} elsif ($options{fastq_input}) {
 			# If starting from FASTQ then change QUERY_FILE to use FASTQ input
 			$config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = $options{fastq_input};
 		} else {
-            $config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = '$;REPOSITORY_ROOT$;/output_repository/sra2fastq/$;PIPELINEID$;_default/sra2fastq.list';
+			$config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = '$;REPOSITORY_ROOT$;/output_repository/sra2fastq/$;PIPELINEID$;_default/sra2fastq.list';
 		}
 		$config{"lgt_bwa_post_process default"}->{'$;RECIPIENT_FILE_LIST$;'} = '';
 		$config{"lgt_bwa_post_process default"}->{'$;SKIP_WF_COMMAND$;'} = 'create LGT host BAM file list,create recipient BAM file,create donor BAM file list,create no-map BAM file list';
