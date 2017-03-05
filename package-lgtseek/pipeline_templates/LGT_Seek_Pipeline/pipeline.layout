@@ -47,17 +47,17 @@
 					<name>lgt_mpileup.all_donor</name>
 				</commandSet>
 			</commandSet>
-			<!-- RECIPIENT side -->
+		</commandSet>
+		<!-- RECIPIENT side -->
+		<commandSet type="serial">
+			<state>incomplete</state>
 			<commandSet type="serial">
 				<state>incomplete</state>
-				<commandSet type="serial">
-					<state>incomplete</state>
-					<name>filter_dups_lc_seqs.recipient</name>
-				</commandSet>
-				<commandSet type="serial">
-					<state>incomplete</state>
-					<name>lgt_mpileup.all_recipient</name>
-				</commandSet>
+				<name>filter_dups_lc_seqs.recipient</name>
+			</commandSet>
+			<commandSet type="serial">
+				<state>incomplete</state>
+				<name>lgt_mpileup.all_recipient</name>
 			</commandSet>
 		</commandSet>
 	</commandSet>
