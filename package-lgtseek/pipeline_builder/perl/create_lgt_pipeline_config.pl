@@ -289,8 +289,6 @@ if ($options{bam_input}) {
 		push @gather_output_skip, 'move m8 output';
 		push @gather_output_skip, 'move clone output';
 		push @gather_output_skip, 'move blast-validated BAM';
-# TEMPORARY - until I can fix Picard errors with all-recipient mapping
-		push @gather_output_skip, 'move all recipient mpileup';
 
 		$config{'lgt_mpileup all_recipient'}->{'$;FASTA_REFERENCE$;'} = $options{host_reference};
 	}
