@@ -96,7 +96,7 @@ my $logfh;
 my $DEFAULT_LC_THRESHOLD = 7;
 my $DEFAULT_LC_METHOD = "dust";
 my $JAVA_PATH = "/usr/bin/java";	# Picard-2.0.1 needs Java 1.8
-#my $JAVA_OPTS = '-Xmx2g';
+my $JAVA_OPTS = '-Xmx4096m';
 ####################################################
 
 my %options;
@@ -136,7 +136,7 @@ my $lgtseek = LGT::LGTSeek->new( {
 		'prinseq_bin'	=> $options{'prinseq_path'},
 		'Picard_jar'	=> $options{'picard_path'},
 		'java_bin'		=> $java_path,
-		'java_opts'		=> '',
+		'java_opts'		=> '$JAVA_OPTS',
 		'samtools_bin'	=> $options{'samtools_path'},
 		'paired_end'	=> 1,
 		'verbose'		=> 1
