@@ -148,7 +148,7 @@ fi
 
 exit 0
 
-check_for_success() {
+function check_for_success() {
     if [ $2 -ne 0 ]; then 
         echo "$1 failed with exit code $2"
         exit 1
