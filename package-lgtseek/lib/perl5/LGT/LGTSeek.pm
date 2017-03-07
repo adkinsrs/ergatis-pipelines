@@ -335,12 +335,12 @@ sub _prinseqFilterPaired {
             }
             if (
                 $self->_run_cmd(
-                    "$self->{samtools_bin} view -H $bam_file | head -n 1") !~
+                    "TMP_DIR=$tmp_dir $self->{samtools_bin} view -H $bam_file | head -n 1") !~
                 /queryname/
               )
             {
                 $self->_run_cmd(
-                    "$self->{samtools_bin} sort -n -o $tmp_dir/$name\.bam $bam_file");
+                    "TMP_DIR=$tmp_dir $self->{samtools_bin} sort -n -o $tmp_dir/$name\.bam $bam_file");
                 $bam_file = "$tmp_dir/$name\.bam";
             }
             $self->_run_cmd(
@@ -349,7 +349,7 @@ sub _prinseqFilterPaired {
             $self->_run_cmd(
 "$Picard MarkDuplicates I=$bam_file TMP_DIR=$tmp_dir OUTPUT=$tmp_dir/$name\_dedup.bam METRICS_FILE=$tmp_dir/$name\_dedup-metrics.txt REMOVE_DUPLICATES=false VALIDATION_STRINGENCY=SILENT"
             );
-            open( my $BAM, "$self->{samtools_bin} view $tmp_dir/$name\_dedup.bam |" )
+            open( my $BAM, "TMP_DIR=$tmp_dir $self->{samtools_bin} view $tmp_dir/$name\_dedup.bam |" )
               or $self->fail(
 "*** Error *** &prinseqFilterBam unable to open the deduped bam: $tmp_dir/$name\_dedup.bam"
               );
