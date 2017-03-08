@@ -20,17 +20,17 @@
         </command>
         <command>
             <type>RunUnixCommand</type>
-            <name>move recipient BAM</name>
+            <name>move all recipient BAM</name>
             <state>incomplete</state>
             <executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
-            <arg>/mnt/output_data/$;PIPELINEID$;/recipient_bam $;RECIPIENT_BAM_OUT$;</arg>
+            <arg>/mnt/output_data/$;PIPELINEID$;/all_recipient_bam $;RECIPIENT_BAM_OUT$;</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>
-            <name>move donor BAM</name>
+            <name>move all donor BAM</name>
             <state>incomplete</state>
             <executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
-            <arg>/mnt/output_data/$;PIPELINEID$;/donor_bam $;DONOR_BAM_OUT$;</arg>
+            <arg>/mnt/output_data/$;PIPELINEID$;/all_donor_bam $;DONOR_BAM_OUT$;</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>

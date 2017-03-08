@@ -237,10 +237,10 @@ if ($options{bam_input}) {
 		$config{"filter_dups_lc_seqs lgt"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
 		$config{"filter_dups_lc_seqs donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.all_map.bam.list';
 
-		push @gather_output_skip, 'move recipient BAM';
-		push @gather_output_skip, 'move donor BAM';
+		push @gather_output_skip, 'move all recipient BAM';
+		push @gather_output_skip, 'move all donor BAM';
 		push @gather_output_skip, 'move all recipient mpileup';
-		push @gather_output_skip, 'move lgt recipient mpileup';
+		push @gather_output_skip, 'move LGT recipient mpileup';
 
 	} else {
 		# Only add host-relevant info to config if we are aligning to a host
@@ -268,7 +268,7 @@ if ($options{bam_input}) {
 
 		$config{"filter_dups_lc_seqs lgt"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
 		
-		push @gather_output_skip, 'move lgt donor mpileup';
+		push @gather_output_skip, 'move LGT donor mpileup';
 		push @gather_output_skip, 'move all donor mpileup';
 		push @gather_output_skip, 'move all recipient mpileup';
 	} else {
