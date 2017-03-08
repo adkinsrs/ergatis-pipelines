@@ -93,7 +93,7 @@
             <name>archive output</name>
             <state>incomplete</state>
             <executable>/bin/tar</executable>
-            <arg>-C /mnt/output_data -czvf $;PIPELINEID$;_output.tgz $;PIPELINEID$;</arg>
+            <arg>-C /mnt/output_data -czvf /mnt/output_data/$;PIPELINEID$;_output.tgz $;PIPELINEID$;</arg>
         </command>
     </commandSet>
 </commandSetRoot>
