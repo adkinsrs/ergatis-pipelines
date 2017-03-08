@@ -8,10 +8,8 @@ GiTaxon
 Utility to look up taxon information in a mongo database.
 
 =head1 AUTHOR
-
-David Riley
-
-driley@som.umaryland.edu
+Shaun Adkins
+sadkins@som.umaryland.edu
 
 =cut
 
@@ -22,8 +20,6 @@ use MongoDB;
 use Bio::DB::Taxonomy;
 use Bio::DB::EUtilities;
 use File::Find;
-
-my $version;
 
 my $NODES = '/local/db/repository/ncbi/blast/20120414_001321/taxonomy/taxdump/nodes.dmp';
 my $NAMES =  '/local/db/repository/ncbi/blast/20120414_001321/taxonomy/taxdump/names.dmp';
@@ -37,13 +33,14 @@ my $TMP = '/tmp';
 sub new {
     my ( $class, $args ) = @_;
 
+    my $self = {};
     # Get version of MongoDB being used
     # Version is 'v#.#.#' or '#.#' so let's just get the first digit only.
-    $version = $MongoDB::VERSION;
-    chop $version if $version =~ /^v/;
+    my $version = $MongoDB::VERSION;
+    $version =~ s/^.// if $version =~ /^v/;
     $version = substr($version, 0, 1);
+    $self->{'version'} = $version;
 
-    my $self = {};
     # If we choose to not provide any taxonomy flatfiles, enable this property
     # This will cause all taxon entries to be added from the Entrez database
     $self->{'no_flatfiles'} =
@@ -301,6 +298,7 @@ sub insert_chunk {
     my $coll  = shift;
     my $chunk = shift;
 
+    my $version = defined $self->{'version'} ? $self->{'version'} : 0.9;
     if ($version < 1) {
         $coll->batch_insert( $chunk, { 'safe' => 1 } );    # Uses older MongoDB
     } else {
@@ -313,7 +311,7 @@ sub get_mongodb_connection {
 
     # First we'll establish our connection to mongodb
     my $conn;
-    chop $version if $version =~ /^v/;
+    my $version = defined $self->{'version'} ? $self->{'version'} : 0.9;
     if ($version < 1) {
         print STDERR "Using version of MongoDB before version 1.0\n";
         require MongoDB::Connection;

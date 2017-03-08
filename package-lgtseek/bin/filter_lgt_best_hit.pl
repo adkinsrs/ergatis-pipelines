@@ -194,12 +194,13 @@ sub check_options {
        &_log($ERROR, "Option $req is required") unless( $opts->{$req} );
    }
 
-   if (!( -e $opts->{'names_file'} && -e $opts->{'nodes_file'})){
+   if (!(length $opts->{'names_file'} && length $opts->{'nodes_file'})
+     || !( -e $opts->{'names_file'} && -e $opts->{'nodes_file'})) { 
        &_log($DEBUG, "Both --names_file and --nodes_file were not provided or invalid.  Will use Entrez to determine taxonomy lineage instead.");
        $no_flatfiles = 1;
    }
 
-   if (!( -e $opts->{'tax_id_file'})) {
+   if (!(length $opts->{'tax_id_file'} && -e $opts->{'tax_id_file'})) {
        &_log($DEBUG, "The --tax_id_file option was not passed or invalid.  Will build MongoDB database with NCBI ESummary taxon lookup.");
        $opts->{'tax_id_file'} = '';
    }
