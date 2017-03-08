@@ -68,23 +68,14 @@ case $arg in
     --out)
     out="$val"
     ;;
-    --exclude_gi)
-    exclude_gi="${val:-0}"
-    ;;
-    --gi_file)
-    gi_file="$val:-"
-    ;;
     --other_opts)
     other_opts="$val"
-	;;
+    ;;
     --query)
     query="$val"
     ;;
     --remote)
     remote="${val:-0}"
-    ;;
-    --task)
-    task="$val"
     ;;
 esac
 shift
@@ -97,25 +88,13 @@ fi
 
 # Setup and run the BLAST+ command
 blast_plus_cmd="${blast_plus_bin}/$blast_type"
-blast_plus_cmd="$blast_plus_cmd -db $db -dust $dust -evalue $evalue -query $query -task $task $other_opts"
+blast_plus_cmd="$blast_plus_cmd -db $db -dust $dust -evalue $evalue -query $query $other_opts"
 
 # For remote searches, output needs to be pairwise.  Non-remote needs to be ASN
 if [ $remote -eq 0 ]; then
-	# If GI file is passed, then filter blast db to either exclude or only use these GI
-	if [ ! -z $gi_file ] && [ -f $gi_file ]; then
-		if [ $exclude_gi -eq 0 ]; then
-			blast_plus_cmd="$blast_plus_cmd -gilist $gi_file"
-		else
-			blast_plus_cmd="$blast_plus_cmd -negative_gilist $gi_file"
-		fi
-	fi
 	# Local version
     blast_plus_cmd="$blast_plus_cmd -outfmt 11 -out $out.asn -max_target_seqs $max_target_seqs"
 else
-	if [ ! -z $gi_file ] && [ -f $gi_file ]; then
-		echo "Cannot use GI file to filter BLAST database in 'remote mode': Exiting" >&2
-		exit 1
-	fi
 	# Remote version
     blast_plus_cmd="$blast_plus_cmd -outfmt 0 -out $out -num_descriptions $max_target_seqs -num_alignments $max_target_seqs -remote"
 fi
