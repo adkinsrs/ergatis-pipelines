@@ -32,6 +32,13 @@ export LC_ALL
 #   a) Choose the correct BLAST output format depending on if --remote is used
 #   b) Format the output using 'blast_formatter' so that both pairwise and m8 formats are present
 
+check_for_success () {
+    if [ $2 -ne 0 ]; then 
+        echo "$1 failed with exit code $2"
+        exit 1
+    fi
+}
+
 while [[ $# -ge 1 ]]
 do
 i="$1"
@@ -116,7 +123,7 @@ fi
 echo "$blast_plus_cmd"
 $blast_plus_cmd
 
-check_for_success $blast_plus_cmd $?
+check_for_success "$blast_plus_cmd" $?
 
 # Time to run blast_formatter, either once or twice depending on -remote
 blast_fmtr_cmd="${blast_plus_bin}/blast_formatter"
@@ -129,7 +136,7 @@ if [ $remote -eq 0 ]; then
     $blast_pairwise_cmd
     echo "$blast_m8_cmd"
     $blast_m8_cmd
-    check_for_success $blast_m8_cmd $?
+    check_for_success "$blast_m8_cmd" $?
     echo "Now removing ASN file"
     `rm $out.asn`
 else
@@ -139,7 +146,7 @@ else
         blast_m8_cmd="$blast_fmtr_cmd -rid $RID -outfmt 6 -out $out.m8"
         echo "$blast_m8_cmd"
         $blast_m8_cmd
-        check_for_success $blast_m8_cmd $?
+        check_for_success "$blast_m8_cmd" $?
     else
         echo "Cannot obtain RID from BLAST+ remote pairwise output $out: Exiting" >&2
     	exit 1
@@ -148,9 +155,3 @@ fi
 
 exit 0
 
-function check_for_success() {
-    if [ $2 -ne 0 ]; then 
-        echo "$1 failed with exit code $2"
-        exit 1
-    fi
-}
