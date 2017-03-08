@@ -1412,7 +1412,7 @@ sub _bwaPostProcessDonorHostPaired {
          "| $samtools view -S -b -o $output_dir/" . $prefix . ".lgt_donor.bam -"
      ) or die "Unable to open LGT donor file for writing\n";
      open( my $lgth_fh,
-         "| $samtools view -S -b -o $output_dir/" . $prefix . ".lgt_host.bam -" )
+         "| $samtools view -S -b -o $output_dir/" . $prefix . ".lgt_recipient.bam -" )
        or die "Unable to open LGT recipient file for writing\n";
      open(
          my $int_site_donor_d_fh,
