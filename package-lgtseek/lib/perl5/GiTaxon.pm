@@ -313,6 +313,7 @@ sub get_mongodb_connection {
 
     # First we'll establish our connection to mongodb
     my $conn;
+    chop $version if $version =~ /^v/;
     if ($version < 1) {
         print STDERR "Using version of MongoDB before version 1.0\n";
         require MongoDB::Connection;
