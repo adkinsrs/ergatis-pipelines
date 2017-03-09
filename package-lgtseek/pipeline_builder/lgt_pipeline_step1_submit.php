@@ -62,15 +62,15 @@
 				$formValuesArr['r_input']['msg'] = "No donor input file found.";
 			}
 		}
-		if ( !empty($_POST['thost']) ) {
-			$host = trim($_POST['thost']);
-			$host = adjust_paths($host, $dir, "/mnt/input_data/host_ref");
-			$args .= "--host_reference $host ";
+		if ( !empty($_POST['trecipient']) ) {
+			$recipient = trim($_POST['trecipient']);
+			$recipient = adjust_paths($recipient, $dir, "/mnt/input_data/recipient_ref");
+			$args .= "--host_reference $recipient ";
 		} else {
 			if ( trim($_POST['r_usecase']) == 'case1' || trim($_POST['r_usecase']) == 'case3' ){
 				$errFlag++;
 				$formValuesArr['r_input']['error'] = $errFlag;
-				$formValuesArr['r_input']['msg'] = "No host input file found.";
+				$formValuesArr['r_input']['msg'] = "No recipient input file found.";
 			}
 		}
 		if ( !empty($_POST['trefseq']) ) {

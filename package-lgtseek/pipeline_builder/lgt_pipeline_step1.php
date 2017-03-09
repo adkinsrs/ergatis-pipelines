@@ -17,10 +17,10 @@ include_once('header.php');
 
 <fieldset name="Step1">
 <legend class="legend">STEP 1: Select the use-case for this pipeline</legend>
-<label><input type="radio" name="r_usecase" id="r_case1" value="case1" onclick="SetUpRefFields()">Use Case 1 - Good donor and good LGT-free host</label><br>
-<label><input type="radio" name="r_usecase" id="r_case2" value="case2" onclick="SetUpRefFields()">Use Case 2 - Good donor but unknown host</label><br>
-<label><input type="radio" name="r_usecase" id="r_case3" value="case3" onclick="SetUpRefFields()">Use Case 3 - Good host but unknown donor</label><br>
-<label><input type="radio" name="r_usecase" id="r_case4" value="case4" onclick="SetUpRefFields()" disabled>Use Case 4 - Good donor but LGT-infected host (coming soon)</label><br>
+<label><input type="radio" name="r_usecase" id="r_case1" value="case1" onclick="SetUpRefFields()">Use Case 1 - Good donor and good LGT-free recipient</label><br>
+<label><input type="radio" name="r_usecase" id="r_case2" value="case2" onclick="SetUpRefFields()">Use Case 2 - Good donor but unknown recipient</label><br>
+<label><input type="radio" name="r_usecase" id="r_case3" value="case3" onclick="SetUpRefFields()">Use Case 3 - Good recipient but unknown donor</label><br>
+<label><input type="radio" name="r_usecase" id="r_case4" value="case4" onclick="SetUpRefFields()" disabled>Use Case 4 - Good donor but LGT-infected recipient (coming soon)</label><br>
 </fieldset>
 
 <fieldset name="Step2" style="display:none">
@@ -36,9 +36,9 @@ include_once('header.php');
 <label for="tdonor">Donor reference/list/index</label><br>
 <input type="text" name="tdonor" id="tdonor" class="textbox" value=''><br><br>
 </div>
-<div id="dhost">
-<label for="thost">Recipient reference/list/index</label><br>
-<input type="text" name="thost" id="thost" class="textbox" value=''><br><br>
+<div id="drecipient">
+<label for="trecipient">Recipient reference/list/index</label><br>
+<input type="text" name="trecipient" id="trecipient" class="textbox" value=''><br><br>
 </div>
 <div id="drefseq">
 <label for="trefseq">RefSeq reference/list/index</label><br>
