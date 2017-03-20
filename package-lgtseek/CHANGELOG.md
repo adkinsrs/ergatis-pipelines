@@ -1,4 +1,8 @@
 # CHANGELOG
+
+3/20/17
+* Adding classification for LGT-infected recipient in 'lgt_bwa_post_process' component (for last use-case)
+
 3/5/17
 * Lots of renaming and rearranging in lgt\_bwa\_post\_process component
 * Changing split\_multifasta component to have 2000 seqs per file instead of 500

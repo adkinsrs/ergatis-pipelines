@@ -117,5 +117,23 @@
                 <value>$;ALL_DONOR_BAM_OUTPUT_LIST$;</value>
             </param>
         </command>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>create LGT-infected BAM file list</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/create_list_file</executable>
+            <param>
+                <key>--directory</key>
+                <value>$;OUTPUT_DIRECTORY$;</value>
+            </param>
+            <param>
+                <key>--regex</key>
+                <value>".*lgt_infected_recipient\.bam"</value>
+            </param>
+            <param>
+                <key>--output_list</key>
+                <value>$;LGT_INFECTED_BAM_OUTPUT_LIST$;</value>
+            </param>
+        </command>
     </commandSet>
 </commandSetRoot>

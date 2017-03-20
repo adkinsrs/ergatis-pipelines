@@ -1350,16 +1350,16 @@ sub _bwaPostProcessSingle {
 }
 
 sub _bwaPostProcessDonorHostPaired {
-     my ( $self, $config ) = @_;
+    my ( $self, $config ) = @_;
 
-     $self->{samtools_bin} =
+    $self->{samtools_bin} =
        $self->{samtools_bin} ? $self->{samtools_bin} : '/usr/local/bin/samtools';
-     my $samtools = $self->{samtools_bin};
-     my $output_dir =
+    my $samtools = $self->{samtools_bin};
+    my $output_dir =
        $config->{output_dir} ? $config->{output_dir} : $self->{output_dir};
 
-     # Classes have the donor on the left and the host on the right
-     my $classes_both = {
+    # Classes have the donor on the left and the host on the right
+    my $classes_both = {
          'UM_MU' => 'lgt',
          'MU_UM' => 'lgt',
          'UM_MM' => 'integration_site_rec',
@@ -1376,72 +1376,51 @@ sub _bwaPostProcessDonorHostPaired {
          'MM_MM' => 'all_map',
          'UM_UM' => 'single_map',
          'MU_MU' => 'single_map'
-     };
+    };
 
-     my $prefix = $config->{output_prefix} ? $config->{output_prefix} : '';
-     my $class_to_file_name = {
+    my $prefix = $config->{output_prefix} ? $config->{output_prefix} : '';
+    my $class_to_file_name = {
          'lgt_donor' => "$output_dir/" . $prefix . ".lgt_donor.bam",
          'lgt_host'  => "$output_dir/" . $prefix . ".lgt_recipient.bam",
-         'integration_site_donor_donor' => "$output_dir/"
-           . $prefix
-           . ".integration_site_donor_donor.bam",
-         'integration_site_donor_host' => "$output_dir/"
-           . $prefix
-           . ".integration_site_donor_recipient.bam",
          'all_donor_donor' => "$output_dir/" . $prefix . ".all_donor.bam",
          'all_recipient_host' => "$output_dir/" . $prefix . ".all_recipient.bam",
-     };
+		 'lgt_infected_host' => "$output_dir/" . $prefix . ".lgt_infected_recipient.bam"
+    };
 
-     my $class_counts = {
+    my $class_counts = {
          'lgt'                    => undef,
-         'integration_site_rec'  => undef,
+         'integration_site_rec'   => undef,
          'integration_site_donor' => undef,
          'all_donor'              => undef,
          'all_recipient'          => undef,
          'no_map'                 => undef,
          'all_map'                => undef,
          'single_map'             => undef
-     };
+    };
 
      # Here are a bunch of file handles we'll use later.
-     if ( $self->{verbose} ) {
-         print STDERR "$output_dir/" . $prefix . ".lgt_donor.bam\n";
-     }
-     open(
-         my $lgtd_fh,
-         "| $samtools view -S -b -o $output_dir/" . $prefix . ".lgt_donor.bam -"
+     open ( my $lgtd_fh,
+         "| $samtools view -S -b -o " . $class_to_file_name->{"lgt_donor"} . " -"
      ) or die "Unable to open LGT donor file for writing\n";
-     open( my $lgth_fh,
-         "| $samtools view -S -b -o $output_dir/" . $prefix . ".lgt_recipient.bam -" )
+     open ( my $lgth_fh,
+         "| $samtools view -S -b -o " . $class_to_file_name->{"lgt_recipient"} . " -" )
        or die "Unable to open LGT recipient file for writing\n";
-     open(
-         my $int_site_donor_d_fh,
-         "| $samtools view -S -b -o $output_dir/"
-           . $prefix
-           . ".integration_site_donor_donor.bam -"
-     ) or die "Unable to open donor integration site file for writing\n";
-     open(
-         my $int_site_donor_h_fh,
-         "| $samtools view -S -b -o $output_dir/"
-           . $prefix
-           . ".integration_site_donor_host.bam -"
-     ) or die "Unable to open recipient integration site file for writing\n";
-     open(
-         my $all_donor_d_fh,
-         "| $samtools view -S -b -o $output_dir/" . $prefix . ".all_donor.bam -"
+     open (
+         my $all_donor_d_fh, "| $samtools view -S -b -o " . $class_to_file_name->{"all_donor_donor"} . " -"
      ) or die "Unable to open donor microbiome file for writing\n";
-     open(
-         my $all_host_h_fh,
-         "| $samtools view -S -b -o $output_dir/" . $prefix . ".all_recipient.bam -"
+     open (
+         my $all_host_h_fh, "| $samtools view -S -b -o " . $class_to_file_name->{"all_recipient_host"} . " -"
      ) or die "Unable to open donor microbiome file for writing\n";
+     open ( my $inf_fh,
+        "| $samtools view -S -b -o " . $class_to_file_name->{"lgt_infected_host"} . " -" 
+	 ) or die "Unable to open LGT recipient file for writing\n";
 
      my $class_to_file = {
          'lgt_donor'                    => $lgtd_fh,
          'lgt_host'                     => $lgth_fh,
-         'integration_site_donor_donor' => $int_site_donor_d_fh,
-         'integration_site_donor_host'  => $int_site_donor_h_fh,
          'all_donor_donor'              => $all_donor_d_fh,
-         'all_recipient_host'           => $all_host_h_fh
+         'all_recipient_host'           => $all_host_h_fh,
+	     'lgt_infected_host'			=> $inf_fh
      };
 
      my $donor_bam = $config->{donor_bam};
@@ -1584,6 +1563,13 @@ sub _bwaPostProcessDonorHostPaired {
                  $class_counts->{ $classes_both->{$paired_class} }++;
              }
 
+			 # Special case : LGT-infected recipient reference
+            if ($paired_class eq 'UM_MM' || $paired_class eq  'MU_MM' ) {
+                 print {
+                     $class_to_file->{ "lgt_infected_host" }
+                 } "$hr1_line\n$hr2_line\n";
+
+			}
              # Increment the total count
              $line_num++;
          }

@@ -20,8 +20,6 @@
 		<commandSet type="parallel">
 			<state>incomplete</state>
 			<!-- LGT side -->
-			<!-- LGT Reads consist of MU-UM and MU-MM (for donor-recipient) -->
-			<!-- After running mpileup, split reads into seperate outputs based on type -->
 			<commandSet type="serial">
 				<state>incomplete</state>
 				<commandSet type="serial">
@@ -39,7 +37,6 @@
 			</commandSet>
 			<!-- DONOR side -->
 			<commandSet type="serial">
-			<commandSet type="serial">
 				<state>incomplete</state>
 				<commandSet type="serial">
 					<state>incomplete</state>
@@ -47,21 +44,20 @@
 				</commandSet>
 				<commandSet type="serial">
 					<state>incomplete</state>
-					<name>lgt_mpileup.donor_donor</name>
+					<name>lgt_mpileup.all_donor</name>
 				</commandSet>
 			</commandSet>
-			<!-- RECIPIENT side -->
-			<commandSet type="serial">
+		</commandSet>
+		<!-- RECIPIENT side -->
+		<commandSet type="serial">
+			<state>incomplete</state>
 			<commandSet type="serial">
 				<state>incomplete</state>
-				<commandSet type="serial">
-					<state>incomplete</state>
-					<name>filter_dups_lc_seqs.recipient</name>
-				</commandSet>
-				<commandSet type="serial">
-					<state>incomplete</state>
-					<name>lgt_mpileup.rec_rec</name>
-				</commandSet>
+				<name>filter_dups_lc_seqs.recipient</name>
+			</commandSet>
+			<commandSet type="serial">
+				<state>incomplete</state>
+				<name>lgt_mpileup.all_recipient</name>
 			</commandSet>
 		</commandSet>
 	</commandSet>
