@@ -216,11 +216,10 @@ foreach $key (sort keys (%bam)) {
 		$right_count = $arr[1];
 		
 	    }
-	    #if ($_ =~m/reads_in/) {
-		#@arr= split (/\=/,$_);
-		#$total_count = $arr[1];
-		#
-	    #}
+      if ($_ =~m/reads_in/) {
+        @arr= split (/\=/,$_);
+        $total_count = $arr[1];
+      }
 	}
 	close $pfile;
  
