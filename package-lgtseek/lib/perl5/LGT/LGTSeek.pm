@@ -1403,7 +1403,7 @@ sub _bwaPostProcessDonorHostPaired {
          "| $samtools view -S -b -o " . $class_to_file_name->{"lgt_donor"} . " -"
      ) or die "Unable to open LGT donor file for writing\n";
      open ( my $lgth_fh,
-         "| $samtools view -S -b -o " . $class_to_file_name->{"lgt_recipient"} . " -" )
+         "| $samtools view -S -b -o " . $class_to_file_name->{"lgt_host"} . " -" )
        or die "Unable to open LGT recipient file for writing\n";
      open (
          my $all_donor_d_fh, "| $samtools view -S -b -o " . $class_to_file_name->{"all_donor_donor"} . " -"
@@ -1420,7 +1420,7 @@ sub _bwaPostProcessDonorHostPaired {
          'lgt_host'                     => $lgth_fh,
          'all_donor_donor'              => $all_donor_d_fh,
          'all_recipient_host'           => $all_host_h_fh,
-	     'lgt_infected_host'			=> $inf_fh
+         'lgt_infected_host'            => $inf_fh
      };
 
      my $donor_bam = $config->{donor_bam};
