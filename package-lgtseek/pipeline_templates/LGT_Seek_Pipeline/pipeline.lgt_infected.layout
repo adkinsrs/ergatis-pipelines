@@ -34,6 +34,10 @@
 					<state>incomplete</state>
 					<name>lgt_mpileup.lgt_recipient</name>
 				</commandSet>
+				<commandSet type="serial">
+					<state>incomplete</state>
+					<name>filter_dups_lc_seqs.paired</name>
+				</commandSet>
 			</commandSet>
 			<!-- DONOR side -->
 			<commandSet type="serial">

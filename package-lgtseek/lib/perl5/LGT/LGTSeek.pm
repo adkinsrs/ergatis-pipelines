@@ -347,7 +347,7 @@ sub _prinseqFilterPaired {
 "$Picard FixMateInformation I=$bam_file TMP_DIR=$tmp_dir SO=coordinate ASSUME_SORTED=1 VALIDATION_STRINGENCY=SILENT"
             );
             $self->_run_cmd(
-"$Picard MarkDuplicates I=$bam_file TMP_DIR=$tmp_dir OUTPUT=$tmp_dir/$name\_dedup.bam METRICS_FILE=$tmp_dir/$name\_dedup-metrics.txt REMOVE_DUPLICATES=false VALIDATION_STRINGENCY=SILENT"
+"$Picard MarkDuplicates I=$bam_file TMP_DIR=$tmp_dir OUTPUT=$tmp_dir/$name\_dedup.bam METRICS_FILE=$tmp_dir/$name\_dedup-metrics.txt REMOVE_DUPLICATES=false VALIDATION_STRINGENCY=SILENT MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000"
             );
             open( my $BAM, "TMP_DIR=$tmp_dir $self->{samtools_bin} view $tmp_dir/$name\_dedup.bam |" )
               or $self->fail(
@@ -519,13 +519,7 @@ sub _run_cmd {
     if ( $self->{verbose} ) { print STDERR "CMD: $cmd\n"; }
     my $res = `$cmd`;
     if ($?) {
-        print STDERR "FAIL_CMD: $cmd died with message: $res\n";
-        print STDERR "Pausing 1 min and trying to run the cmd again.\n";
-        sleep 60;
-        chomp( $res = `$cmd` );
-        if ($?) {
-            $self->fail("*** Error *** $cmd died with message:\n$res\n\n");
-        }
+        $self->fail("*** Error *** $cmd died with message:\n$res\n\n");
     }
     return $res;
 }
