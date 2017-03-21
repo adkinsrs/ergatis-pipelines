@@ -1384,7 +1384,7 @@ sub _bwaPostProcessDonorHostPaired {
          'lgt_host'  => "$output_dir/" . $prefix . ".lgt_recipient.bam",
          'all_donor_donor' => "$output_dir/" . $prefix . ".all_donor.bam",
          'all_recipient_host' => "$output_dir/" . $prefix . ".all_recipient.bam",
-		 'lgt_infected_host' => "$output_dir/" . $prefix . ".lgt_infected_recipient.bam"
+         'lgt_infected_host' => "$output_dir/" . $prefix . ".lgt_infected_recipient.bam"
     };
 
     my $class_counts = {

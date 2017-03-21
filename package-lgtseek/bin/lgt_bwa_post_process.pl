@@ -175,11 +175,11 @@ if ($donor_only || $host_only) {
 		# Take list of counts and write them to file
 		my $counts_file = $output_dir . "/" . $curr_prefix . ".counts";
 		my (@header, @vals);
-	    map {
-	        push( @header, $_ );
-	        my $foo = $pp_data->{counts}->{$_} ? $pp_data->{counts}->{$_} : 0;
-	        push( @vals, $foo );
-	    } ( 'total', 'host', 'no_map', 'all_map', 'single_map', 'integration_site_host', 'integration_site_donor', 'microbiome', 'lgt' );
+		map {
+			push( @header, $_ );
+			my $foo = $pp_data->{counts}->{$_} ? $pp_data->{counts}->{$_} : 0;
+			push( @vals, $foo );
+		} ( 'total', 'lgt', 'all_donor', 'all_recipient', 'no_map', 'all_map', 'single_map', 'integration_site_rec', 'integration_site_donor' );
 		LGT::LGTSeek->print_tab( $counts_file, \@header, \@vals );
 	};
 }
