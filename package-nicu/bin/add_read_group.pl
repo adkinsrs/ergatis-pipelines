@@ -138,7 +138,7 @@ sub main {
 			'RGPL' => $options{'platform'},
 			'RGPU' => $options{'platform_unit'},
 			'RGSM' => $options{'sample_name'},
-			'VALIDATION_STRINGENCY' => $options{'validation_stringency'},
+			'VALIDATION_STRINGENCY' => uc($options{'validation_stringency'}),
 			'MAX_RECORDS_IN_RAM' => $options{'max_records_stored'}
     );
 

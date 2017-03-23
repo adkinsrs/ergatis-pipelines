@@ -6,13 +6,14 @@ split_spliced_reads.pl - Wrapper script for GATK's SplitNCigarReads utility
 
 =head1 SYNOPSIS
 
- USAGE: add_read_group.pl
+ USAGE: split_spliced_reads.pl
        --input_file=/path/to/some/input.bam
        --output_file=/path/to/output.bam
 	   --reference_file=/path/to/ref.fa
      [ 
 	   --read_filter=ReassignOneMappingQuality
 	   --max_reads_stored=1000000
+	   --unsafe=ALLOW_N_CIGAR_READS
 	   --gatk_jar=/path/to/gatk.jar
 	   --java_path=/path/to/java
 	   --log=/path/to/file.log
@@ -36,6 +37,9 @@ B<--read_filter>
 
 B<--max_records_stored>
 	Optional.  Number of records to store in RAM before spilling to disk.
+
+B<--unsafe>
+	Optional.  Enable unsafe operations: nothing will be checked at runtime.  For RNAseq analysis, "ALLOW_N_CIGAR_READS" should be passed in.
 
 B<--gatk_jar>
 	Optional. Path to the GATK JAR file.  If not provided, will use /usr/local/packages/GATK-3.7/GenomeAnalysisTK.jar
@@ -101,6 +105,7 @@ sub main {
 						 "reference_file|r=s",
 						 "read_filter=s",
 						 "max_reads_stored=s",
+						 "unsafe=s",
 						 "gatk_jar=s",
 						 "java_path=s",
                          "log|l=s",
@@ -114,7 +119,8 @@ sub main {
 			'--input_file' => $options{'input_file'},
 			'--out' => $options{'output_file'},
 			'--reference_sequence' => $options{'reference_file'},
-			'--maxReadsInMemory' => $options{'max_reads_stored'}
+			'--maxReadsInMemory' => $options{'max_reads_stored'},
+			'--unsafe' => uc($options{'unsafe'}
     );
 
     # Start building the Picard tools command
