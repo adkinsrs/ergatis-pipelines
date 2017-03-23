@@ -1,5 +1,8 @@
 # CHANGELOG
 
+3/23/17
+* Fixed bug with missing param in XML file for blastn_plus
+
 3/20/17
 * Adding classification for LGT-infected recipient in 'lgt_bwa_post_process' component (for last use-case)
 
