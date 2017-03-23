@@ -19,15 +19,15 @@ function ResetText() {
 function SetUpRefFields() {
 	var FormName = document.forms.namedItem("lgt_pipeline_step1_form");
 	FormName.Step2.style.display = "block";
-	if (document.getElementById("r_case1").checked) {
+	if (document.getElementById("r_case1").checked || document.getElementById("r_case2").checked) {
 		document.getElementById('ddonor').style.display = "block";
 		document.getElementById('drecipient').style.display = "block";
 		document.getElementById('drefseq').style.display = "none";
-	} else if (document.getElementById("r_case2").checked) {
+	} else if (document.getElementById("r_case3").checked) {
 		document.getElementById('ddonor').style.display = "block";
 		document.getElementById('drecipient').style.display = "none";
 		document.getElementById('drefseq').style.display = "none";
-	} else if (document.getElementById("r_case3").checked) {
+	} else if (document.getElementById("r_case4").checked) {
 		document.getElementById('ddonor').style.display = "none";
 		document.getElementById('drecipient').style.display = "block";
 		document.getElementById('drefseq').style.display = "block";

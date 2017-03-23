@@ -4,6 +4,7 @@
 * Fixed bug with missing param in XML file for blastn_plus
 * Edited 'concatenate_files' component to use perl script instead of 'cat' Unix command.  This gives greater flexibility in either concatenating a string of files, or files in one or more lists together.
 * Adding 'samtools_merge' component to use in the good donor/lgt-infected recipient use case
+* Editing pipeline\_builder code to incorporate new use-case
 
 3/20/17
 * Adding classification for LGT-infected recipient in 'lgt_bwa_post_process' component (for last use-case)

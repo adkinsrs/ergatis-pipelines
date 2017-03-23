@@ -33,7 +33,10 @@ B<--donor_reference,-d>
 	Path to the donor reference fasta file, or list file (ends in .list).  If not provided, the script assumes this is a host-only LGTSeek run.  If the reference has already been indexed by BWA, the index files must be in the same directory as the reference(s).
 
 B<--host_reference,-h>
-	Path to the donor reference fasta file, or list file (ends in .list).  If not provided, the script assumes this is a donor-only LGTSeek run.If the reference has already been indexed by BWA, the index files must be in the same directory as the reference(s).
+	Path to the recipient reference fasta file, or list file (ends in .list).  If not provided, the script assumes this is a donor-only LGTSeek run.If the reference has already been indexed by BWA, the index files must be in the same directory as the reference(s).
+
+B<--lgt_infected, -i>
+	Flag to indicate that the recipient reference is infected with LGT from the donor reference.  This will enable a different pipeline layout compared to the LGT-free use-case
 
 B<--refseq_reference,-r>
 	Path to the RefSeq reference fasta file, or list file (ends in .list).  If the reference has already been indexed by BWA, the index files must be in the same directory as the reference(s).
@@ -100,11 +103,12 @@ my %included_subpipelines = ();
 my @gather_output_skip;	# array to keep track of which steps to skip if Post-Analysis components are enabled
 my $donor_only = 0;
 my $host_only = 0;
+my $lgt_infected = 0;
 ####################################################
 
 my %options;
 my $pipelines = {
-	    'sra' => 'LGT_Seek_Pipeline_SRA',
+		'sra' => 'LGT_Seek_Pipeline_SRA',
 		'indexing' => 'LGT_Seek_Pipeline_BWA_Index',
 		'lgtseek' => 'LGT_Seek_Pipeline',
 		'post' => 'LGT_Seek_Pipeline_Post_Analysis'
@@ -121,6 +125,7 @@ sub main {
 						  "bam_input|b=s",
 						  "fastq_input|f=s",
 						  "host_reference|h=s",
+						  "lgt_infected|i",
 						  "donor_reference|d=s",
 						  "refseq_reference|r=s",
 						  "build_indexes|B",
@@ -154,17 +159,21 @@ sub main {
 	# Write the pipeline.layout file
 	&write_pipeline_layout( $layout_writer, sub {
 		my ($writer) = @_;
-   		&write_include($writer, $pipelines->{'sra'}) if( $included_subpipelines{'sra'} );
+			&write_include($writer, $pipelines->{'sra'}) if( $included_subpipelines{'sra'} );
 		# Use the right layout file if this run is donor-only, or both donor/host alignment
 		if ($donor_only) {
-   			&write_include($writer, $pipelines->{'indexing'}, "pipeline.donor_only.layout") if( $included_subpipelines{'indexing'} );
-   			&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.donor_only.layout") if( $included_subpipelines{'lgtseek'} );
+				&write_include($writer, $pipelines->{'indexing'}, "pipeline.donor_only.layout") if( $included_subpipelines{'indexing'} );
+				&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.donor_only.layout") if( $included_subpipelines{'lgtseek'} );
 		} elsif ($host_only) {
-   			&write_include($writer, $pipelines->{'indexing'}, "pipeline.recipient_only.layout") if( $included_subpipelines{'indexing'} );
-   			&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.recipient_only.layout") if( $included_subpipelines{'lgtseek'} );
+				&write_include($writer, $pipelines->{'indexing'}, "pipeline.recipient_only.layout") if( $included_subpipelines{'indexing'} );
+				&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.recipient_only.layout") if( $included_subpipelines{'lgtseek'} );
 		} else {
-   			&write_include($writer, $pipelines->{'indexing'}) if( $included_subpipelines{'indexing'} );
-   			&write_include($writer, $pipelines->{'lgtseek'}) if( $included_subpipelines{'lgtseek'} );
+			&write_include($writer, $pipelines->{'indexing'}) if( $included_subpipelines{'indexing'} );
+			if ($lgt_infected){
+				&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.lgt_infected.layout") if( $included_subpipelines{'lgtseek'} );
+			} else {
+				&write_include($writer, $pipelines->{'lgtseek'}) if( $included_subpipelines{'lgtseek'} );
+			}
 		}
 		&write_include($writer, $pipelines->{'post'}) if( $included_subpipelines{'post'} );
 	});
@@ -178,23 +187,27 @@ sub main {
 	foreach my $sp ( keys %included_subpipelines ) {
 		if ($sp eq 'lgtseek') {
 			if ($donor_only) {
-			    &add_config( \%config, $pipelines->{ $sp }, "pipeline.donor_only.config");
+			    &add_config( \%config, $pipelines->{ $sp }, "pipeline.donor_only.config" );
 			} elsif ($host_only) {
-			    &add_config( \%config, $pipelines->{ $sp }, "pipeline.recipient_only.config");
+			    &add_config( \%config, $pipelines->{ $sp }, "pipeline.recipient_only.config" );
 			} else {
+				if ($lgt_infected){
+					&add_config( \%config, $pipelines->{ $sp }, "pipeline.lgt_infected.config" );
+				} else {
 			    &add_config( \%config, $pipelines->{ $sp } );
+				}
 			}
 		} elsif ($sp eq 'indexing') {
 			if ($donor_only) {
-			    &add_config(\%config, $pipelines->{$sp}, "pipeline.donor_only.config");
+			    &add_config( \%config, $pipelines->{$sp}, "pipeline.donor_only.config" );
 			} elsif ($host_only) {
-				&add_config(\%config, $pipelines->{$sp}, "pipeline.recipient_only.config");
+				&add_config( \%config, $pipelines->{$sp}, "pipeline.recipient_only.config" );
 			} else {
-				&add_config(\%config, $pipelines->{$sp} );
+				&add_config( \%config, $pipelines->{$sp} );
 
 			}
 		} else {
-			&add_config( \%config, $pipelines->{ $sp }) if $included_subpipelines{$sp};
+			&add_config( \%config, $pipelines->{ $sp } ) if $included_subpipelines{$sp};
 		}
 	}
 
@@ -291,6 +304,13 @@ if ($options{bam_input}) {
 		push @gather_output_skip, 'move blast-validated BAM';
 
 		$config{'lgt_mpileup all_recipient'}->{'$;FASTA_REFERENCE$;'} = $options{host_reference};
+
+		# If recipient is infected with LGT, change mpileup to use LGT-infected BAM list
+		if ($lgt_infected) {
+			$config{'lgt_mpileup lgt_donor'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected/samtools_merge.bam.list';
+			$config{'lgt_mpileup lgt_recipient'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected/samtools_merge.bam.list';
+			$config{'gather_lgtseek_files'}->{'LGT_BAM_OUTPUT'} = '$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_infected/filter_dups_lc_seqs.bam.list' if $included_subpipelines{'post'};
+		}
 	}
 
 	# If we are indexing references in the pipeline, we need to change some config inputs
@@ -473,13 +493,20 @@ sub check_options {
 	# If host reference is not present, then we have a donor-only run
 	$donor_only = 1 unless ($opts->{'host_reference'});
 
+	# Specify LGT-infected option if provided
+	$lgt_infected = 1 if ($opts->{'lgt_infected'});
+	if ($lgt_infected && ($donor_only || $host_only)) {
+		&_log($WARN, "WARNING - Must have both donor and recipient references in order to use 'lgt-infected' option ... ignoring");
+		$lgt_infected = 0;
+	}
+
 	# If we need to build BWA reference indexes, then set option
 	$included_subpipelines{indexing} = 1 if ( $opts->{'build_indexes'} );
 
 	&_log($ERROR, "ERROR - Need either a host_reference, a donor_reference or both provided") if ($donor_only && $host_only);
 
    print STDOUT "Perform alignments to the donor reference only.\n" if ($donor_only);
-   print STDOUT "Perform alignments to the host reference only.\n" if ($host_only);
+   print STDOUT "Perform alignments to the recipient reference only.\n" if ($host_only);
    print STDOUT "Perform BWA reference indexing in pipeline.\n" if ($included_subpipelines{indexing});
    print STDOUT "Starting point is BAM input.\n" if $opts->{bam_input};
    print STDOUT "Starting point is FASTQ input.\n" if $opts->{fastq_input};

@@ -18,9 +18,9 @@ include_once('header.php');
 <fieldset name="Step1">
 <legend class="legend">STEP 1: Select the use-case for this pipeline</legend>
 <label><input type="radio" name="r_usecase" id="r_case1" value="case1" onclick="SetUpRefFields()">Use Case 1 - Good donor and good LGT-free recipient</label><br>
-<label><input type="radio" name="r_usecase" id="r_case2" value="case2" onclick="SetUpRefFields()">Use Case 2 - Good donor but unknown recipient</label><br>
-<label><input type="radio" name="r_usecase" id="r_case3" value="case3" onclick="SetUpRefFields()">Use Case 3 - Good recipient but unknown donor</label><br>
-<label><input type="radio" name="r_usecase" id="r_case4" value="case4" onclick="SetUpRefFields()" disabled>Use Case 4 - Good donor but LGT-infected recipient (coming soon)</label><br>
+<label><input type="radio" name="r_usecase" id="r_case2" value="case2" onclick="SetUpRefFields()">Use Case 2 - Good donor but LGT-infected recipient</label><br>
+<label><input type="radio" name="r_usecase" id="r_case3" value="case3" onclick="SetUpRefFields()">Use Case 3 - Good donor but unknown recipient</label><br>
+<label><input type="radio" name="r_usecase" id="r_case4" value="case4" onclick="SetUpRefFields()">Use Case 4 - Good recipient but unknown donor</label><br>
 </fieldset>
 
 <fieldset name="Step2" style="display:none">

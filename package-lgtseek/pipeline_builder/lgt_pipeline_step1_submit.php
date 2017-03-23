@@ -56,7 +56,7 @@
 			$donor = adjust_paths($donor, $dir, "/mnt/input_data/donor_ref");
 			$args .= "--donor_reference $donor ";
 		} else {
-			if ( trim($_POST['r_usecase']) == 'case1' || trim($_POST['r_usecase']) == 'case2' ){
+			if ( trim($_POST['r_usecase']) == 'case1' || trim($_POST['r_usecase']) == 'case2' || trim($_POST['r_usecase']) == 'case3' ){
 				$errFlag++;
 				$formValuesArr['r_input']['error'] = $errFlag;
 				$formValuesArr['r_input']['msg'] = "No donor input file found.";
@@ -67,7 +67,7 @@
 			$recipient = adjust_paths($recipient, $dir, "/mnt/input_data/recipient_ref");
 			$args .= "--host_reference $recipient ";
 		} else {
-			if ( trim($_POST['r_usecase']) == 'case1' || trim($_POST['r_usecase']) == 'case3' ){
+			if ( trim($_POST['r_usecase']) == 'case1' || trim($_POST['r_usecase']) == 'case2' || trim($_POST['r_usecase']) == 'case4' ){
 				$errFlag++;
 				$formValuesArr['r_input']['error'] = $errFlag;
 				$formValuesArr['r_input']['msg'] = "No recipient input file found.";
@@ -78,7 +78,7 @@
 			$refseq = adjust_paths($refseq, $dir, "/mnt/input_data/refseq_ref");
 			$args .= "--refseq_reference $refseq ";
 		} else {
-			if ( trim($_POST['r_usecase']) == 'case3' ){
+			if ( trim($_POST['r_usecase']) == 'case4' ){
 				$errFlag++;
 				$formValuesArr['r_input']['error'] = $errFlag;
 				$formValuesArr['r_input']['msg'] = "No RefSeq input file found.";
@@ -87,6 +87,11 @@
 
 		if ( $_POST['c_build'] == 1 ) {
 			$args .= "--build_indexes ";
+		}
+
+
+		if ( trim($_POST['r_usecase']) == 'case2' ){
+			$args .= "--lgt_infected "
 		}
 	}
 
