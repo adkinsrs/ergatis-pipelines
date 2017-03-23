@@ -126,17 +126,17 @@ sub main {
     # Start building the Picard tools command
     my $cmd = $options{'java_path'}." ".$options{'gatk_jar'}." --analysis_type SplitNCigarReads ";
 
+    # Add only passed in options to command
+    foreach my $arg (keys %options) {
+        $cmd .= "${arg}=".$options{$arg}." " if defined $options{$arg};
+    }
+
 	# Split csv list of filters and add as individual options
     if ($options{'read_filter'}) {
 		$cmd .= '--read_filter ';
 		my @filters = split(/,/, $options{'read_filter'});
 		$cmd .= join '--read_filter ', @filters;
 	}
-
-    # Add only passed in options to command
-    foreach my $arg (keys %options) {
-        $cmd .= "${arg}=".$options{$arg}." " if defined $options{$arg};
-    }
 
     exec_command($cmd);
 

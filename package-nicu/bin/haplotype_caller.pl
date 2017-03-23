@@ -2,17 +2,18 @@
 
 =head1 NAME
 
-haplotype_caller.pl - Wrapper script for GATK's SplitNCigarReads utility
+haplotype_caller.pl - Wrapper script for GATK's HaplotypeCaller utility
 
 =head1 SYNOPSIS
 
  USAGE: haplotype_caller.pl
        --input_file=/path/to/some/input.bam
-       --output_file=/path/to/output.bam
+       --output_file=/path/to/output.vcf
 	   --reference_file=/path/to/ref.fa
      [ 
-	   --read_filter=ReassignOneMappingQuality
+	   --stand_call_conf=20.0
 	   --max_reads_stored=1000000
+	   --no_soft_clipped_bases=1
 	   --gatk_jar=/path/to/gatk.jar
 	   --java_path=/path/to/java
 	   --log=/path/to/file.log
@@ -26,13 +27,16 @@ B<--input_file,-i>
 	Required. Path to BAM file to serve as input
 
 B<--output_file,-o>
-	Required. File name for output BAM file
+	Required. File name for output VCF file
 
 B<--reference_file>
 	Required.  Path to FASTA file to serve as reference
 
-B<--read_filter>
-	Optional. Reads that fail the specified filters will not be used in the analysis.  Pass in each filter as a comma-separated list.
+B<--stand_call_conf>
+	Optional. The minimum phred-scaled confidence threshold at which variants should be called.  Default is 30.0
+
+B<--no_soft_clipped_bases>
+	Optional.  If set to 1, will not use soft-clipped bases for analyses
 
 B<--max_records_stored>
 	Optional.  Number of records to store in RAM before spilling to disk.
@@ -99,7 +103,8 @@ sub main {
 						 "input_file|i=s",
 						 "output_file|o=s",
 						 "reference_file|r=s",
-						 "read_filter=s",
+						 "stand_call_conf=s",
+						 "no_soft_clipped_bases=i",
 						 "max_reads_stored=s",
 						 "gatk_jar=s",
 						 "java_path=s",
@@ -114,23 +119,20 @@ sub main {
 			'--input_file' => $options{'input_file'},
 			'--out' => $options{'output_file'},
 			'--reference_sequence' => $options{'reference_file'},
-			'--maxReadsInMemory' => $options{'max_reads_stored'}
+			'--maxReadsInMemory' => $options{'max_reads_stored'},
+			'--standard_min_confidence_threshold_for_calling' => $options{'stand_call_conf'}
     );
 
     # Start building the Picard tools command
     my $cmd = $options{'java_path'}." ".$options{'gatk_jar'}." --analysis_type SplitNCigarReads ";
 
-	# Split csv list of filters and add as individual options
-    if ($options{'read_filter'}) {
-		$cmd .= '--read_filter ';
-		my @filters = split(/,/, $options{'read_filter'});
-		$cmd .= join '--read_filter ', @filters;
-	}
 
     # Add only passed in options to command
     foreach my $arg (keys %options) {
         $cmd .= "${arg}=".$options{$arg}." " if defined $options{$arg};
     }
+
+	$cmd = "--dontUseSoftClippedBases " if ($options{"no_soft_clipped_bases"});
 
     exec_command($cmd);
 
