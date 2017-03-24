@@ -7,16 +7,9 @@ add_read_group.pl - Wrapper script for Picard's AddOrReplaceReadGroup utility
 =head1 SYNOPSIS
 
  USAGE: add_read_group.pl
-       --input_file=/path/to/some/input.bam
-       --output_file=/path/to/output.bam
-	   --library=lib1
-	   --platform=illumina
-	   --platform_unit=abc123
-	   --sample_name=sample1
+       --config_file=/path/to/some/config
      [ 
-	   --id=1
-	   --validation_stringency=lenient
-	   --max_records_in_RAM=1000000
+	   --output_dir=/path/to/output/dir
 	   --picard_jar=/path/to/picard.jar
 	   --java_path=/path/to/java
 	   --log=/path/to/file.log
@@ -26,32 +19,11 @@ add_read_group.pl - Wrapper script for Picard's AddOrReplaceReadGroup utility
 
 =head1 OPTIONS
 
-B<--input_file,-i>
-	Required. Path to BAM file to serve as input
+B<--config_file,-c>
+	Required. Path to config file that lists parameters to use in this script
 
-B<--output_file,-o>
-	Required. File name for output BAM file
-
-B<--id>
-	Optional. Read Group ID number.  Will assign to 1 if not provided.
-
-B<--library>
-	Required. Read Group library string name
-
-B<--platform>
-	Required. Platform the reads originated from (eg. illumina or solid)
-
-B<--platform_unit>
-	Required. Platform unit (eg. run barcode)
-
-B<--sample_name>
-	Required.  Read Group sample name
-
-B<--validation_stringency>
-	Optional.  Validation stringency for all SAM/BAM files read in by Picard Tools.  Possible values are "STRICT" (default if not provided), "LENIENT", or "SILENT"
-
-B<--max_records_stored>
-	Optional.  Number of records to store in RAM before spilling to disk.  Default is 500000.
+B<--output_dir,-o>
+	Optional. Path to directory to write output to.  If not provided, use current directory
 
 B<--picard_jar>
 	Optional. Path to picard JAR file.  If not provided, will use /usr/local/packages/picard/bin/picard.jar
@@ -92,19 +64,23 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
 use Pod::Usage;
 use List::Util;
+use File::Spec;
+use NICU::Config;
 
 ############# GLOBALS AND CONSTANTS ################
 my $debug = 1;
 my ($ERROR, $WARN, $DEBUG) = (1,2,3);
 my $logfh;
 
-my $JAVA_PATH="/usr/bin/java";
-my $PICARD_JAR="/usr/local/packages/picard/bin/picard.jar";
+use constant JAVA_PATH => "/usr/bin/java";
+use constant PICARD_JAR => "/usr/local/packages/picard/bin/picard.jar";
 
 my @stringency = qw(STRICT LENIENT SILENT);
 ####################################################
 
 my %options;
+my %config;
+my $outdir;
 
 # Allow program to run as module for unit testing if necessary
 main() unless caller();
@@ -112,15 +88,8 @@ exit(0);
 
 sub main {
     my $results = GetOptions (\%options,
-						 "input_file|i=s",
-						 "output_file|o=s",
-						 "id=i",
-						 "sample_name=s",
-						 "library=s",
-						 "platform=s",
-						 "platform_unit=s",
-						 "validation_stringency=s",
-						 "max_records_stored=s",
+						 "config_file|c=s",
+						 "output_dir|o=s",
 						 "picard_jar=s",
 						 "java_path=s",
                          "log|l=s",
@@ -128,18 +97,26 @@ sub main {
                          "help|h"
                           );
 
+
+    $outdir = File::Spec->curdir();
     &check_options(\%options);
 
+    read_config(\%options, \%config);
+
+    if ( defined $config{'validation_stringency'} && none{$_ eq uc($config{'validation_stringency'})} @stringency ) {
+        &_log($ERROR, $config{'validation_stringency'}." is not a valid option.  Choose from 'SILENT', 'LENIENT', or 'STRICT'");
+    }
+
     my %picard_args = ( 
-			'INPUT' => $options{'input_file'},
-			'OUTPUT' => $options{'output_file'},
-			'RGID' => $options{'id'},
-			'RGLB' => $options{'library'},
-			'RGPL' => $options{'platform'},
-			'RGPU' => $options{'platform_unit'},
-			'RGSM' => $options{'sample_name'},
-			'VALIDATION_STRINGENCY' => uc($options{'validation_stringency'}),
-			'MAX_RECORDS_IN_RAM' => $options{'max_records_stored'}
+			'INPUT' => $config{'input_file'},
+			'OUTPUT' => $config{'output_file'},
+			'RGID' => $config{'id'},
+			'RGLB' => $config{'library'},
+			'RGPL' => $config{'platform'},
+			'RGPU' => $config{'platform_unit'},
+			'RGSM' => $config{'sample_name'},
+			'VALIDATION_STRINGENCY' => uc($config{'validation_stringency'}),
+			'MAX_RECORDS_IN_RAM' => $config{'max_records_stored'}
     );
 
     # Start building the Picard tools command
@@ -151,6 +128,10 @@ sub main {
     }
 
     exec_command($cmd);
+
+    my $config_out = "$outdir/add_read_group." .$config{'add_read_group'}{'Prefix'}[0].".config" ;
+    $config{'split_spliced_reads'}{'Prefix'}[0] = "$config{'add_read_group'}{'Prefix'}[0]";
+    write_config($options, \%config, $config_out);
 
 }
 
@@ -166,16 +147,24 @@ sub check_options {
 
    $debug = $opts->{'debug'} if( $opts->{'debug'} );
 
-   foreach my $req ( qw(input_file output_file library sample_name platform platform_unit) ) {
+   foreach my $req ( qw(config_file) ) {
        &_log($ERROR, "Option $req is required") unless( $opts->{$req} );
    }
 
-   $opts->{'java_path'} = $JAVA_PATH if !$opts->{'java_path'};
-   $opts->{'picard_jar'} = $PICARD_JAR if !$opts->{'picard_jar'};
+   $opts->{'java_path'} = JAVA_PATH if !$opts->{'java_path'};
+   $opts->{'picard_jar'} = PICARD_JAR if !$opts->{'picard_jar'};
 
-   if ( defined $opts->{'validation_stringency'} && none{$_ eq uc($opts->{'validation_stringency'})} @stringency ) {
-       &_log($ERROR, $opts->{'validation_stringency'}." is not a valid option.  Choose from 'SILENT', 'LENIENT', or 'STRICT'");
-   }
+    if (defined $opts->{'output_dir'}) {
+        $outdir = $opts->{'output_dir'};
+
+        if (! -e $outdir) {
+           mkdir($opts->{'output_dir'}) ||
+            die "ERROR! Cannot create output directory\n";
+        } elsif (! -d $opts->{'output_dir'}) {
+            die "ERROR! $opts->{'output_dir'} is not a directory\n";
+        }
+    }
+    $outdir = File::Spec->canonpath($outdir);
 }
 
 sub exec_command {

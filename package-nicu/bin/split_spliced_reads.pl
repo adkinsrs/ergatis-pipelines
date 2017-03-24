@@ -80,19 +80,21 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
 use Pod::Usage;
 use List::Util;
+use File::Spec;
+use NICU::Config;
 
 ############# GLOBALS AND CONSTANTS ################
 my $debug = 1;
 my ($ERROR, $WARN, $DEBUG) = (1,2,3);
 my $logfh;
 
-my $JAVA_PATH="/usr/bin/java";
-my $GATK_JAR="/usr/local/packages/GATK-3.7/GenomeAnalysisTK.jar";
-
-my @stringency = qw(STRICT LENIENT SILENT);
+use constant JAVA_PATH => "/usr/bin/java";
+use constant GATK_JAR => "/usr/local/packages/GATK-3.7/GenomeAnalysisTK.jar";
 ####################################################
 
 my %options;
+my %config;
+my $outdir;
 
 # Allow program to run as module for unit testing if necessary
 main() unless caller();
@@ -113,6 +115,7 @@ sub main {
                          "help|h"
                           );
 
+    $outdir = File::Spec->curdir();
     &check_options(\%options);
 
     my %picard_args = ( 
@@ -154,15 +157,25 @@ sub check_options {
 
    $debug = $opts->{'debug'} if( $opts->{'debug'} );
 
-   foreach my $req ( qw(input_file output_file reference_file) ) {
+   foreach my $req ( qw(config_file) ) {
        &_log($ERROR, "Option $req is required") unless( $opts->{$req} );
    }
 
-   $opts->{'java_path'} = $JAVA_PATH if !$opts->{'java_path'};
-   $opts->{'gatk_jar'} = $GATK_JAR if !$opts->{'gatk_jar'};
+   $opts->{'java_path'} = JAVA_PATH if !$opts->{'java_path'};
+   $opts->{'gatk_jar'} = GATK_JAR if !$opts->{'picard_jar'};
 
+    if (defined $opts->{'output_dir'}) {
+        $outdir = $opts->{'output_dir'};
+
+        if (! -e $outdir) {
+           mkdir($opts->{'output_dir'}) ||
+            die "ERROR! Cannot create output directory\n";
+        } elsif (! -d $opts->{'output_dir'}) {
+            die "ERROR! $opts->{'output_dir'} is not a directory\n";
+        }
+    }
+    $outdir = File::Spec->canonpath($outdir);
 }
-
 sub exec_command {
 	my $sCmd = shift;
 	
