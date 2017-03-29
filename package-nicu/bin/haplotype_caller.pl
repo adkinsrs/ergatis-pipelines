@@ -7,13 +7,9 @@ haplotype_caller.pl - Wrapper script for GATK's HaplotypeCaller utility
 =head1 SYNOPSIS
 
  USAGE: haplotype_caller.pl
-       --input_file=/path/to/some/input.bam
-       --output_file=/path/to/output.vcf
-	   --reference_file=/path/to/ref.fa
+       --config_file=/path/to/some/config.txt
+       --output_dir=/path/to/output/dir
      [ 
-	   --stand_call_conf=20.0
-	   --max_reads_stored=1000000
-	   --no_soft_clipped_bases=1
 	   --gatk_jar=/path/to/gatk.jar
 	   --java_path=/path/to/java
 	   --log=/path/to/file.log
@@ -23,23 +19,11 @@ haplotype_caller.pl - Wrapper script for GATK's HaplotypeCaller utility
 
 =head1 OPTIONS
 
-B<--input_file,-i>
-	Required. Path to BAM file to serve as input
+B<--config_file,-c>
+	Required. Path to config file that lists parameters to use in this script
 
-B<--output_file,-o>
-	Required. File name for output VCF file
-
-B<--reference_file>
-	Required.  Path to FASTA file to serve as reference
-
-B<--stand_call_conf>
-	Optional. The minimum phred-scaled confidence threshold at which variants should be called.  Default is 30.0
-
-B<--no_soft_clipped_bases>
-	Optional.  If set to 1, will not use soft-clipped bases for analyses
-
-B<--max_records_stored>
-	Optional.  Number of records to store in RAM before spilling to disk.
+B<--output_dir,-o>
+	Optional. Path to directory to write output to.  If not provided, use current directory
 
 B<--gatk_jar>
 	Optional. Path to the GATK JAR file.  If not provided, will use /usr/local/packages/GATK-3.7/GenomeAnalysisTK.jar
@@ -80,19 +64,21 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
 use Pod::Usage;
 use List::Util;
+use File::Spec;
+use NICU::Config;
 
 ############# GLOBALS AND CONSTANTS ################
 my $debug = 1;
 my ($ERROR, $WARN, $DEBUG) = (1,2,3);
 my $logfh;
 
-my $JAVA_PATH="/usr/bin/java";
-my $GATK_JAR="/usr/local/packages/GATK-3.7/GenomeAnalysisTK.jar";
-
-my @stringency = qw(STRICT LENIENT SILENT);
+use constant JAVA_PATH => "/usr/bin/java";
+use constant GATK_JAR => "/usr/local/packages/GATK-3.7/GenomeAnalysisTK.jar";
 ####################################################
 
 my %options;
+my %config;
+my $outdir;
 
 # Allow program to run as module for unit testing if necessary
 main() unless caller();
@@ -100,12 +86,8 @@ exit(0);
 
 sub main {
     my $results = GetOptions (\%options,
-						 "input_file|i=s",
-						 "output_file|o=s",
-						 "reference_file|r=s",
-						 "stand_call_conf=s",
-						 "no_soft_clipped_bases=i",
-						 "max_reads_stored=s",
+						 "config_file|c=s",
+						 "output_dir|o=s",
 						 "gatk_jar=s",
 						 "java_path=s",
                          "log|l=s",
@@ -114,28 +96,32 @@ sub main {
                           );
 
     &check_options(\%options);
+    read_config(\%options, \%config);
 
     my %picard_args = ( 
-			'--input_file' => $options{'input_file'},
-			'--out' => $options{'output_file'},
-			'--reference_sequence' => $options{'reference_file'},
-			'--maxReadsInMemory' => $options{'max_reads_stored'},
-			'--standard_min_confidence_threshold_for_calling' => $options{'stand_call_conf'}
+			'--input_file' => $config{'input_file'},
+			'--out' => $outdir,
+			'--reference_sequence' => $config{'reference_file'},
+			'--maxReadsInMemory' => $config{'max_reads_stored'},
+			'--standard_min_confidence_threshold_for_calling' => $config{'stand_call_conf'}
     );
 
     # Start building the Picard tools command
-    my $cmd = $options{'java_path'}." ".$options{'gatk_jar'}." --analysis_type SplitNCigarReads ";
+    my $cmd = $options{'java_path'}." ".$options{'gatk_jar'}." --analysis_type HaplotypeCaller ";
 
 
     # Add only passed in options to command
-    foreach my $arg (keys %options) {
-        $cmd .= "${arg}=".$options{$arg}." " if defined $options{$arg};
+    foreach my $arg (keys %config) {
+        $cmd .= "${arg}=".$config{$arg}." " if defined $config{$arg};
     }
 
-	$cmd = "--dontUseSoftClippedBases " if ($options{"no_soft_clipped_bases"});
+	$cmd = "--dontUseSoftClippedBases " if ($config{"no_soft_clipped_bases"} == 1);
 
     exec_command($cmd);
 
+    my $config_out = "$outdir/haplotype_caller." .$config{'haplotype_caller'}{'Prefix'}[0].".config" ;
+    $config{'variant_filtration'}{'Prefix'}[0] = "$config{'haplotype_caller'}{'Prefix'}[0]";
+    write_config($options, \%config, $config_out);
 }
 
 sub check_options {
@@ -150,13 +136,24 @@ sub check_options {
 
    $debug = $opts->{'debug'} if( $opts->{'debug'} );
 
-   foreach my $req ( qw(input_file output_file reference_file) ) {
+   foreach my $req ( qw(config_file) ) {
        &_log($ERROR, "Option $req is required") unless( $opts->{$req} );
    }
 
-   $opts->{'java_path'} = $JAVA_PATH if !$opts->{'java_path'};
-   $opts->{'gatk_jar'} = $GATK_JAR if !$opts->{'gatk_jar'};
+   $opts->{'java_path'} = JAVA_PATH if !$opts->{'java_path'};
+   $opts->{'gatk_jar'} = GATK_JAR if !$opts->{'picard_jar'};
 
+    if (defined $opts->{'output_dir'}) {
+        $outdir = $opts->{'output_dir'};
+
+        if (! -e $outdir) {
+           mkdir($opts->{'output_dir'}) ||
+            die "ERROR! Cannot create output directory\n";
+        } elsif (! -d $opts->{'output_dir'}) {
+            die "ERROR! $opts->{'output_dir'} is not a directory\n";
+        }
+    }
+    $outdir = File::Spec->canonpath($outdir);
 }
 
 sub exec_command {

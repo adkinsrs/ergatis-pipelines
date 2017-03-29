@@ -106,27 +106,22 @@ sub main {
 			'--reference_sequence' => $config{'reference_file'},
 			'--maxReadsInMemory' => $config{'max_reads_stored'},
 			'--unsafe' => uc($config{'unsafe'}
+			'--reassign_mapping_quality_from' => $config{'orig_mapping_quality'},
+            '--reassign_mapping_quality_to' => $config{'desired_mapping_quality'}
     );
 
     # Start building the Picard tools command
-    my $cmd = $options{'java_path'}." ".$options{'gatk_jar'}." --analysis_type SplitNCigarReads ";
+    my $cmd = $options{'java_path'}." ".$options{'gatk_jar'}." --analysis_type SplitNCigarReads -rf ReassignOneMappingQuality ";
 
     # Add only passed in options to command
     foreach my $arg (keys %config) {
         $cmd .= "${arg}=".$config{$arg}." " if defined $config{$arg};
     }
 
-	# Split csv list of filters and add as individual options
-    if ($config{'read_filter'}) {
-		$cmd .= '--read_filter ';
-		my @filters = split(/,/, $config{'read_filter'});
-		$cmd .= join '--read_filter ', @filters;
-	}
-
     exec_command($cmd);
 
     my $config_out = "$outdir/split_spliced_reads." .$config{'split_spliced_reads'}{'Prefix'}[0].".config" ;
-    $config{'haplotype_caller'}{'Prefix'}[0] = "$config{'split_spliced_reads'}{'Prefix'}[0]";
+    $config{'realigner_target_creator'}{'Prefix'}[0] = "$config{'split_spliced_reads'}{'Prefix'}[0]";
     write_config($options, \%config, $config_out);
 }
 
@@ -161,6 +156,7 @@ sub check_options {
     }
     $outdir = File::Spec->canonpath($outdir);
 }
+
 sub exec_command {
 	my $sCmd = shift;
 	
