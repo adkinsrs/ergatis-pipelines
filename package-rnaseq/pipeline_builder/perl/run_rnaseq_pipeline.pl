@@ -3,10 +3,17 @@
 use strict;
 use warnings;
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
-use lib ("../../lib/perl5");
+use lib ("../lib/perl5");
 use Ergatis::Pipeline;
 use Ergatis::SavedPipeline;
 use Ergatis::ConfigFile;
+
+# If on a Docker container being run on Docker-Machine, get IP of Docker Host
+my $host = 'ergatis.igs.umaryland.edu/';
+if (defined $ENV{'DOCKER_HOST'}) {
+    $host = $ENV{'DOCKER_HOST'} . ":8080/ergatis";
+}
+
 
 my %options;
 my $results = GetOptions (\%options,
@@ -39,7 +46,7 @@ my $id = &make_pipeline( $layout, $repo_root, $id_repo, $config, $ergatis_config
 # Label the pipeline.
 # &label_pipeline( $repo_root, $id);
 
-my $url = "http://ergatis.igs.umaryland.edu/cgi/view_pipeline.cgi?instance=$repo_root/workflow/runtime/pipeline/$id/pipeline.xml";
+my $url = "http://${host}/cgi/view_pipeline.cgi?instance=$repo_root/workflow/runtime/pipeline/$id/pipeline.xml";
 print "pipeline_id -> $id | pipeline_url -> $url\n";
 
 sub make_pipeline {
