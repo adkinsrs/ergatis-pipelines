@@ -2,11 +2,11 @@
 
 =head1 NAME
 
-add_read_group.pl - Wrapper script for Picard's AddOrReplaceReadGroup utility
+picard_processing.pl - Wrapper script for several Picard utilities in the dRNASeq SNP pipeline
 
 =head1 SYNOPSIS
 
- USAGE: add_read_group.pl
+ USAGE: picard_processing.pl
        --config_file=/path/to/some/config
      [ 
 	   --output_dir=/path/to/output/dir
@@ -42,7 +42,10 @@ B<--help,-h>
 
 =head1  DESCRIPTION
 
- DESCRIPTION
+ This script is a wrapper script for 3 utilities from the Picard-tools suite
+ 1) AddOrReplaceReadGroups - Add Read Group to BAM file
+ 2) MarkDuplicates - Mark duplicate reads in BAM file
+ 3) BuildBamIndex - Index resulting BAM file
  
 =head1  INPUT
 
@@ -109,7 +112,7 @@ sub main {
 
     my %picard_args = ( 
 			'INPUT' => $config{'input_file'},
-			'OUTPUT' => $config{'output_file'},
+			'OUTPUT' => $outdir."/add_read_group.bam" ,
 			'RGID' => $config{'id'},
 			'RGLB' => $config{'library'},
 			'RGPL' => $config{'platform'},
@@ -129,8 +132,8 @@ sub main {
 
     exec_command($cmd);
 
-    my $config_out = "$outdir/add_read_group." .$config{'add_read_group'}{'Prefix'}[0].".config" ;
-    $config{'split_spliced_reads'}{'Prefix'}[0] = "$config{'add_read_group'}{'Prefix'}[0]";
+    my $config_out = "$outdir/picard_processing." .$config{'picard_processing'}{'Prefix'}[0].".config" ;
+    $config{'split_spliced_reads'}{'Prefix'}[0] = "$config{'picard_processing'}{'Prefix'}[0]";
     write_config($options, \%config, $config_out);
 
 }

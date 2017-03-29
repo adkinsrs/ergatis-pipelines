@@ -7,13 +7,9 @@ split_spliced_reads.pl - Wrapper script for GATK's SplitNCigarReads utility
 =head1 SYNOPSIS
 
  USAGE: split_spliced_reads.pl
-       --input_file=/path/to/some/input.bam
-       --output_file=/path/to/output.bam
-	   --reference_file=/path/to/ref.fa
+       --config_file=/path/to/some/config/file
+       --output_dir=/path/to/output/dir
      [ 
-	   --read_filter=ReassignOneMappingQuality
-	   --max_reads_stored=1000000
-	   --unsafe=ALLOW_N_CIGAR_READS
 	   --gatk_jar=/path/to/gatk.jar
 	   --java_path=/path/to/java
 	   --log=/path/to/file.log
@@ -23,23 +19,11 @@ split_spliced_reads.pl - Wrapper script for GATK's SplitNCigarReads utility
 
 =head1 OPTIONS
 
-B<--input_file,-i>
-	Required. Path to BAM file to serve as input
+B<--config_file,-c>
+	Required. Path to config file that lists parameters to use in this script
 
-B<--output_file,-o>
-	Required. File name for output BAM file
-
-B<--reference_file>
-	Required.  Path to FASTA file to serve as reference
-
-B<--read_filter>
-	Optional. Reads that fail the specified filters will not be used in the analysis.  Pass in each filter as a comma-separated list.
-
-B<--max_records_stored>
-	Optional.  Number of records to store in RAM before spilling to disk.
-
-B<--unsafe>
-	Optional.  Enable unsafe operations: nothing will be checked at runtime.  For RNAseq analysis, "ALLOW_N_CIGAR_READS" should be passed in.
+B<--output_dir,-o>
+	Optional. Path to directory to write output to.  If not provided, use current directory
 
 B<--gatk_jar>
 	Optional. Path to the GATK JAR file.  If not provided, will use /usr/local/packages/GATK-3.7/GenomeAnalysisTK.jar
@@ -102,12 +86,8 @@ exit(0);
 
 sub main {
     my $results = GetOptions (\%options,
-						 "input_file|i=s",
+						 "config_file|c=s,"
 						 "output_file|o=s",
-						 "reference_file|r=s",
-						 "read_filter=s",
-						 "max_reads_stored=s",
-						 "unsafe=s",
 						 "gatk_jar=s",
 						 "java_path=s",
                          "log|l=s",
@@ -118,31 +98,36 @@ sub main {
     $outdir = File::Spec->curdir();
     &check_options(\%options);
 
+    read_config(\%options, \%config);
+
     my %picard_args = ( 
-			'--input_file' => $options{'input_file'},
-			'--out' => $options{'output_file'},
-			'--reference_sequence' => $options{'reference_file'},
-			'--maxReadsInMemory' => $options{'max_reads_stored'},
-			'--unsafe' => uc($options{'unsafe'}
+			'--input_file' => $config{'input_file'},
+			'--out' => $config{'output_file'},
+			'--reference_sequence' => $config{'reference_file'},
+			'--maxReadsInMemory' => $config{'max_reads_stored'},
+			'--unsafe' => uc($config{'unsafe'}
     );
 
     # Start building the Picard tools command
     my $cmd = $options{'java_path'}." ".$options{'gatk_jar'}." --analysis_type SplitNCigarReads ";
 
     # Add only passed in options to command
-    foreach my $arg (keys %options) {
-        $cmd .= "${arg}=".$options{$arg}." " if defined $options{$arg};
+    foreach my $arg (keys %config) {
+        $cmd .= "${arg}=".$config{$arg}." " if defined $config{$arg};
     }
 
 	# Split csv list of filters and add as individual options
-    if ($options{'read_filter'}) {
+    if ($config{'read_filter'}) {
 		$cmd .= '--read_filter ';
-		my @filters = split(/,/, $options{'read_filter'});
+		my @filters = split(/,/, $config{'read_filter'});
 		$cmd .= join '--read_filter ', @filters;
 	}
 
     exec_command($cmd);
 
+    my $config_out = "$outdir/split_spliced_reads." .$config{'split_spliced_reads'}{'Prefix'}[0].".config" ;
+    $config{'haplotype_caller'}{'Prefix'}[0] = "$config{'split_spliced_reads'}{'Prefix'}[0]";
+    write_config($options, \%config, $config_out);
 }
 
 sub check_options {
