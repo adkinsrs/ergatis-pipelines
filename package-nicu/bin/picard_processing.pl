@@ -67,6 +67,7 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
 use Pod::Usage;
 use List::Util;
+use File::Basename;
 use File::Spec;
 use NICU::Config;
 
@@ -105,14 +106,17 @@ sub main {
     &check_options(\%options);
 
     read_config(\%options, \%config);
+    my ($filename, $dirs, $suffix) = fileparse($config{'input_file'};
+		(my $prefix = $filename) =~ s/\.bam//;
 
     if ( defined $config{'validation_stringency'} && none{$_ eq uc($config{'validation_stringency'})} @stringency ) {
         &_log($ERROR, $config{'validation_stringency'}." is not a valid option.  Choose from 'SILENT', 'LENIENT', or 'STRICT'");
     }
 
+	### AddOrReplaceReadGroups ###
     my %picard_args = ( 
 			'INPUT' => $config{'input_file'},
-			'OUTPUT' => $outdir."/add_read_group.bam" ,
+			'OUTPUT' => $outdir."/$prefix.add_read_group.bam" ,
 			'RGID' => $config{'id'},
 			'RGLB' => $config{'library'},
 			'RGPL' => $config{'platform'},
@@ -132,6 +136,42 @@ sub main {
 
     exec_command($cmd);
 
+	### MarkDuplicates ###
+    %picard_args = ( 
+			'INPUT' => $outdir."/$prefix.add_read_group.bam",
+			'OUTPUT' => $outdir."/$prefix.mark_dups.bam" ,
+			'METRICS_FILE' => $outdir."/mark_dups_metrics.txt",
+			'VALIDATION_STRINGENCY' => uc($config{'validation_stringency'}),
+			'MAX_RECORDS_IN_RAM' => $config{'max_records_stored'}
+    );
+
+    # Start building the Picard tools command
+    my $cmd = $options{'java_path'}." ".$options{'picard_jar'}." MarkDuplicates ";
+
+    # Add only passed in options to command
+    foreach my $arg (keys %options) {
+        $cmd .= "${arg}=".$options{$arg}." " if defined $options{$arg};
+    }
+
+    exec_command($cmd);
+
+	### BuildBamIndex ###
+    %picard_args = ( 
+			'INPUT' => $outdir."/$prefix.mark_dups.bam",
+			'OUTPUT' => $outdir . "/$prefix.bai",
+			'VALIDATION_STRINGENCY' => uc($config{'validation_stringency'}),
+			'MAX_RECORDS_IN_RAM' => $config{'max_records_stored'}
+    );
+
+    # Start building the Picard tools command
+    my $cmd = $options{'java_path'}." ".$options{'picard_jar'}." BuildBamIndex ";
+
+    # Add only passed in options to command
+    foreach my $arg (keys %options) {
+        $cmd .= "${arg}=".$options{$arg}." " if defined $options{$arg};
+    }
+
+    exec_command($cmd);
     my $config_out = "$outdir/picard_processing." .$config{'picard_processing'}{'Prefix'}[0].".config" ;
     $config{'split_spliced_reads'}{'Prefix'}[0] = "$config{'picard_processing'}{'Prefix'}[0]";
     write_config($options, \%config, $config_out);
