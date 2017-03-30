@@ -101,8 +101,6 @@ sub main {
                          "help|h"
                           );
 
-
-    $outdir = File::Spec->curdir();
     &check_options(\%options);
 
     read_config(\%options, \%config);
@@ -114,7 +112,7 @@ sub main {
     }
 
 	### AddOrReplaceReadGroups ###
-    my %picard_args = ( 
+    my %args = ( 
 			'INPUT' => $config{'input_file'},
 			'OUTPUT' => $outdir."/$prefix.add_read_group.bam" ,
 			'RGID' => $config{'id'},
@@ -130,14 +128,14 @@ sub main {
     my $cmd = $options{'java_path'}." ".$options{'picard_jar'}." AddOrReplaceReadGroups ";
 
     # Add only passed in options to command
-    foreach my $arg (keys %options) {
-        $cmd .= "${arg}=".$options{$arg}." " if defined $options{$arg};
+    foreach my $arg (keys %args) {
+        $cmd .= "${arg}=".$args{$arg}." " if defined $args{$arg};
     }
 
     exec_command($cmd);
 
 	### MarkDuplicates ###
-    %picard_args = ( 
+    %args = ( 
 			'INPUT' => $outdir."/$prefix.add_read_group.bam",
 			'OUTPUT' => $outdir."/$prefix.mark_dups.bam" ,
 			'METRICS_FILE' => $outdir."/mark_dups_metrics.txt",
@@ -149,14 +147,14 @@ sub main {
     my $cmd = $options{'java_path'}." ".$options{'picard_jar'}." MarkDuplicates ";
 
     # Add only passed in options to command
-    foreach my $arg (keys %options) {
-        $cmd .= "${arg}=".$options{$arg}." " if defined $options{$arg};
+    foreach my $arg (keys %args) {
+        $cmd .= "${arg}=".$args{$arg}." " if defined $args{$arg};
     }
 
     exec_command($cmd);
 
 	### BuildBamIndex ###
-    %picard_args = ( 
+    %args = ( 
 			'INPUT' => $outdir."/$prefix.mark_dups.bam",
 			'OUTPUT' => $outdir . "/$prefix.bai",
 			'VALIDATION_STRINGENCY' => uc($config{'validation_stringency'}),
@@ -167,8 +165,8 @@ sub main {
     my $cmd = $options{'java_path'}." ".$options{'picard_jar'}." BuildBamIndex ";
 
     # Add only passed in options to command
-    foreach my $arg (keys %options) {
-        $cmd .= "${arg}=".$options{$arg}." " if defined $options{$arg};
+    foreach my $arg (keys %args) {
+        $cmd .= "${arg}=".$args{$arg}." " if defined $args{$arg};
     }
 
     exec_command($cmd);
@@ -197,6 +195,7 @@ sub check_options {
    $opts->{'java_path'} = JAVA_PATH if !$opts->{'java_path'};
    $opts->{'picard_jar'} = PICARD_JAR if !$opts->{'picard_jar'};
 
+   $outdir = File::Spec->curdir();
     if (defined $opts->{'output_dir'}) {
         $outdir = $opts->{'output_dir'};
 

@@ -2,15 +2,15 @@
 
 =head1 NAME
 
-haplotype_caller.pl - Wrapper script for GATK's HaplotypeCaller utility
+preprocess_alignment.pl - Wrapper script for several Picard utilities in the dRNASeq SNP pipeline
 
 =head1 SYNOPSIS
 
- USAGE: haplotype_caller.pl
-       --config_file=/path/to/some/config.txt
-       --output_dir=/path/to/output/dir
+ USAGE: preprocess_alignment.pl
+       --config_file=/path/to/some/config
      [ 
-	   --gatk_jar=/path/to/gatk.jar
+	   --output_dir=/path/to/output/dir
+	   --picard_jar=/path/to/picard.jar
 	   --java_path=/path/to/java
 	   --log=/path/to/file.log
        --debug=3
@@ -25,8 +25,8 @@ B<--config_file,-c>
 B<--output_dir,-o>
 	Optional. Path to directory to write output to.  If not provided, use current directory
 
-B<--gatk_jar>
-	Optional. Path to the GATK JAR file.  If not provided, will use /usr/local/packages/GATK-3.7/GenomeAnalysisTK.jar
+B<--picard_jar>
+	Optional. Path to picard JAR file.  If not provided, will use /usr/local/packages/picard/bin/picard.jar
 
 B<--java_path>
 	Optiona. Path to JAVA executable from Java 8 JDK.  If not provided, will use /usr/bin/java
@@ -42,7 +42,9 @@ B<--help,-h>
 
 =head1  DESCRIPTION
 
- DESCRIPTION
+ This script is a wrapper script for 2 utilities from the Picard-tools suite
+ 1) ReorderSam - Reorder reads to match contig ordering in reference file
+ 2) SortSam - Sort reads in BAM file by coordinate
  
 =head1  INPUT
 
@@ -64,6 +66,7 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
 use Pod::Usage;
 use List::Util;
+use File::Basename;
 use File::Spec;
 use NICU::Config;
 
@@ -73,7 +76,9 @@ my ($ERROR, $WARN, $DEBUG) = (1,2,3);
 my $logfh;
 
 use constant JAVA_PATH => "/usr/bin/java";
-use constant GATK_JAR => "/usr/local/packages/GATK-3.7/GenomeAnalysisTK.jar";
+use constant PICARD_JAR => "/usr/local/packages/picard/bin/picard.jar";
+
+my @stringency = qw(STRICT LENIENT SILENT);
 ####################################################
 
 my %options;
@@ -88,7 +93,7 @@ sub main {
     my $results = GetOptions (\%options,
 						 "config_file|c=s",
 						 "output_dir|o=s",
-						 "gatk_jar=s",
+						 "picard_jar=s",
 						 "java_path=s",
                          "log|l=s",
                          "debug|d=s",
@@ -96,32 +101,58 @@ sub main {
                           );
 
     &check_options(\%options);
-    read_config(\%options, \%config);
 
+    read_config(\%options, \%config);
+    my ($filename, $dirs, $suffix) = fileparse($config{'input_file'};
+		(my $prefix = $filename) =~ s/\.bam//;
+
+    if ( defined $config{'validation_stringency'} && none{$_ eq uc($config{'validation_stringency'})} @stringency ) {
+        &_log($ERROR, $config{'validation_stringency'}." is not a valid option.  Choose from 'SILENT', 'LENIENT', or 'STRICT'");
+    }
+
+	### ReorderSam ###
     my %args = ( 
-			'--input_file' => $config{'input_file'},
-			'--out' => $outdir,
-			'--reference_sequence' => $config{'reference_file'},
-			'--maxReadsInMemory' => $config{'max_reads_stored'},
-			'--standard_min_confidence_threshold_for_calling' => $config{'stand_call_conf'}
+			'INPUT' => $config{'input_file'},
+			'OUTPUT' => $outdir."/$prefix.reorder.bam" ,
+			'REFERENCE' => $config{'reference'},
+			'VALIDATION_STRINGENCY' => uc($config{'validation_stringency'}),
+			'MAX_RECORDS_IN_RAM' => $config{'max_records_stored'},
+			'CREATE_INDEX' => "TRUE"
     );
 
     # Start building the Picard tools command
-    my $cmd = $options{'java_path'}." ".$options{'gatk_jar'}." --analysis_type HaplotypeCaller ";
-
+    my $cmd = $options{'java_path'}." ".$options{'picard_jar'}." ReorderSam ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
         $cmd .= "${arg}=".$args{$arg}." " if defined $args{$arg};
     }
 
-	$cmd = "--dontUseSoftClippedBases " if ($config{"no_soft_clipped_bases"} == 1);
+    exec_command($cmd);
+
+	### SortSam ###
+    %args = ( 
+			'INPUT' => $outdir."/$prefix.reorder.bam",
+			'OUTPUT' => $outdir."/$prefix.sorted.bam" ,
+			'VALIDATION_STRINGENCY' => uc($config{'validation_stringency'}),
+			'MAX_RECORDS_IN_RAM' => $config{'max_records_stored'},
+			'SORT_ORDER' => "coordinate"
+    );
+
+    # Start building the Picard tools command
+    my $cmd = $options{'java_path'}." ".$options{'picard_jar'}." SortSam ";
+
+    # Add only passed in options to command
+    foreach my $arg (keys %args) {
+        $cmd .= "${arg}=".$args{$arg}." " if defined $args{$arg};
+    }
 
     exec_command($cmd);
 
-    my $config_out = "$outdir/haplotype_caller." .$config{'haplotype_caller'}{'Prefix'}[0].".config" ;
-    $config{'variant_filtration'}{'Prefix'}[0] = $config{'haplotype_caller'}{'Prefix'}[0];
+    my $config_out = "$outdir/preprocess_alignment." .$config{'preprocess_alignment'}{'Prefix'}[0].".config" ;
+    $config{'picard_processing'}{'Prefix'}[0] = $config{'preprocess_alignment'}{'Prefix'}[0];
     write_config($options, \%config, $config_out);
+
 }
 
 sub check_options {
@@ -141,11 +172,12 @@ sub check_options {
    }
 
    $opts->{'java_path'} = JAVA_PATH if !$opts->{'java_path'};
-   $opts->{'gatk_jar'} = GATK_JAR if !$opts->{'gatk_jar'};
+   $opts->{'picard_jar'} = PICARD_JAR if !$opts->{'picard_jar'};
 
    $outdir = File::Spec->curdir();
     if (defined $opts->{'output_dir'}) {
         $outdir = $opts->{'output_dir'};
+
         if (! -e $outdir) {
            mkdir($opts->{'output_dir'}) ||
             die "ERROR! Cannot create output directory\n";

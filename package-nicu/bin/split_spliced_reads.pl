@@ -95,12 +95,11 @@ sub main {
                          "help|h"
                           );
 
-    $outdir = File::Spec->curdir();
     &check_options(\%options);
 
     read_config(\%options, \%config);
 
-    my %picard_args = ( 
+    my %args = ( 
 			'--input_file' => $config{'input_file'},
 			'--out' => $config{'output_file'},
 			'--reference_sequence' => $config{'reference_file'},
@@ -114,9 +113,12 @@ sub main {
     my $cmd = $options{'java_path'}." ".$options{'gatk_jar'}." --analysis_type SplitNCigarReads -rf ReassignOneMappingQuality ";
 
     # Add only passed in options to command
-    foreach my $arg (keys %config) {
-        $cmd .= "${arg}=".$config{$arg}." " if defined $config{$arg};
-    }
+    foreach my $arg (keys %args) {
+        $cmd .= "${arg}=".$args{$arg}." " if defined $args{$arg};
+	}
+
+	# Add other misc parameters via a string
+	$cmd .= $config{'other_opts'};
 
     exec_command($cmd);
 
@@ -142,8 +144,9 @@ sub check_options {
    }
 
    $opts->{'java_path'} = JAVA_PATH if !$opts->{'java_path'};
-   $opts->{'gatk_jar'} = GATK_JAR if !$opts->{'picard_jar'};
+   $opts->{'gatk_jar'} = GATK_JAR if !$opts->{'gatk_jar'};
 
+   $outdir = File::Spec->curdir();
     if (defined $opts->{'output_dir'}) {
         $outdir = $opts->{'output_dir'};
 

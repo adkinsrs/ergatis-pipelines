@@ -2,11 +2,11 @@
 
 =head1 NAME
 
-haplotype_caller.pl - Wrapper script for GATK's HaplotypeCaller utility
+variant_filtration.pl - Wrapper script for GATK's VariantFiltration utility
 
 =head1 SYNOPSIS
 
- USAGE: haplotype_caller.pl
+ USAGE: variant_filtration.pl
        --config_file=/path/to/some/config.txt
        --output_dir=/path/to/output/dir
      [ 
@@ -107,7 +107,7 @@ sub main {
     );
 
     # Start building the Picard tools command
-    my $cmd = $options{'java_path'}." ".$options{'gatk_jar'}." --analysis_type HaplotypeCaller ";
+    my $cmd = $options{'java_path'}." ".$options{'gatk_jar'}." --analysis_type VariantFiltration ";
 
 
     # Add only passed in options to command
@@ -119,8 +119,6 @@ sub main {
 
     exec_command($cmd);
 
-    my $config_out = "$outdir/haplotype_caller." .$config{'haplotype_caller'}{'Prefix'}[0].".config" ;
-    $config{'variant_filtration'}{'Prefix'}[0] = $config{'haplotype_caller'}{'Prefix'}[0];
     write_config($options, \%config, $config_out);
 }
 
