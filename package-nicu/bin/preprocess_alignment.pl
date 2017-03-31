@@ -66,7 +66,6 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
 use Pod::Usage;
 use List::Util;
-use File::Basename;
 use File::Spec;
 use NICU::Config;
 
@@ -78,7 +77,7 @@ my $logfh;
 use constant JAVA_PATH => "/usr/bin/java";
 use constant PICARD_JAR => "/usr/local/packages/picard/bin/picard.jar";
 
-my @stringency = qw(STRICT LENIENT SILENT);
+my @stringency_arr = qw(STRICT LENIENT SILENT);
 ####################################################
 
 my %options;
@@ -103,20 +102,21 @@ sub main {
     &check_options(\%options);
 
     read_config(\%options, \%config);
-    my ($filename, $dirs, $suffix) = fileparse($config{'input_file'};
-		(my $prefix = $filename) =~ s/\.bam//;
+	my $prefix = $config{'preprocess_alignment'}{'Prefix'}[0];
+	my $stringency = uc($config{'picard_processing'}{'validation_stringency'}[0]);
+	my $max_records = $config{'picard_processing'}{'max_records_stored'}[0];
 
-    if ( defined $config{'validation_stringency'} && none{$_ eq uc($config{'validation_stringency'})} @stringency ) {
-        &_log($ERROR, $config{'validation_stringency'}." is not a valid option.  Choose from 'SILENT', 'LENIENT', or 'STRICT'");
+    if ( defined $stringency && none{$_ eq $stringency} @stringency_arr ) {
+        &_log($ERROR, $stringency." is not a valid option.  Choose from 'SILENT', 'LENIENT', or 'STRICT'");
     }
 
 	### ReorderSam ###
     my %args = ( 
-			'INPUT' => $config{'input_file'},
+			'INPUT' => $config{'preprocess_alignment'}{'INPUT_FILE'}[0],
 			'OUTPUT' => $outdir."/$prefix.reorder.bam" ,
-			'REFERENCE' => $config{'reference'},
-			'VALIDATION_STRINGENCY' => uc($config{'validation_stringency'}),
-			'MAX_RECORDS_IN_RAM' => $config{'max_records_stored'},
+			'REFERENCE' => $config{'preprocess_alignment'}{'REFERENCE'}[0],
+			'VALIDATION_STRINGENCY' => $stringency,
+			'MAX_RECORDS_IN_RAM' => $max_records,
 			'CREATE_INDEX' => "TRUE"
     );
 
@@ -134,8 +134,8 @@ sub main {
     %args = ( 
 			'INPUT' => $outdir."/$prefix.reorder.bam",
 			'OUTPUT' => $outdir."/$prefix.sorted.bam" ,
-			'VALIDATION_STRINGENCY' => uc($config{'validation_stringency'}),
-			'MAX_RECORDS_IN_RAM' => $config{'max_records_stored'},
+			'VALIDATION_STRINGENCY' => $stringency,
+			'MAX_RECORDS_IN_RAM' => $max_records,
 			'SORT_ORDER' => "coordinate"
     );
 
@@ -149,8 +149,9 @@ sub main {
 
     exec_command($cmd);
 
-    my $config_out = "$outdir/preprocess_alignment." .$config{'preprocess_alignment'}{'Prefix'}[0].".config" ;
-    $config{'picard_processing'}{'Prefix'}[0] = $config{'preprocess_alignment'}{'Prefix'}[0];
+    my $config_out = "$outdir/preprocess_alignment." .$prefix.".config" ;
+    $config{'picard_processing'}{'INPUT_FILE'}[0] = $outdir."/$prefix.sorted.bam";
+    $config{'picard_processing'}{'Prefix'}[0] = $prefix;
     write_config($options, \%config, $config_out);
 
 }

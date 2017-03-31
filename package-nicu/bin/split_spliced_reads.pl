@@ -98,15 +98,16 @@ sub main {
     &check_options(\%options);
 
     read_config(\%options, \%config);
+	my $prefix = $config{'split_spliced_reads'}{'Prefix'}[0];
 
     my %args = ( 
-			'--input_file' => $config{'input_file'},
-			'--out' => $config{'output_file'},
-			'--reference_sequence' => $config{'reference_file'},
-			'--maxReadsInMemory' => $config{'max_reads_stored'},
+			'--input_file' => $config{'split_spliced_reads'}{'INPUT_FILE'}[0],
+			'--out' => $outdir."/$prefix.split.bam",
+			'--reference_sequence' => $config{'split_spliced_reads'}{'REFERENCE'}[0],
+			'--maxReadsInMemory' => $config{'split_spliced_reads'}{'MAX_READS_STORED'}[0],
 			'--unsafe' => uc($config{'unsafe'}
-			'--reassign_mapping_quality_from' => $config{'orig_mapping_quality'},
-            '--reassign_mapping_quality_to' => $config{'desired_mapping_quality'}
+			'--reassign_mapping_quality_from' => $config{'split_spliced_reads'}{'ORIG_MAPPING_QUALITY'}[0],
+            '--reassign_mapping_quality_to' => $config{'split_spliced_reads'}{'DESIRED_MAPPING_QUALITY'}[0]
     );
 
     # Start building the Picard tools command
@@ -118,12 +119,13 @@ sub main {
 	}
 
 	# Add other misc parameters via a string
-	$cmd .= $config{'other_opts'};
+	$cmd .= $config{'split_spliced_reads'}{'OTHER_OPTS'}[0];
 
     exec_command($cmd);
 
-    my $config_out = "$outdir/split_spliced_reads." .$config{'split_spliced_reads'}{'Prefix'}[0].".config" ;
-    $config{'realigner_target_creator'}{'Prefix'}[0] = "$config{'split_spliced_reads'}{'Prefix'}[0]";
+    my $config_out = "$outdir/split_spliced_reads." .$prefix.".config" ;
+    $config{'realigner_target_creator'}{'INPUT_FILE'}[0] = $outdir."/$prefix.split.bam";
+    $config{'realigner_target_creator'}{'Prefix'}[0] = $prefix;
     write_config($options, \%config, $config_out);
 }
 

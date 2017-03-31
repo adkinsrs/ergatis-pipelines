@@ -67,7 +67,6 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
 use Pod::Usage;
 use List::Util;
-use File::Basename;
 use File::Spec;
 use NICU::Config;
 
@@ -79,7 +78,7 @@ my $logfh;
 use constant JAVA_PATH => "/usr/bin/java";
 use constant PICARD_JAR => "/usr/local/packages/picard/bin/picard.jar";
 
-my @stringency = qw(STRICT LENIENT SILENT);
+my @stringency_arr = qw(STRICT LENIENT SILENT);
 ####################################################
 
 my %options;
@@ -104,24 +103,26 @@ sub main {
     &check_options(\%options);
 
     read_config(\%options, \%config);
-    my ($filename, $dirs, $suffix) = fileparse($config{'input_file'};
-		(my $prefix = $filename) =~ s/\.bam//;
+	my $prefix = $config{'picard_processing'}{'Prefix'}[0];
 
-    if ( defined $config{'validation_stringency'} && none{$_ eq uc($config{'validation_stringency'})} @stringency ) {
-        &_log($ERROR, $config{'validation_stringency'}." is not a valid option.  Choose from 'SILENT', 'LENIENT', or 'STRICT'");
+	my $stringency = uc($config{'picard_processing'}{'validation_stringency'}[0]);
+	my $max_records = $config{'picard_processing'}{'max_records_stored'}[0];
+
+    if ( defined $stringency && none{$_ eq $stringency} @stringency_arr ) {
+        &_log($ERROR, $stringency." is not a valid option.  Choose from 'SILENT', 'LENIENT', or 'STRICT'");
     }
 
 	### AddOrReplaceReadGroups ###
     my %args = ( 
-			'INPUT' => $config{'input_file'},
+			'INPUT' => $config{'picard_processing'}{'INPUT_FILE'}[0],
 			'OUTPUT' => $outdir."/$prefix.add_read_group.bam" ,
-			'RGID' => $config{'id'},
-			'RGLB' => $config{'library'},
-			'RGPL' => $config{'platform'},
-			'RGPU' => $config{'platform_unit'},
-			'RGSM' => $config{'sample_name'},
-			'VALIDATION_STRINGENCY' => uc($config{'validation_stringency'}),
-			'MAX_RECORDS_IN_RAM' => $config{'max_records_stored'}
+			'RGID' => $config{'picard_processing'}{'ID'}[0],
+			'RGLB' => $config{'picard_processing'}{'LIBRARY'}[0],
+			'RGPL' => $config{'picard_processing'}{'PLATFORM'}[0],
+			'RGPU' => $config{'picard_processing'}{'PLATFORM_UNIT'}[0],
+			'RGSM' => $config{'picard_processing'}{'SAMPLE_NAME'}[0],
+			'VALIDATION_STRINGENCY' => $stringency,
+			'MAX_RECORDS_IN_RAM' => $max_records
     );
 
     # Start building the Picard tools command
@@ -138,9 +139,9 @@ sub main {
     %args = ( 
 			'INPUT' => $outdir."/$prefix.add_read_group.bam",
 			'OUTPUT' => $outdir."/$prefix.mark_dups.bam" ,
-			'METRICS_FILE' => $outdir."/mark_dups_metrics.txt",
-			'VALIDATION_STRINGENCY' => uc($config{'validation_stringency'}),
-			'MAX_RECORDS_IN_RAM' => $config{'max_records_stored'}
+			'METRICS_FILE' => $outdir."/$prefix.mark_dups_metrics.txt",
+			'VALIDATION_STRINGENCY' => $stringency,
+			'MAX_RECORDS_IN_RAM' => $max_records
     );
 
     # Start building the Picard tools command
@@ -156,9 +157,9 @@ sub main {
 	### BuildBamIndex ###
     %args = ( 
 			'INPUT' => $outdir."/$prefix.mark_dups.bam",
-			'OUTPUT' => $outdir . "/$prefix.bai",
-			'VALIDATION_STRINGENCY' => uc($config{'validation_stringency'}),
-			'MAX_RECORDS_IN_RAM' => $config{'max_records_stored'}
+			'OUTPUT' => $outdir . "/$prefix.mark_dups.bai",
+			'VALIDATION_STRINGENCY' => $stringency,
+			'MAX_RECORDS_IN_RAM' => $max_records
     );
 
     # Start building the Picard tools command
@@ -170,8 +171,9 @@ sub main {
     }
 
     exec_command($cmd);
-    my $config_out = "$outdir/picard_processing." .$config{'picard_processing'}{'Prefix'}[0].".config" ;
-    $config{'split_spliced_reads'}{'Prefix'}[0] = "$config{'picard_processing'}{'Prefix'}[0]";
+    my $config_out = "$outdir/picard_processing." .$prefix.".config" ;
+    $config{'split_spliced_reads'}{'INPUT_FILE'}[0] = $outdir."/$prefix.mark_dups.bam";
+    $config{'split_spliced_reads'}{'Prefix'}[0] = $prefix;
     write_config($options, \%config, $config_out);
 
 }

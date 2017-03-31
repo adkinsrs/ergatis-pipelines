@@ -97,17 +97,16 @@ sub main {
 
     &check_options(\%options);
     read_config(\%options, \%config);
-    my ($filename, $dirs, $suffix) = fileparse($config{'input_file'};
-		(my $prefix = $filename) =~ s/\.bam//;
+	my $prefix = $config{'variant_filtration'}{'Prefix'}[0];
 
     my %args = ( 
-			'--variant' => $config{'input_file'},
+			'--variant' => $config{'variant_filtration'}{'INPUT_FILE'}[0],
 			'--out' => "$outdir/$prefix.variant_filtration.vcf",
-			'--reference_sequence' => $config{'reference_file'},
-			'--clusterWindowSize' => $config{'window_size'},
-			'--clusterSize'	=> $config{'cluster_size'},
-			'--maxReadsInMemory' => $config{'max_reads_stored'},
-			'--standard_min_confidence_threshold_for_calling' => $config{'stand_call_conf'}
+			'--reference_sequence' => $config{'variant_filtration'}{'REFERENCE'}[0],
+			'--clusterWindowSize' => $config{'variant_filtration'}{'WINDOW_SIZE'}[0],
+			'--clusterSize'	=> $config{'variant_filtration'}{'CLUSTER_SIZE'}[0],
+			'--maxReadsInMemory' => $config{'variant_filtration'}{'MAX_READS_STORED'}[0],
+			'--standard_min_confidence_threshold_for_calling' => $config{'variant_filtration'}{'STAND_CALL_CONF'}[0]
     );
 
     # Start building the Picard tools command
@@ -120,11 +119,9 @@ sub main {
     }
 
 	# Add other misc parameters via a string
-	$cmd .= $config{'other_opts'};
+	$cmd .= $config{'variant_filtration'}{'OTHER_OPTS'}[0];
 
     exec_command($cmd);
-
-    write_config($options, \%config, $config_out);
 }
 
 sub check_options {

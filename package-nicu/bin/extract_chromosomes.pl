@@ -64,7 +64,6 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
 use Pod::Usage;
 use List::Util;
-use File::Basename;
 use File::Spec;
 use NICU::Config;
 
@@ -99,8 +98,7 @@ sub main {
     &check_options(\%options);
     read_config(\%options, \%config);
 
-    my ($filename, $dirs, $suffix) = fileparse($config{'input_file'};
-		(my $prefix = $filename) =~ s/\.bam//;
+    my $prefix = $config{'extract_chromosomes'}{'Prefix'}[0];
 
     my %args = ( 
 			'-o' => $outdir."/$prefix.extract_chromosomes.bam",
@@ -119,12 +117,13 @@ sub main {
         $cmd .= "${arg}=".$args{$arg}." " if defined $args{$arg};
     }
 
-	$cmd .= $config{'input_file'} . $groups_str;
+	$cmd .= $config{'extract_chromosomes'}{'input_file'}[0] . $groups_str;
 
     exec_command($cmd);
 
-    my $config_out = "$outdir/extract_chromosomes." .$config{'extract_chromosomes'}{'Prefix'}[0].".config" ;
-    $config{'preprocess_alignment'}{'Prefix'}[0] = $config{'extract_chromosomes'}{'Prefix'}[0];
+    my $config_out = "$outdir/extract_chromosomes." .$prefix.".config" ;
+    $config{'preprocess_alignment'}{'INPUT_FILE'}[0] = $outdir."/$prefix.extract_chromosomes.bam";
+    $config{'preprocess_alignment'}{'Prefix'}[0] = $prefix;
     write_config($options, \%config, $config_out);
 }
 

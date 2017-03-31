@@ -98,12 +98,14 @@ sub main {
     &check_options(\%options);
     read_config(\%options, \%config);
 
+	my $prefix = $confitg{'haplotype_caller'}['Prefix'}[0];
+
     my %args = ( 
-			'--input_file' => $config{'input_file'},
-			'--out' => $outdir,
-			'--reference_sequence' => $config{'reference_file'},
-			'--maxReadsInMemory' => $config{'max_reads_stored'},
-			'--standard_min_confidence_threshold_for_calling' => $config{'stand_call_conf'}
+			'--input_file' => $config{'haplotype_caller'}{'INPUT_FILE'}[0],
+			'--out' => $outdir."/$prefix.haplotype_caller.vcf",
+			'--reference_sequence' => $config{'haplotype_caller'}{'REFERENCE_FILE'}[0],
+			'--maxReadsInMemory' => $config{'haplotype_caller'}{'MAX_READS_STORED'}[0],
+			'--standard_min_confidence_threshold_for_calling' => $config{'haplotype_caller'}{'STAND_CALL_CONF'}[0]
     );
 
     # Start building the Picard tools command
@@ -115,12 +117,13 @@ sub main {
         $cmd .= "${arg}=".$args{$arg}." " if defined $args{$arg};
     }
 
-	$cmd = "--dontUseSoftClippedBases " if ($config{"no_soft_clipped_bases"} == 1);
+	$cmd = "--dontUseSoftClippedBases " if ($config{'haplotype_caller'}{"NO_SOFT_CLIPPED_BASES"}[0] == 1);
 
     exec_command($cmd);
 
-    my $config_out = "$outdir/haplotype_caller." .$config{'haplotype_caller'}{'Prefix'}[0].".config" ;
-    $config{'variant_filtration'}{'Prefix'}[0] = $config{'haplotype_caller'}{'Prefix'}[0];
+    my $config_out = "$outdir/haplotype_caller." .$prefix.".config" ;
+    $config{'variant_filtration'}{'INPUT_FILE'}[0] = $outdir."/$prefix.haplotype_caller.vcf";
+    $config{'variant_filtration'}{'Prefix'}[0] = $prefix;
     write_config($options, \%config, $config_out);
 }
 
