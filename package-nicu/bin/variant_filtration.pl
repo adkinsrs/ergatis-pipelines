@@ -97,11 +97,15 @@ sub main {
 
     &check_options(\%options);
     read_config(\%options, \%config);
+    my ($filename, $dirs, $suffix) = fileparse($config{'input_file'};
+		(my $prefix = $filename) =~ s/\.bam//;
 
     my %args = ( 
-			'--input_file' => $config{'input_file'},
-			'--out' => $outdir,
+			'--variant' => $config{'input_file'},
+			'--out' => "$outdir/$prefix.variant_filtration.vcf",
 			'--reference_sequence' => $config{'reference_file'},
+			'--clusterWindowSize' => $config{'window_size'},
+			'--clusterSize'	=> $config{'cluster_size'},
 			'--maxReadsInMemory' => $config{'max_reads_stored'},
 			'--standard_min_confidence_threshold_for_calling' => $config{'stand_call_conf'}
     );
@@ -115,7 +119,8 @@ sub main {
         $cmd .= "${arg}=".$args{$arg}." " if defined $args{$arg};
     }
 
-	$cmd = "--dontUseSoftClippedBases " if ($config{"no_soft_clipped_bases"} == 1);
+	# Add other misc parameters via a string
+	$cmd .= $config{'other_opts'};
 
     exec_command($cmd);
 
