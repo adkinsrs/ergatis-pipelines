@@ -1,0 +1,279 @@
+use warnings;
+use strict;
+use Getopt::Long;
+use File::Spec;
+use Time::localtime;
+=head
+#################################
+#The following script requires following options - 
+Usage  : perl create_dnaseq_snp_pipeline.pl -seq1 Fastq1 -seq2 Fastq2 -Prefix <project name>  -build 19 -Out-dir <dirname> -Candidate-gene <genelist>
+=cut
+# Translate user input <--> description line (;;) in file
+
+#########time stamp
+
+sub timestamp {
+        my $t = localtime;
+        return sprintf ("%04d-%02d-%02d_%02d-%02d-%02d",
+                  $t->year + 1900, $t->mon + 1, $t->mday,
+                  $t->hour, $t->min, $t->sec );
+                }
+
+
+my ($o1, $o2, $o3, $o4, $o5, $o6, $o7, $o8, $o9) = qw(Seq1 Seq2 Align_Ref Prefix Chr_list GATK_ref GATK_known_sites Read_grp Gene_list) ;
+
+my (%input,$build,%conf, @mod_order, $mod_name, $des, $enter_input, $Outdir, $Candidate_gene, $New_Sample_config);
+
+my %desc = (
+    $o1 => 'Sequence file 1', 
+    $o2 => 'Sequence file 2',
+    $o3 => 'Align Reference',
+    $o4 => 'Output Prefix',
+    $o5 => 'Chromosome List file',
+    $o6 => 'Reference',
+    $o7 => 'Known sites',
+    $o8 => 'Read Group', 
+    $o9 => 'Candidate Gene',   
+ # ...
+);
+
+
+GetOptions(\%input, "$o1=s", "$o2=s","$o4=s", 'build=i' => \$build, 'Out-dir=s' => \$Outdir, "$o9=s") or die("Error in the input options - Usage  - perl GUI_complete_NICU_config.pl -seq1 Fastq1 -seq2 Fastq2 -Prefix <project name>  -build 19 -Candidate-gene <genelist>");
+#'Candidate-gene=s' => \$Candidate_gene
+
+if (!$input{$o1} or !$input{$o2} or !$input{$o4} or !$build or !$Outdir) {
+die "usage : perl Create_configs_launch.pl  -seq1 <Fasta_file1> -seq2 <Fasta_file2> -Prefix <Project_name>  -build 19 -Out-dir <Out_dir> -Gene_list <genelist>\n"; }																																	
+if (! -e $Outdir) {
+	mkdir ("$Outdir") or die "Cannot create $Outdir: $!\n";
+	}
+	
+
+
+$o5 = "/local/projects/NICU/variant_analysis/samples/chr_list";
+$o6 = "/local/projects/CAAPA/ancestry/reference/h_sapiens/1KGP/human_g1k_v37.chromosome.fasta";
+$o7 = "/local/projects/CAAPA/ancestry/reference/h_sapiens/gatk_resource_bundle/dbsnp_137.b37.vcf";
+#$o8 = $o4;
+$o3 = "/local/projects/ENICU/variant_analysis/reference/human_g1k_v37.chromosome.fasta";
+$input{Chr_list} = $o5;
+$input{GATK_ref} = $o6;
+$input{GATK_known_sites} = $o7;
+$input{Read_grp} = $input{$o4};
+$input{Align_Ref} = $o3;
+#print "$input{$o4}\n";
+
+if ($build == 19) {
+
+#my $Dir = $ARGV[0];
+#my $Output_dir = $ARGV[1];
+my $config_file = "/local/projects/NICU/variant_analysis/scripts/Input.config";
+open my $in_fh, '<', $config_file or die $!;
+#print timestamp();
+mkdir("$Outdir/".timestamp());
+my $Outdir_new = "$Outdir/".timestamp();
+#print $Outdir_new"\n";
+my $Outname = "$Outdir_new/$input{$o4}.".timestamp().".Sample.config";
+$New_Sample_config = File::Spec->rel2abs ($Outname);
+#my $Outname = "$Outdir".timestamp()."/$input{$o4}.".timestamp().".Sample.config";
+#print "$Outname\n";
+#write file 
+#my $Out_config = "$Outdir/$input{$o4}.Sample.config";
+#print $Outname;
+my $Out_config = $Outname;
+
+open my $out_fh, '>', $Out_config or die $!;
+
+
+while (my $line = <$in_fh>)
+{
+    chomp($line);
+    next if $line =~ m/^\s*$/;
+    # Name of new section ([]), for hash and order-array
+    if ($line =~ m/^\[(.*)\]$/) {
+        #print "$line\n";
+	push @mod_order, $mod_name = $1;
+    }
+
+
+    # A description (;;) line
+    if ( ($des) = $line =~ m/^;;(.*)/ ) {
+        # Remember input if there is any for this line
+  	#print "$line\n"; 
+	for (keys %desc) {
+            if (exists $input{$_} and $des =~ /^$desc{$_}/) {
+               # $enter_input = $input{$_};
+                #print "$input{$_}, $des\n";
+		$enter_input = process_input($desc{$_}, $input{$_});
+		last;
+            }
+        }
+	
+
+        push @{$conf{$mod_name}}, $line . "\n";
+        next;
+    }
+
+
+    if ($enter_input) {
+        # Overwrite what is there or append
+        $line =~ s/(.*?=)(.*)/$1 $enter_input/;
+       # $out_fh =~ s/(.*?=)(.*)/$1 $enter_input/;
+	$enter_input = '';
+    }
+
+
+
+    push @{$conf{$mod_name}}, $line . "\n";
+}
+close $in_fh;
+ 
+foreach (@mod_order){
+print $out_fh @{$conf{$_}} , "\n";
+#print $out_fh "\n"; 
+} #for @mod_order;
+
+close $out_fh;
+
+
+# In case user's raw input need be processed further
+sub process_input {
+    my ( $desc, $raw_input) = @_;
+    # Example (comment): prepend path for `Chromosome` input
+     if ($desc =~ /Read Group/) {
+        return "'".'@RG\tID:'.$raw_input.'\tSM:'.$raw_input.'\tPL:ILLUMINA\tLB:'.$raw_input.'\tPU:'.$raw_input."'";}
+    		
+		else {
+			if ($desc =~/Output Prefix/ and $mod_name =~ /speedseq_aln/)
+				{return $raw_input;}
+			
+			  if($desc =~/Output Prefix/)
+				{return;}
+     				
+
+
+	else {return File::Spec->rel2abs($raw_input);}
+	}
+}
+} 
+else { print " Enter correct build\n";}
+
+
+
+##################################create pipeline config ###############################
+
+my($p1) = qw(config_file);
+
+my %pipe_desc = (
+        $p1 => ' path to  config file',
+                );
+
+my %input2;
+#print "$Outdir\n";
+#$p1 = File::Spec->rel2abs ("$Outdir/$input{$o4}.Sample.config"); # Get location of teh sample config file created above
+#$p1 = File::Spec->rel2abs ("$Outdir/$input{$o4}.".timestamp().".Sample.config");
+#print "$p1\n"; #to check the p1 value
+$p1 = $New_Sample_config; 
+$input2{config_file} = $p1;
+#print "$input2{config_file}";  # check the hash key value
+#print "$input\n";
+
+#print "Key: $_ and Value: $input2{$_}\n" foreach (keys%input2);
+
+my $pipeline_file = "/local/projects/NICU/variant_analysis/scripts/Sample.pipeline.config";   #pipeline templtae file user input
+open my $in_fh, '<', $pipeline_file;
+my $Outdir_new = "$Outdir/".timestamp();
+#my $Out_config_pipe = "$Outdir/$input{$o4}.Project.pipeline.config";
+my $Out_config_pipe = "$Outdir_new/$input{$o4}.".timestamp().".Project.pipeline.config";
+
+open my $out_fh, '>', $Out_config_pipe;
+
+my (%pconf, @pmod_order, $pmod_name, $pdesc, $penter_input);
+while (my $pline = <$in_fh>)
+{
+    chomp($pline);
+    next if $pline =~ m/^\s*$/;
+    # Name of new section ([]), for hash and order-array
+    if ($pline =~ m/^\[(.*)\]$/ ) {
+        
+        push @pmod_order, $pmod_name = $1;
+	#print "$pmod_name\n";
+        }
+
+
+    # A description (;;) pline
+    if ( ($pdesc) = $pline =~ m/^;;(.*)/ ) {
+        # Remember input if there is any for this pline
+        #print "$pline\n";
+        #print "$pdesc\n";
+        for (keys %pipe_desc) {
+            if (exists $input2{$_} and $pdesc =~ /^$pipe_desc{$_}/) {
+                #$penter_input = $input2{$_};
+                #$penter_input .="_check";
+                #print "$pdesc\n";
+                $penter_input = pipe_process($pipe_desc{$_}, $input2{$_});
+               #print "$penter_input\n";
+                last;
+            }
+        }
+
+        push @{$pconf{$pmod_name}}, $pline . "\n" ;
+        next;
+    }
+
+if ($penter_input) {
+        # Overwrite what is there or append
+        $pline =~ s/(.*?=)(.*)/$1 $penter_input/;
+       # $out_fh =~ s/(.*?=)(.*)/$1 $penter_input/;
+        $penter_input = '';
+    }
+
+    push @{$pconf{$pmod_name}}, $pline  . "\n";
+    
+}
+close $in_fh;
+
+foreach (@pmod_order){
+#print "$_\n" @{$pconf{$_}};
+print  $out_fh @{$pconf{$_}} , "\n";
+
+#print $out_fh "$_ \n";
+} #for @pmod_order;
+
+
+close $out_fh;
+
+# In case user's raw input need be processed further
+sub pipe_process {
+    my ( $pipe_desc, $praw_input) = @_;
+    # Example (comment): prepend path for `Chromosome` input
+			if ($pipe_desc =~/ path to  config file/ and $pmod_name =~ /speedseq_aln alignment/)
+				{return $praw_input;}
+			
+			  if($pipe_desc =~/path to  config file/)
+				{return;}
+     				
+	}
+my $file_info = File::Spec->rel2abs($Out_config_pipe);
+
+my $sCmd = "./run_enicu_pipeline.pl --layout ../pipeline_template/DNASeq_SNP_Pipeline/snp_pipeline.layout --config ".$file_info." --repository_root $repo_root";
+$sCmd .= ' --ergatis_config /usr/local/projects/ergatis/ergatis.ini';
+#system($sCmd);
+#print $sCmd;
+exec_command($sCmd);
+#print(exec_command($sCmd));
+ 
+sub exec_command {
+	my $sCmd = shift;
+	
+	if ((!(defined $sCmd)) || ($sCmd eq "")) {
+		die "\nSubroutine::exec_command : ERROR! Incorrect command!\n";
+	}
+	
+	my $nExitCode;
+	
+	#print STDERR "$sCmd\n";
+	$nExitCode = system("$sCmd");
+	if ($nExitCode != 0) {
+		die "\tERROR! Command Failed!\n\t$!\n";
+	}
+#	print STDERR "\n";
+}

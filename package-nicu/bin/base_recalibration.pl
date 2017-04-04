@@ -63,8 +63,8 @@ use constant FALSE => 0;
 use constant TRUE  => 1;
 
 
-use constant GATK_BIN_DIR => '/usr/local/packages/GenomeAnalysisTK-3.1.1' ;
-use constant JAVA_BIN_DIR => '/usr/local/packages/jdk1.7.0_40' ;
+use constant GATK_BIN => '/usr/local/packages/GenomeAnalysisTK-3.1.1' ;
+use constant JAVA_EXEC => '/usr/local/packages/jdk1.7.0_40' ;
 
 use constant VERSION => '1.0.0';
 use constant PROGRAM => eval { ($0 =~ m/(\w+\.pl)$/) ? $1 : $0 };
@@ -151,8 +151,8 @@ while(<$fh>) {
 ##Read config file 
 
 
-if (!defined $hConfig{'base_recalibration'}{'GATK_BIN_DIR'}[0]) {
-    $hConfig{'base_recalibration'}{'GATK_BIN_DIR'}[0] = GATK_BIN_DIR;
+if (!defined $hConfig{'base_recalibration'}{'GATK_BIN'}[0]) {
+    $hConfig{'base_recalibration'}{'GATK_BIN'}[0] = GATK_BIN;
 }
 
 $sCmd = "java ";
@@ -161,7 +161,7 @@ if (defined $hConfig{'base_recalibration'}{'Java_Memory'}) {
 	$sCmd .= "$hConfig{'base_recalibration'}{'Java_Memory'}[0]" ;
 }
 
-$sCmd  .= " -Djava.io.tmpdir=$hCmdLineOption{tmpdir} -jar " .  $hConfig{'base_recalibration'}{'GATK_BIN_DIR'}[0] . "/GenomeAnalysisTK.jar -T BaseRecalibrator " . 
+$sCmd  .= " -Djava.io.tmpdir=$hCmdLineOption{tmpdir} -jar " .  $hConfig{'base_recalibration'}{'GATK_BIN'}[0] . "/GenomeAnalysisTK.jar -T BaseRecalibrator " . 
 		  " -I $hConfig{'base_recalibration'}{'Infile'}[0] -o $sOutDir/Merged.base.recal.grp ".
 		  " -knownSites $hConfig{'base_recalibration'}{'KnownSites'}[0] -R $hConfig{'base_recalibration'}{'Reference'}[0] " ;
 
@@ -202,10 +202,10 @@ sub set_environment {
 	umask 0000;
 	
 	# adding speedseq executible path to user environment
-	$ENV{PATH} = GATK_BIN_DIR .":".$ENV{PATH} ;
-	$ENV{PATH} = JAVA_BIN_DIR ."/bin" .":".$ENV{PATH} ;
-	$ENV{JAVA_HOME} = JAVA_BIN_DIR ;
-	$ENV{CLASSPATH} = JAVA_BIN_DIR . "/jre/lib/ext" . ":" . JAVA_BIN_DIR . "/lib/tools.jar" ;
+	$ENV{PATH} = GATK_BIN .":".$ENV{PATH} ;
+	$ENV{PATH} = JAVA_EXEC ."/bin" .":".$ENV{PATH} ;
+	$ENV{JAVA_HOME} = JAVA_EXEC ;
+	$ENV{CLASSPATH} = JAVA_EXEC . "/jre/lib/ext" . ":" . JAVA_EXEC . "/lib/tools.jar" ;
 }
 
 sub exec_command {

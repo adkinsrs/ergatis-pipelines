@@ -63,8 +63,8 @@ use constant FALSE => 0;
 use constant TRUE  => 1;
 
 
-use constant GATK_BIN_DIR => '/usr/local/packages/GenomeAnalysisTK-3.1.1' ;
-use constant JAVA_BIN_DIR => '/usr/local/packages/jdk1.7.0_40' ;
+use constant GATK_BIN => '/usr/local/packages/GenomeAnalysisTK-3.1.1' ;
+use constant JAVA_EXEC => '/usr/local/packages/jdk1.7.0_40' ;
 
 use constant VERSION => '1.0.0';
 use constant PROGRAM => eval { ($0 =~ m/(\w+\.pl)$/) ? $1 : $0 };
@@ -127,8 +127,8 @@ $sOutDir = File::Spec->canonpath($sOutDir);
 
 read_config(\%hCmdLineOption, \%hConfig);
 
-if (!defined $hConfig{'realigner_target_creator'}{'GATK_BIN_DIR'}[0]) {
-    $hConfig{'realigner_target_creator'}{'GATK_BIN_DIR'}[0] = GATK_BIN_DIR;
+if (!defined $hConfig{'realigner_target_creator'}{'GATK_BIN'}[0]) {
+    $hConfig{'realigner_target_creator'}{'GATK_BIN'}[0] = GATK_BIN;
 }
 
 $sCmd = "java ";
@@ -138,7 +138,7 @@ if (defined $hConfig{'realigner_target_creator'}{'Java_Memory'}) {
 }
 
 
-$sCmd  .= " -Djava.io.tmpdir=$hCmdLineOption{tmpdir} -jar " . $hConfig{'realigner_target_creator'}{'GATK_BIN_DIR'}[0] . "/GenomeAnalysisTK.jar -T RealignerTargetCreator " . 
+$sCmd  .= " -Djava.io.tmpdir=$hCmdLineOption{tmpdir} -jar " . $hConfig{'realigner_target_creator'}{'GATK_BIN'}[0] . "/GenomeAnalysisTK.jar -T RealignerTargetCreator " . 
 		  " -I $hConfig{'realigner_target_creator'}{'INPUT_FILE'}[0] -o $sOutDir/$hConfig{'realigner_target_creator'}{'Prefix'}[0].bam.indels.list ".
 		  " -R $hConfig{'realigner_target_creator'}{'Reference'}[0] " ;
 
@@ -182,10 +182,10 @@ sub set_environment {
 	umask 0000;
 	
 	# adding speedseq executible path to user environment
-	$ENV{PATH} = GATK_BIN_DIR .":".$ENV{PATH} ;
-	$ENV{PATH} = JAVA_BIN_DIR ."/bin" .":".$ENV{PATH} ;
-	$ENV{JAVA_HOME} = JAVA_BIN_DIR ;
-	$ENV{CLASSPATH} = JAVA_BIN_DIR . "/jre/lib/ext" . ":" . JAVA_BIN_DIR . "/lib/tools.jar" ;
+	$ENV{PATH} = GATK_BIN .":".$ENV{PATH} ;
+	$ENV{PATH} = JAVA_EXEC ."/bin" .":".$ENV{PATH} ;
+	$ENV{JAVA_HOME} = JAVA_EXEC ;
+	$ENV{CLASSPATH} = JAVA_EXEC . "/jre/lib/ext" . ":" . JAVA_EXEC . "/lib/tools.jar" ;
 }
 
 sub exec_command {

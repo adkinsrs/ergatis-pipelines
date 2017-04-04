@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-extract_chromosomes.pl - Use samtools view to filter reads to those only from chromosomes
+run_annovar.pl - Wrapper script for table_annovar.pl, which annotates filtered variants from input
 
 =head1 SYNOPSIS
 
@@ -11,7 +11,7 @@ extract_chromosomes.pl - Use samtools view to filter reads to those only from ch
        --output_dir=/path/to/output/dir
      [ 
 	   --tmp_dir=/path/to/tmp
-	   --samtools_bin=/path/to/samtools
+	   --annovar_bin=/usr/bin/annovar
 	   --log=/path/to/file.log
        --debug=3
        --help
@@ -25,11 +25,8 @@ B<--config_file,-c>
 B<--output_dir,-o>
 	Optional. Path to directory to write output to.  If not provided, use current directory
 
-B<--tmp_dir,-t>
-	Optional. Path to directory to write temporary files to.  If not provided, use /tmp
-
-B<--samtools_bin>
-	Optional. Path to the samtools bin directory.  If not provided, will use /usr/local/bin/
+B<--annovar_bin>
+	Optional. Path to the samtools bin directory.  If not provided, will use /usr/local/packages/annovar/
 
 B<--log,-l>
     Logfile.
@@ -72,8 +69,7 @@ my $debug = 1;
 my ($ERROR, $WARN, $DEBUG) = (1,2,3);
 my $logfh;
 
-use constant SAMTOOLS_BIN => "/usr/local/bin/";
-use constant TMP_DIR => "/tmp";
+use constant ANNOVAR_BIN => "/usr/local/packages/annovar/";
 ####################################################
 
 my %options;
@@ -89,7 +85,7 @@ sub main {
 						 "config_file|c=s",
 						 "output_dir|o=s",
 						 "tmp_dir|t=s",
-						 "samtools_bin=s",
+						 "annovar_bin=s",
                          "log|l=s",
                          "debug|d=s",
                          "help|h"
@@ -98,33 +94,32 @@ sub main {
     &check_options(\%options);
     read_config(\%options, \%config);
 
-    my $prefix = $config{'extract_chromosomes'}{'Prefix'}[0];
+    my $prefix = $config{'annovar'}{'Prefix'}[0];
 
     my %args = ( 
-			'-o' => $outdir."/$prefix.extract_chromosomes.bam",
+			'-outfile' => $outdir."/$prefix.annovar.tbl",
+			'-protocol' => $config{'annovar'}{'PROTOCOL'}[0],
+			'-buildver' => $config{'annovar'}{'BUILDVER'}[0],
+			'-operation' => $config{'annovar'}{'OPERATION'}[0],
+			'-nastring' => $config{'annovar'}{'NASTRING'}[0]
     );
 
-    # Start building the Samtools command
-	my $tmp_dir_env = "TMP_DIR=".$options{'tmp_dir'} . " ";
-	my $groups_str = " 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y MT";
+    # Start building the annovar command
+    my $cmd =  $options{'annovar_bin'}."/table_annovar.pl ";
 
-    my $cmd = $tmp_dir_env . $options{'samtools_bin'}."/samtools view -b ";
-
-
+	$cmd .= $config{'annovar'}{'INPUT_FILE'}[0] . ' ';
+	$cmd .= $config{'annovar'}{'DB_PATH'}[0] . ' ';
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
         $cmd .= "${arg}=".$args{$arg}." " if defined $args{$arg};
     }
 
-	$cmd .= $config{'extract_chromosomes'}{'INPUT_FILE'}[0] . $groups_str;
+	$cmd .= "-remove" if $config{'annovar'}{'REMOVE'} == 1;
+	$cmd .= "-vcfinput" if $config{'annovar'}{'VCFINPUT'} == 1;
+	$cmd .= $config{'annovar'}{'OTHER_ARGS'} if $config{'annovar'}{'OTHER_ARGS'};
 
     exec_command($cmd);
-
-    my $config_out = "$outdir/extract_chromosomes." .$prefix.".config" ;
-    $config{'preprocess_alignment'}{'INPUT_FILE'}[0] = $outdir."/$prefix.extract_chromosomes.bam";
-    $config{'preprocess_alignment'}{'Prefix'}[0] = $prefix;
-    write_config($options, \%config, $config_out);
 }
 
 sub check_options {
@@ -143,8 +138,7 @@ sub check_options {
        &_log($ERROR, "Option $req is required") unless( $opts->{$req} );
    }
 
-   $opts->{'samtools_bin'} = SAMTOOLS_BIN if !$opts->{'samtools_bin'};
-   $opts->{'tmp_dir'} = TMP_DIR if !$opts->{'tmp_dir'};
+   $opts->{'annovar_bin'} = ANNOVAR_BIN if !$opts->{'annovar_bin'};
 
    $outdir = File::Spec->curdir();
     if (defined $opts->{'output_dir'}) {

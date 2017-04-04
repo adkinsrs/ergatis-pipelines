@@ -22,11 +22,11 @@
             </param>
             <param>
                 <key>stdout</key>
-                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/indel_realigner.stdout</value>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.indel_realigner.stdout</value>
             </param>
             <param>
                 <key>stderr</key>
-                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/indel_realigner.stderr</value>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.indel_realigner.stderr</value>
             </param>
             <arg>$;OTHER_ARGS$;</arg>
         </command>

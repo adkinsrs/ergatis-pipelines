@@ -1,0 +1,46 @@
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="commandSet.xsd" type="instance">
+   <commandSet type="serial">
+      <state>incomplete</state>
+      <name>start pipeline:</name>
+      <commandSet type="serial">
+         <state>incomplete</state>
+	     <name>extract_chromosomes.map</name>
+      </commandSet>
+      <commandSet type="serial">
+         <state>incomplete</state>
+	     <name>preprocess_alignment.preprocess</name>
+      </commandSet>
+      <commandSet type="serial">
+         <state>incomplete</state>
+	     <name>picard_processing.process</name>
+      </commandSet>
+      <commandSet type="serial">
+         <state>incomplete</state>
+	     <name>split_spliced_reads.split</name>
+      </commandSet>
+      <commandSet type="serial">
+         <state>incomplete</state>
+	     <name>realigner_target_checker.realign</name>
+      </commandSet>
+      <commandSet type="serial">
+         <state>incomplete</state>
+	     <name>indel_realigner.indel_realign</name>
+      </commandSet>
+      <commandSet type="serial">
+         <state>incomplete</state>
+	     <name>base_recalibration.base_recal</name>
+      </commandSet>
+      <commandSet type="serial">
+         <state>incomplete</state>
+	     <name>print_reads.printreads</name>
+      </commandSet>
+      <commandSet type="serial">
+         <state>incomplete</state>
+	     <name>haplotype_caller.caller</name>
+      </commandSet>
+      <commandSet type="serial">
+         <state>incomplete</state>
+	     <name>variant_filtration.filter</name>
+      </commandSet>
+    </commandSet>
+</commandSetRoot>
