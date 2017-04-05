@@ -3,11 +3,11 @@ package main;    # Change this to reflect name of script.  If you want to use as
 
 =head1 NAME
 
-create_dnaseq_snp_pipeline_config.pl - Will create a pipeline.layout and pipeline.config for the DNASeq SNP pipeline
+create_dnaseq_snp_pipeline.pl - Will create a pipeline.layout and pipeline.config for the DNASeq SNP pipeline
 
 =head1 SYNOPSIS
 
- USAGE: create_wait_pipeline_config.pl
+ USAGE: create_dnaseq_pipeline.pl
        --input_file=/path/to/some/input.file
        --output=/path/to/transterm.file
      [ --log=/path/to/file.log
@@ -94,12 +94,11 @@ sub main {
 
 	my $pipeline_layout;
 	my $pipeline_config;
-	my $process = $$;
 	mkdir( $outdir . "/" . timestamp() ) || die "Cannot create timestampped directory within $outdir\n";
 	$outdir = $outdir . "/" . timestamp();
 	# The file that will be written to
-	$pipeline_layout = $outdir."/pipeline.$process.layout";
-	$pipeline_config = $outdir."/pipeline.$process.config";
+	$pipeline_layout = $outdir."/pipeline.layout";
+	$pipeline_config = $outdir."/pipeline.config";
 
 	# File handles for files to be written
 	open( my $plfh, "> $pipeline_layout") or &_log($ERROR, "Could not open $pipeline_layout for writing: $!");
