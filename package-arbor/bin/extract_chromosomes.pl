@@ -110,14 +110,12 @@ sub main {
 
     my $cmd = $tmp_dir_env . $options{'samtools_bin'}."/samtools view -b ";
 
-
-
     # Add only passed in options to command
     foreach my $arg (keys %args) {
         $cmd .= "${arg}=".$args{$arg}." " if defined $args{$arg};
     }
 
-	$cmd .= $config{'extract_chromosomes'}{'INPUT_FILE'}[0] . $groups_str;
+	$cmd .= $config{'extract_chromosomes'}{'INPUT_FILE'}[0] . " $groups_str";
 
     exec_command($cmd);
 

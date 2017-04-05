@@ -105,8 +105,8 @@ sub main {
     read_config(\%options, \%config);
 	my $prefix = $config{'picard_processing'}{'Prefix'}[0];
 
-	my $stringency = uc($config{'picard_processing'}{'validation_stringency'}[0]);
-	my $max_records = $config{'picard_processing'}{'max_records_stored'}[0];
+	my $stringency = uc($config{'picard_processing'}{'VALIDATION_STRINGENCY'}[0]);
+	my $max_records = $config{'picard_processing'}{'MAX_RECORDS_STORED'}[0];
 
     if ( defined $stringency && none{$_ eq $stringency} @stringency_arr ) {
         &_log($ERROR, $stringency." is not a valid option.  Choose from 'SILENT', 'LENIENT', or 'STRICT'");

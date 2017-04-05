@@ -105,7 +105,7 @@ sub main {
 			'--out' => $outdir."/$prefix.split.bam",
 			'--reference_sequence' => $config{'split_spliced_reads'}{'REFERENCE'}[0],
 			'--maxReadsInMemory' => $config{'split_spliced_reads'}{'MAX_READS_STORED'}[0],
-			'--unsafe' => uc($config{'unsafe'}
+			'--unsafe' => uc($config{'split_spliced_reads'}{'UNSAFE'}[0]),
 			'--reassign_mapping_quality_from' => $config{'split_spliced_reads'}{'ORIG_MAPPING_QUALITY'}[0],
             '--reassign_mapping_quality_to' => $config{'split_spliced_reads'}{'DESIRED_MAPPING_QUALITY'}[0]
     );
