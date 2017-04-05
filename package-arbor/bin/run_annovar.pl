@@ -6,7 +6,7 @@ run_annovar.pl - Wrapper script for table_annovar.pl, which annotates filtered v
 
 =head1 SYNOPSIS
 
- USAGE: haplotype_caller.pl
+ USAGE: run_annovar.pl
        --config_file=/path/to/some/config.txt
        --output_dir=/path/to/output/dir
      [ 
