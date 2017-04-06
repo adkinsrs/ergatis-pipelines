@@ -17,6 +17,9 @@ create_dnaseq_snp_pipeline.pl - Will create a pipeline.layout and pipeline.confi
 
 =head1 OPTIONS
 
+B<--input_file, -i>
+	Path to the input BAM file to pass to the first component
+
 B<--template_directory,-t>
 	Path of the template configuration and layout files used to create the pipeline config and layout files.
 
@@ -60,6 +63,7 @@ use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
 use Pod::Usage;
 use File::Basename;
 use XML::Writer;
+use NICU::Config;
 
 ############# GLOBALS AND CONSTANTS ################
 my $debug = 1;
@@ -83,6 +87,7 @@ exit(0);
 sub main {
 	my $results = GetOptions (\%options,
 						  "config_file|c=s",
+						  "input_file|i=s",
 						  "template_directory|t=s",
 						  "output_directory|o=s",
 						  "log|l=s",
@@ -99,6 +104,7 @@ sub main {
 	# The file that will be written to
 	$pipeline_layout = $outdir."/pipeline.layout";
 	$pipeline_config = $outdir."/pipeline.config";
+	$sample_config = $outdir . "/input.config";
 
 	# File handles for files to be written
 	open( my $plfh, "> $pipeline_layout") or &_log($ERROR, "Could not open $pipeline_layout for writing: $!");
@@ -114,7 +120,8 @@ sub main {
 
 	my %config;
 	# Write the pipeline config file
-	&add_config( \%config, $pipelines->{'wait'} );
+	&add_config( \%config, $pipelines->{'dnaseq'} );
+	$config{'extract_chromosomes'}{'$;INPUT_FILE$;'} = $sample_config;
 	# open config file for writing
 	open( my $pcfh, "> $pipeline_config") or &_log($ERROR, "Could not open $pipeline_config for writing: $!");
 	# Write the config
@@ -124,11 +131,23 @@ sub main {
 	close($plfh);
 	close($pcfh);
 
+	# Write sample.config file
+	my %input_config;
+	&add_config( \%input_config, $pipelines->{'dnaseq'}, basename($sample_config));
+	# Add BAM input file into 'extract_chromosomes' config section
+	$input_config{'extract_chromosomes'}{'$;INPUT_FILE$;'} = $options{'input_file'};
+	# Write sample config file
+	open( my $sfh, "> $sample_config") or &_log($ERROR, "Could not open $sample_config for writing: $!");
+	&write_config(\%input_config, $sfh);
+	close ($sfh);
+
 	my $mode = 0755;
 	chmod $mode, $pipeline_config;
 	chmod $mode, $pipeline_layout;
+	chmod $mode, $sample_config;
 
 	print "Wrote $pipeline_layout and $pipeline_config for 'DNASeq SNP' pipeline\n";
+	print "Wrote $sample_config for 'DNASeq SNP' pipeline\n";
 }
 
 ### UTILITY SUBROUTINES ###
@@ -234,6 +253,9 @@ sub check_options {
 
    	$debug = $opts->{'debug'} if( $opts->{'debug'} );
 
+    foreach my $req ( qw(input_file output_directory config_file) ) {
+        die("Option $req is required: $!")  unless ($opts->{$req});
+    }
    	$outdir = $opts->{'output_directory'} if( $opts->{'output_directory'} );
    	$template_directory = $opts->{'template_directory'} if( $opts->{'template_directory'} );
 
