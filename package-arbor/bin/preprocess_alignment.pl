@@ -140,7 +140,7 @@ sub main {
     );
 
     # Start building the Picard tools command
-    my $cmd = $options{'java_path'}." ".$options{'picard_jar'}." SortSam ";
+    $cmd = $options{'java_path'}." ".$options{'picard_jar'}." SortSam ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
@@ -152,7 +152,7 @@ sub main {
     my $config_out = "$outdir/preprocess_alignment." .$prefix.".config" ;
     $config{'picard_processing'}{'INPUT_FILE'}[0] = $outdir."/$prefix.sorted.bam";
     $config{'picard_processing'}{'Prefix'}[0] = $prefix;
-    write_config($options, \%config, $config_out);
+    write_config(\%options, \%config, $config_out);
 
 }
 

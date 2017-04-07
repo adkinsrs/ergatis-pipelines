@@ -86,7 +86,7 @@ exit(0);
 
 sub main {
     my $results = GetOptions (\%options,
-						 "config_file|c=s,"
+						 "config_file|c=s",
 						 "output_file|o=s",
 						 "gatk_jar=s",
 						 "java_path=s",
@@ -126,7 +126,7 @@ sub main {
     my $config_out = "$outdir/split_spliced_reads." .$prefix.".config" ;
     $config{'realigner_target_creator'}{'INPUT_FILE'}[0] = $outdir."/$prefix.split.bam";
     $config{'realigner_target_creator'}{'Prefix'}[0] = $prefix;
-    write_config($options, \%config, $config_out);
+    write_config(\%options, \%config, $config_out);
 }
 
 sub check_options {

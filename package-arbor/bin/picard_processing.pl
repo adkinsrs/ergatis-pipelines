@@ -145,7 +145,7 @@ sub main {
     );
 
     # Start building the Picard tools command
-    my $cmd = $options{'java_path'}." ".$options{'picard_jar'}." MarkDuplicates ";
+    $cmd = $options{'java_path'}." ".$options{'picard_jar'}." MarkDuplicates ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
@@ -163,7 +163,7 @@ sub main {
     );
 
     # Start building the Picard tools command
-    my $cmd = $options{'java_path'}." ".$options{'picard_jar'}." BuildBamIndex ";
+    $cmd = $options{'java_path'}." ".$options{'picard_jar'}." BuildBamIndex ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
@@ -174,7 +174,7 @@ sub main {
     my $config_out = "$outdir/picard_processing." .$prefix.".config" ;
     $config{'split_spliced_reads'}{'INPUT_FILE'}[0] = $outdir."/$prefix.mark_dups.bam";
     $config{'split_spliced_reads'}{'Prefix'}[0] = $prefix;
-    write_config($options, \%config, $config_out);
+    write_config(\%options, \%config, $config_out);
 
 }
 

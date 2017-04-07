@@ -98,7 +98,7 @@ sub main {
     &check_options(\%options);
     read_config(\%options, \%config);
 
-	my $prefix = $confitg{'haplotype_caller'}['Prefix'}[0];
+	my $prefix = $config{'haplotype_caller'}['Prefix'}[0];
 
     my %args = ( 
 			'--input_file' => $config{'haplotype_caller'}{'INPUT_FILE'}[0],
@@ -124,7 +124,7 @@ sub main {
     my $config_out = "$outdir/haplotype_caller." .$prefix.".config" ;
     $config{'variant_filtration'}{'INPUT_FILE'}[0] = $outdir."/$prefix.haplotype_caller.vcf";
     $config{'variant_filtration'}{'Prefix'}[0] = $prefix;
-    write_config($options, \%config, $config_out);
+    write_config(\%options, \%config, $config_out);
 }
 
 sub check_options {

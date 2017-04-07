@@ -97,14 +97,12 @@ sub main {
 
     &check_options(\%options);
 
-	my $pipeline_layout;
-	my $pipeline_config;
 	mkdir( $outdir . "/" . timestamp() ) || die "Cannot create timestampped directory within $outdir\n";
 	$outdir = $outdir . "/" . timestamp();
 	# The file that will be written to
-	$pipeline_layout = $outdir."/pipeline.layout";
-	$pipeline_config = $outdir."/pipeline.config";
-	$sample_config = $outdir . "/input.config";
+	my $pipeline_layout = $outdir."/pipeline.layout";
+	my $pipeline_config = $outdir."/pipeline.config";
+	my $sample_config = $outdir . "/input.config";
 
 	# File handles for files to be written
 	open( my $plfh, "> $pipeline_layout") or &_log($ERROR, "Could not open $pipeline_layout for writing: $!");
