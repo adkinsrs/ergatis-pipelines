@@ -63,7 +63,6 @@ use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
 use Pod::Usage;
 use File::Basename;
 use XML::Writer;
-use NICU::Config;
 
 ############# GLOBALS AND CONSTANTS ################
 my $debug = 1;
