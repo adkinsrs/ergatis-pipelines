@@ -3,11 +3,11 @@ package main;    # Change this to reflect name of script.  If you want to use as
 
 =head1 NAME
 
-create_dnaseq_snp_pipeline.pl - Will create a pipeline.layout and pipeline.config for the DNASeq SNP pipeline
+create_rnaseq_snp_pipeline.pl - Will create a pipeline.layout and pipeline.config for the RNASeq SNP pipeline
 
 =head1 SYNOPSIS
 
- USAGE: create_dnaseq_pipeline.pl
+ USAGE: create_rnaseq_snp_pipeline.pl
        --input_file=/path/to/some/input.file
        --output=/path/to/transterm.file
      [ --log=/path/to/file.log
@@ -71,12 +71,12 @@ my ($ERROR, $WARN, $DEBUG) = (1,2,3);
 my $logfh;
 
 my $outdir = ".";
-my $template_directory = "/local/projects/ergatis/package-nicu-devel/pipeline_templates";
+my $template_directory = "/local/projects/ergatis/package-arbor/pipeline_templates";
 ####################################################
 
 my %options;
 my $pipelines = {
-		'dnaseq' => 'DNASeq_SNP_Pipeline',
+		'rnaseq' => 'RNASeq_SNP_Pipeline',
 };
 
 
@@ -111,14 +111,14 @@ sub main {
 	# Write the pipeline.layout file
 	&write_pipeline_layout( $layout_writer, sub {
 		my ($writer) = @_;
-		&write_include($writer, $pipelines->{'dnaseq'});
+		&write_include($writer, $pipelines->{'rnaseq'});
 	});
 	# end the writer
 	$layout_writer->end();
 
 	my %config;
 	# Write the pipeline config file
-	&add_config( \%config, $pipelines->{'dnaseq'} );
+	&add_config( \%config, $pipelines->{'rnaseq'} );
 	$config{'extract_chromosomes'}{'$;INPUT_FILE$;'} = $sample_config;
 	# open config file for writing
 	open( my $pcfh, "> $pipeline_config") or &_log($ERROR, "Could not open $pipeline_config for writing: $!");
@@ -131,7 +131,7 @@ sub main {
 
 	# Write sample.config file
 	my %input_config;
-	&add_config( \%input_config, $pipelines->{'dnaseq'}, basename($sample_config));
+	&add_config( \%input_config, $pipelines->{'rnaseq'}, basename($sample_config));
 	# Add BAM input file into 'extract_chromosomes' config section
 	$input_config{'extract_chromosomes'}{'$;INPUT_FILE$;'} = $options{'input_file'};
 	# Write sample config file
@@ -144,8 +144,8 @@ sub main {
 	chmod $mode, $pipeline_layout;
 	chmod $mode, $sample_config;
 
-	print "Wrote $pipeline_layout and $pipeline_config for 'DNASeq SNP' pipeline\n";
-	print "Wrote $sample_config for 'DNASeq SNP' pipeline\n";
+	print "Wrote $pipeline_layout and $pipeline_config for 'RNASeq SNP' pipeline\n";
+	print "Wrote $sample_config for 'RNASeq SNP' pipeline\n";
 }
 
 ### UTILITY SUBROUTINES ###

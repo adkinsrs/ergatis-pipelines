@@ -20,7 +20,7 @@
       </commandSet>
       <commandSet type="serial">
          <state>incomplete</state>
-	     <name>realigner_target_checker.realign</name>
+	     <name>realigner_target_creator.realign</name>
       </commandSet>
       <commandSet type="serial">
          <state>incomplete</state>
