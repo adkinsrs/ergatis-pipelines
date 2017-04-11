@@ -42,5 +42,9 @@
          <state>incomplete</state>
 	     <name>variant_filtration.filter</name>
       </commandSet>
+      <commandSet type="serial">
+         <state>incomplete</state>
+	     <name>annovar.annotate</name>
+      </commandSet>
     </commandSet>
 </commandSetRoot>
