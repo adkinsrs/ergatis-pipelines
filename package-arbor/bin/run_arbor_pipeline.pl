@@ -8,6 +8,8 @@ use Ergatis::Pipeline;
 use Ergatis::SavedPipeline;
 use Ergatis::ConfigFile;
 
+my $ergatis_config = "/local/projects/ergatis/ergatis.ini";
+
 my %options;
 my $results = GetOptions (\%options,
                           "layout|l=s",
@@ -26,7 +28,7 @@ my $layout = $options{'layout'};
 my $config = $options{'config'};
 my $user_email = "";
 $user_email = $options{'email_id'} if( $options{'email_id'} );
-my $ecfg; 
+my $ecfg = $ergatis_config; 
 $ecfg = $options{'ergatis_ini'} if( $options{'ergatis_ini'} );
 
 my $ergatis_ini;

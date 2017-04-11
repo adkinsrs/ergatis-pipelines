@@ -133,7 +133,7 @@ sub main {
 	my %input_config;
 	&add_config( \%input_config, $pipelines->{'rnaseq'}, basename($sample_config));
 	# Add BAM input file into 'extract_chromosomes' config section
-	$input_config{'extract_chromosomes'}{'$;INPUT_FILE$;'} = $options{'input_file'};
+	$input_config{'extract_chromosomes map'}{'$;INPUT_FILE$;'} = $options{'input_file'};
 	# Write sample config file
 	open( my $sfh, "> $sample_config") or &_log($ERROR, "Could not open $sample_config for writing: $!");
 	&write_config(\%input_config, $sfh);
