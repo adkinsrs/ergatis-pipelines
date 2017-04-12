@@ -67,7 +67,7 @@ sub write_config {
     if ((!(defined $phCmdLineOption)) ||  
         (!(defined $phConfig)) || 
         (!(defined $sConfigFile))) {
-        die "Error! In subroutine read_config: Incomplete parameter list !!!\n";
+        die "Error! In subroutine write_config: Incomplete parameter list !!!\n";
         }
         
         my ($sComponent, $sParam, $sValue, $sDesc);

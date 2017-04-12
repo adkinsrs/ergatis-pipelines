@@ -76,8 +76,8 @@ use constant JAVA_PATH => "/usr/bin/java";
 use constant GATK_JAR => "/usr/local/packages/GATK-3.7/GenomeAnalysisTK.jar";
 ####################################################
 
-my %options;
-my %config;
+my %options = ();
+my %config = ();
 my $outdir;
 
 # Allow program to run as module for unit testing if necessary

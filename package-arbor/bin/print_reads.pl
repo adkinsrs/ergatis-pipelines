@@ -3,9 +3,6 @@
 eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
     if 0; # not running under some shell
 
-eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
-    if 0; # not running under some shell
-
 ################################################################################
 ### POD Documentation
 ################################################################################
@@ -50,10 +47,12 @@ Script to execute Print Reads from GATK software package on input BAM file.
 ################################################################################
 
 use strict;
+use warnings;
 
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
 use Pod::Usage;
 use File::Spec;
+use NICU::Config;
 
 ##############################################################################
 ### Constants
@@ -203,95 +202,6 @@ sub exec_command {
 		die "\tERROR! Command Failed!\n\t$!\n";
 	}
 	print STDERR "\n";
-}
-
-
-sub read_config {
-    my $phOptions       = shift;
-    my $phConfig        = shift;
-    
-    ## make sure config file and config hash are provided
-    if ((!(defined $phOptions->{'config'})) || 
-        (!(defined $phConfig))) {
-        die "Error! In subroutine read_config: Incomplete parameter list !!!\n";
-        }
-        
-        my ($sConfigFile);
-        my ($sComponent, $sParam, $sValue, $sDesc);
-        my ($fpCFG);
-        
-        if (defined $phOptions->{'config'}) {
-                $sConfigFile = $phOptions->{'config'};
-        }
-        open($fpCFG, "<$sConfigFile") or die "Error! Cannot open $sConfigFile for reading: $!";
-        
-        $sComponent = $sParam = $sValue = $sDesc = "";
-        while (<$fpCFG>) {
-                $_ =~ s/\s+$//;
-                next if ($_ =~ /^#/);
-                next if ($_ =~ /^$/);
-                
-                if ($_ =~ m/^\[(\S+)\]$/) {
-                        $sComponent = $1;
-                        next;
-                }
-                elsif ($_ =~ m/^;;\s*(.*)/) {
-                        $sDesc .= "$1.";
-                        next;
-                }
-                elsif ($_ =~ m/\$;(\S+)\$;\s*=\s*(.*)/) {
-                        $sParam = $1;
-                        $sValue = $2;
-                        
-                        if ((defined $sValue) && ($sValue !~ m/^\s*$/)) {
-                                $phConfig->{$sComponent}{$sParam} = ["$sValue", "$sDesc"];
-                        }
-                        
-                        $sParam = $sValue = $sDesc = "";
-                        next;
-                }
-        }
-        
-        close($fpCFG);
-            
-    return;
-}
-
-
-sub write_config {
-    my $phCmdLineOption = shift;
-    my $phConfig            = shift;
-    my $sConfigFile             = shift;
-    
-    ## make sure config file and config hash are provided
-    if ((!(defined $phCmdLineOption)) ||  
-        (!(defined $phConfig)) || 
-        (!(defined $sConfigFile))) {
-        die "Error! In subroutine read_config: Incomplete parameter list !!!\n";
-        }
-        
-        my ($sComponent, $sParam, $sValue, $sDesc);
-        my ($fpCFG);
-        
-        open($fpCFG, ">$sConfigFile") or die "Error! Cannot open $sConfigFile for writing: $!";
-        
-        foreach $sComponent (sort {$a cmp $b} keys %{$phConfig}) {
-                print $fpCFG "[$sComponent]\n";
-                foreach $sParam (sort {$a cmp $b} keys %{$phConfig->{$sComponent}}) {
-                        $sDesc = ((defined $phConfig->{$sComponent}{$sParam}[1]) ? $phConfig->{$sComponent}{$sParam}[1] : "");
-                        print $fpCFG ";;$sDesc\n" if ((defined $sDesc) && ($sDesc !~ m/^$/));
-                        
-                        $sValue = ((defined $phConfig->{$sComponent}{$sParam}[0]) ? $phConfig->{$sComponent}{$sParam}[0] : undef);
-                        print $fpCFG "\$;$sParam\$\; = ";
-                        print $fpCFG "$sValue" if (defined $sValue);
-                        print $fpCFG "\n";
-                }
-                print $fpCFG "\n";
-        }
-        
-        close($fpCFG);
-    
-    return;
 }
 
 ################################################################################

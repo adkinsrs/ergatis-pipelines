@@ -72,8 +72,8 @@ my $logfh;
 use constant ANNOVAR_BIN => "/usr/local/packages/annovar/";
 ####################################################
 
-my %options;
-my %config;
+my %options = ();
+my %config = ();
 my $outdir;
 
 # Allow program to run as module for unit testing if necessary
