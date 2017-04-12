@@ -1079,7 +1079,7 @@ if (defined $hCmdLineOption{'alignment'} || defined $hCmdLineOption{'split'}) {
 
 	if  (!(defined $hCmdLineOption{'split'})){
         %hParams = ();
-		if (defined $hCmdLineOption{'tophat-legacy'}){
+		if (defined $hCmdLineOption{'tophat_legacy'}){
 	    	$hParams{'INPUT_FILE'} = ["$sListFile", "path to list of alignment BAM files"];
 		    include_component_layout($oPL, $sTemplateDir, "align_tophat_stats", "tophat_stats");
 		    add_config_section($fpPC, "align_tophat_stats", "tophat_stats");
@@ -1092,7 +1092,7 @@ if (defined $hCmdLineOption{'alignment'} || defined $hCmdLineOption{'split'}) {
 	}
 	else{
 		%hParams = ();
-		if (defined $hCmdLineOption{'tophat-legacy'}){
+		if (defined $hCmdLineOption{'tophat_legacy'}){
 			$hParams{'SPLITBAM_LIST'} = ["$sListBamFile", "path to list of BAM files from alignment of split fastq file"];
 		    include_component_layout($oPL, $sTemplateDir, "align_tophat_split_stats", "tophat_stats");
 		    add_config_section($fpPC, "align_tophat_split_stats", "tophat_stats");
