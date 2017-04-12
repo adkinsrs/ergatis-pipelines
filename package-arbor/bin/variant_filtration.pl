@@ -115,7 +115,7 @@ sub main {
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
-        $cmd .= "${arg}=".$args{$arg}." " if defined $args{$arg};
+        $cmd .= "${arg} ".$args{$arg}." " if defined $args{$arg};
     }
 
 	# Add other misc parameters via a string
