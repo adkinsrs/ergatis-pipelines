@@ -76,7 +76,7 @@ my %hCmdLineOption = ();
 my $sHelpHeader = "\nThis is ".PROGRAM." version ".VERSION."\n";
 
 GetOptions( \%hCmdLineOption,
-            'config|c=s', 
+            'config_file|c=s', 
             'outdir|o=s', 'verbose|v',
             'debug', 'tmpdir|t=s',
             'help',
@@ -166,7 +166,7 @@ sub check_parameters {
     my $phOptions = shift;
     
     ## make sure input fastx is provided
-    if ( (!(defined $phOptions->{'config'}))){
+    if ( (!(defined $phOptions->{'config_file'}))){
 	 pod2usage( -msg => $sHelpHeader, -exitval => 1);
      }
   

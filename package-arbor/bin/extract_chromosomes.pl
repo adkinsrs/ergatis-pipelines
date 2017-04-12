@@ -76,8 +76,8 @@ use constant SAMTOOLS_BIN => "/usr/local/bin/";
 use constant TMP_DIR => "/tmp";
 ####################################################
 
-my %options = ();
-my %config = ();
+my %options;
+my %config;
 my $outdir;
 
 # Allow program to run as module for unit testing if necessary

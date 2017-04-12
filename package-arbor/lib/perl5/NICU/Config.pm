@@ -11,7 +11,7 @@ sub read_config {
     my $phConfig        = shift;
     
     ## make sure config file and config hash are provided
-    if ((!(defined $phOptions->{'config'})) || 
+    if ((!(defined $phOptions->{'config_file'})) || 
         (!(defined $phConfig))) {
         die "Error! In subroutine read_config: Incomplete parameter list !!!\n";
         }
@@ -20,8 +20,8 @@ sub read_config {
         my ($sComponent, $sParam, $sValue, $sDesc);
         my ($fpCFG);
         
-        if (defined $phOptions->{'config'}) {
-                $sConfigFile = $phOptions->{'config'};
+        if (defined $phOptions->{'config_file'}) {
+                $sConfigFile = $phOptions->{'config_file'};
         }
         open($fpCFG, "<$sConfigFile") or die "Error! Cannot open $sConfigFile for reading: $!";
         

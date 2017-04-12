@@ -9,7 +9,7 @@
             <state>incomplete</state>
             <executable>$;BIN_DIR$;/base_recalibration</executable>
             <param>
-                <key>--config</key>
+                <key>--config_file</key>
                 <value>$;I_FILE_PATH$;</value>
             </param>
             <param>

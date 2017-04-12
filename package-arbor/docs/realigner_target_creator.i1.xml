@@ -9,7 +9,7 @@
             <state>incomplete</state>
             <executable>$;BIN_DIR$;/realigner_target_creator</executable>
             <param>
-                <key>--config</key>
+                <key>--config_file</key>
                 <value>$;I_FILE_PATH$;</value>
             </param>
             <param>

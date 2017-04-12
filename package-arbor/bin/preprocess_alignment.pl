@@ -80,8 +80,8 @@ use constant PICARD_JAR => "/usr/local/packages/picard/bin/picard.jar";
 my @stringency_arr = qw(STRICT LENIENT SILENT);
 ####################################################
 
-my %options = ();
-my %config = ();
+my %options;
+my %config;
 my $outdir;
 
 # Allow program to run as module for unit testing if necessary
