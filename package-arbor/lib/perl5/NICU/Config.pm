@@ -1,6 +1,7 @@
 package NICU::Config;
 
 our @EXPORT = qw(read_config write_config);
+use Exporter qw(import);
 
 # Config.pm - Subroutines to convert config file parameters to and from a hash data structure
 
