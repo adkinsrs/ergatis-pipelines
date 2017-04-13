@@ -120,6 +120,7 @@ sub main {
 	# Write the pipeline config file
 	&add_config( \%config, $pipelines->{'rnaseq'} );
 	$config{'extract_chromosomes map'}{'$;INPUT_FILE$;'} = $sample_config;
+	$config{'extract_chromosomes map'}{'$;Prefix$;'} = 'SNP'; # Hard-coded for now
 	# open config file for writing
 	open( my $pcfh, "> $pipeline_config") or &_log($ERROR, "Could not open $pipeline_config for writing: $!");
 	# Write the config
