@@ -20,7 +20,7 @@ create_prok_rnaseq_pipeline_config.pl - Creates the pipeline.layout and pipeline
     create_prok_rnaseq_pipeline_config.pl --s <samples_file> --c <config_file> [--r <reference_fasta>] 
                                           [--qual <quality_score_format>] [--gtf <annotation_file>] 
                                           [--bowtie_build] [--quality_stats] [--quality_trimming] 
-                                          [--alignment] [--bwtidxfile <bowtie_index>] [--visualization] 
+                                          [--alignment] [--idxfile <bowtie_index>] [--visualization] 
                                           [--diff_gene_expr] [--comparison_groups <str>] [--count]  
                                           [--file_type <SAM|BAM>] [--sorted <position|name>] 
                                           [--td <template_directory>] [--o <outdir>] [--v] 
@@ -54,7 +54,7 @@ create_prok_rnaseq_pipeline_config.pl - Creates the pipeline.layout and pipeline
                                        Sample file should be in the following format
                                        #Sample_ID<tab>Group_ID<tab>Mate_Pair_1<tab>Mate_Pair_2
 
-        --bwtidxfile <bowtie_index>  = /path/to/bowtie index file for alignment of all samples.
+        --idxfile <bowtie_index>  = /path/to/bowtie index file for alignment of all samples.
                                        Required for '--alignment' if not specifying '--bowtie_build'.
 
     --visualization                  = execute bam2bigwig component.
@@ -167,7 +167,7 @@ my $sHelpHeader = "\nThis is ".PROGRAM." version ".VERSION."\n";
 
 GetOptions( \%hCmdLineOption,
 			'sample_file|s=s', 'config_file|c=s', 'reffile|r=s', 'quality|qual=i', 'gtffile|gtf=s',
-			'bowtie_build', 'quality_stats', 'quality_trimming', 'alignment', 'bwtidxfile=s', 
+			'bowtie_build', 'quality_stats', 'quality_trimming', 'alignment', 'idxfile=s', 
 			'visualization', 'rpkm_analysis', 'annotation_format=s', 
 			'diff_gene_expr', 'comparison_groups=s', 'count', 'file_type=s', 'sorted=s', 
 			'repository_root|rr=s', 'ergatis_ini|ei=s', 
@@ -646,9 +646,9 @@ if (defined $hCmdLineOption{'alignment'}) {
 	}
 	
 	if ((!(defined $sBwtIndexDir)) || (!(defined $sBwtIndexPrefix))) {
-		die "Error! Bowtie Index undefined !!!\n" if (!(defined $hCmdLineOption{'bwtidxfile'}));
+		die "Error! Bowtie Index undefined !!!\n" if (!(defined $hCmdLineOption{'idxfile'}));
 		
-		($_, $sBwtIndexDir, $sBwtIndexPrefix) = File::Spec->splitpath($hCmdLineOption{'bwtidxfile'});
+		($_, $sBwtIndexDir, $sBwtIndexPrefix) = File::Spec->splitpath($hCmdLineOption{'idxfile'});
 	}
 	
 	###	Add FastQC Stats and Bowtie Components ###
@@ -1046,7 +1046,7 @@ sub check_parameters {
 	
 	$phOptions->{'reffile'} = File::Spec->rel2abs($phOptions->{'reffile'}) if (defined $phOptions->{'reffile'});
 	$phOptions->{'gtffile'} = File::Spec->rel2abs($phOptions->{'gtffile'}) if (defined $phOptions->{'gtffile'});
-	$phOptions->{'bwtidxfile'} = File::Spec->rel2abs($phOptions->{'bwtidxfile'}) if (defined $phOptions->{'bwtidxfile'});
+	$phOptions->{'idxfile'} = File::Spec->rel2abs($phOptions->{'idxfile'}) if (defined $phOptions->{'idxfile'});
 	
 	my ($nI, $bFlag);
 	

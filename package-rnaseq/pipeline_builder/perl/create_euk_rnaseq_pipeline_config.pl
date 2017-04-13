@@ -888,9 +888,9 @@ if (defined $hCmdLineOption{'alignment'} || defined $hCmdLineOption{'split'}) {
 		
 
 		if ((!(defined $sBwtIndexDir)) || (!(defined $sBwtIndexPrefix))) {
-			die "Error! Bowtie Index undefined !!!\n" if (!(defined $hCmdLineOption{'bwtidxfile'}));
+			die "Error! Bowtie Index undefined !!!\n" if (!(defined $hCmdLineOption{'idxfile'}));
 			
-			($_, $sBwtIndexDir, $sBwtIndexPrefix) = File::Spec->splitpath($hCmdLineOption{'bwtidxfile'});
+			($_, $sBwtIndexDir, $sBwtIndexPrefix) = File::Spec->splitpath($hCmdLineOption{'idxfile'});
 		}
 	
 	    if (defined $hCmdLineOption{'tophat_legacy'}) {
@@ -973,9 +973,9 @@ if (defined $hCmdLineOption{'alignment'} || defined $hCmdLineOption{'split'}) {
 		}
 		
 		if ((!(defined $sBwtIndexDir)) || (!(defined $sBwtIndexPrefix))) {
-			die "Error! Bowtie Index undefined !!!\n" if (!(defined $hCmdLineOption{'bwtidxfile'}));
+			die "Error! Bowtie Index undefined !!!\n" if (!(defined $hCmdLineOption{'idxfile'}));
 			
-			($_, $sBwtIndexDir, $sBwtIndexPrefix) = File::Spec->splitpath($hCmdLineOption{'bwtidxfile'});
+			($_, $sBwtIndexDir, $sBwtIndexPrefix) = File::Spec->splitpath($hCmdLineOption{'idxfile'});
 		}
 		
 		###	Add FastQC Stats and HISAT2/Tophat Components ###
@@ -1610,7 +1610,7 @@ sub check_parameters {
 	
 	$phOptions->{'reffile'} = File::Spec->rel2abs($phOptions->{'reffile'}) if (defined $phOptions->{'reffile'});
 	$phOptions->{'gtffile'} = File::Spec->rel2abs($phOptions->{'gtffile'}) if (defined $phOptions->{'gtffile'});
-	$phOptions->{'bwtidxfile'} = File::Spec->rel2abs($phOptions->{'bwtidxfile'}) if (defined $phOptions->{'bwtidxfile'});
+	$phOptions->{'idxfile'} = File::Spec->rel2abs($phOptions->{'idxfile'}) if (defined $phOptions->{'idxfile'});
 	
 	my ($nI, $bFlag);
 	
