@@ -38,7 +38,7 @@ my ($bDebug, $bVerbose);
 ##############################################################################
 
 GetOptions( \%hCmdLineOption,
-            'input|i=s', 'outdir|o=s', 'numseq|n=i',
+            'input|i=s', 'outdir|o=s', 'numseq|n:20000000',
             'exclude|e=s', 'verbose|v',
             'debug',
             'help',
@@ -74,10 +74,10 @@ if (defined $hCmdLineOption{'outdir'}) {
 }
 $sOutDir = File::Spec->canonpath($sOutDir);
 
-if ((!defined $hCmdLineOption{'numseq'}) || !( $hCmdLineOption{'numseq'} )) {
-	$hCmdLineOption{'numseq'} = 20000000;
-}
-	print 	$hCmdLineOption{'numseq'};
+#if ((!defined $hCmdLineOption{'numseq'}) || !( $hCmdLineOption{'numseq'} )) {
+#	$hCmdLineOption{'numseq'} = 20000000;
+#}
+	print 	"Number of sequences:\t" . $hCmdLineOption{'numseq'} . "\n";
   
 
 # process the input file
@@ -344,7 +344,7 @@ split_fastq.pl - program to split_fastq file.
 
 =head1 SYNOPSIS
 
-    split_fasq.pl --i <fastq_file> [--o <output_dir>] 
+    split_fastq.pl --i <fastq_file> [--o <output_dir>] 
                  [--n < max number of sequences per split file>] [--e <exclude_regex>] [--v]
 
     parameters in [] are optional
