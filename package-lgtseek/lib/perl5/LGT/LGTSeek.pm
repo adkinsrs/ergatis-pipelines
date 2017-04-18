@@ -425,7 +425,7 @@ sub _prinseqFilterPaired {
         }
 
         # Merge bad ids from derep and lc filtering
-        $cmd = "cat";
+        $cmd = "TMP_DIR=$tmp_dir cat";
         if ( $dedup == 1 ) {
             $cmd = $cmd . " $tmp_dir/$name\_derep_bad_ids.out";
         }
@@ -444,6 +444,7 @@ sub _prinseqFilterPaired {
                 header_comment =>
                   "\@CO\tID:PrinSeq-filtered\tPG:LGTseek\tVN:$VERSION",
                 bad_list => "$tmp_dir/$name\_prinseq-bad-ids.out",
+				tmp_dir => $tmp_dir
             }
         );
 
@@ -2519,6 +2520,9 @@ sub filter_bam_by_ids {
 "*** Error *** Must pass &filter_bam_by_ids a file with a list of reads to filter on. Use good_list => || bad_list => \n"
         );
     }
+
+	my $tmp_dir = $config->{tmp_dir};
+
     ## Setup hash of ids
     my $good_ids = {};
     my $bad_ids  = {};
@@ -2541,12 +2545,12 @@ sub filter_bam_by_ids {
       defined $config->{output}
       ? "$config->{output}"
       : "$out_dir/$prefix\_$suffix\.bam";
-    my $header = $self->_run_cmd("$samtools view -H $input");
-    open( my $in, "-|", "$samtools view $input" )
+    my $header = $self->_run_cmd("TMP_DIR=$tmp_dir $samtools view -H $input");
+    open( my $in, "-|", "TMP_DIR=$tmp_dir $samtools view $input" )
       or $self->fail(
 "*** Error *** &filter_bam_by_ids can't open input bam: $input because: $!\n"
       );
-    open( my $fh, "| $samtools view -S - -bo $out" )
+    open( my $fh, "| TMP_DIR=$tmp_dir $samtools view -S - -bo $out" )
       or $self->fail(
 "*** Error *** &filter_bam_by_ids can't open  output bam: $out because: $!\n"
       );
