@@ -42,7 +42,10 @@ B<--refseq_reference,-r>
 	Path to the RefSeq reference fasta file, or list file (ends in .list).  If the reference has already been indexed by BWA, the index files must be in the same directory as the reference(s).
 
 B<--build_indexes,-B>
-	If the flag is enabled, will build indexes using BWA in the pipeline.  If you are using pre-build indexes it is important they are compatible with the version of BWA running in the pipeline (0.7.12 for internal Ergatis, 0.7.15 for Docker Ergatis)
+	If the flag is enabled, will build indexes using BWA in the pipeline.  If you are using pre-build indexes it is important they are compatible with the version of BWA running in the pipeline (0.7.12 for internal Ergatis, 0.7.15 for Docker Ergatis).
+
+B<--skip_alignment,-S>
+    If the flag is enabled, then assumes the BAM input file has already been aligned to a reference, and will skipthe "lgt_bwa" alignment step.  The input will instead be passed straight to the "lgt_bwa_post_process" component.  Note that this can only apply in the good donor/unknown recipient use case or the good recipient/unknown donor use case.  Furthermore, the genome reference will still be required for mpileup coverage downstream in the pipeline.
 
 B<--template_directory,-t>
 	Path of the template configuration and layout files used to create the pipeline config and layout files.
@@ -104,6 +107,7 @@ my @gather_output_skip;	# array to keep track of which steps to skip if Post-Ana
 my $donor_only = 0;
 my $host_only = 0;
 my $lgt_infected = 0;
+my $skip_alignment = 0;
 ####################################################
 
 my %options;
@@ -113,7 +117,6 @@ my $pipelines = {
 		'lgtseek' => 'LGT_Seek_Pipeline',
 		'post' => 'LGT_Seek_Pipeline_Post_Analysis'
 };
-
 
 # Allow program to run as module for unit testing if necessary
 main() unless caller();
@@ -129,6 +132,7 @@ sub main {
 						  "donor_reference|d=s",
 						  "refseq_reference|r=s",
 						  "build_indexes|B",
+						  "skip_alignment|S",
 						  "template_directory|t=s",
 						  "output_directory|o=s",
 						  "data_directory|O=s",
@@ -154,7 +158,7 @@ sub main {
 	open( my $plfh, "> $pipeline_layout") or &_log($ERROR, "Could not open $pipeline_layout for writing: $!");
 
 	# Since the pipeline.layout is XML, create an XML::Writer
-	my $layout_writer = new XML::Writer( 'OUTPUT' => $plfh, 'DATA_MODE' => 1, 'DATA_INDENT' => 3 );
+	my $layout_writer = new XML::Writer( 'OUTPUT' => $plfh, 'DATA_MODE' => 1, 'DATA_INDENT' => 2 );
 
 	# Write the pipeline.layout file
 	&write_pipeline_layout( $layout_writer, sub {
@@ -163,10 +167,14 @@ sub main {
 		# Use the right layout file if this run is donor-only, or both donor/host alignment
 		if ($donor_only) {
 				&write_include($writer, $pipelines->{'indexing'}, "pipeline.donor_only.layout") if( $included_subpipelines{'indexing'} );
-				&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.donor_only.layout") if( $included_subpipelines{'lgtseek'} );
+				unless ($skip_alignment) {
+					&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.donor_only.layout") if( $included_subpipelines{'lgtseek'} );
+				}
 		} elsif ($host_only) {
 				&write_include($writer, $pipelines->{'indexing'}, "pipeline.recipient_only.layout") if( $included_subpipelines{'indexing'} );
-				&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.recipient_only.layout") if( $included_subpipelines{'lgtseek'} );
+				unless ($skip_alignment) {
+					&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.recipient_only.layout") if( $included_subpipelines{'lgtseek'} );
+				}
 		} else {
 			&write_include($writer, $pipelines->{'indexing'}) if( $included_subpipelines{'indexing'} );
 			if ($lgt_infected){
@@ -217,14 +225,27 @@ sub main {
 
 if ($options{bam_input}) {
 	# If starting from BAM instead of SRA, then change QUERY_FILE to use BAM input
-	if (! $donor_only) {
-		$config{"lgt_bwa recipient"}->{'$;QUERY_FILE$;'} = $options{bam_input};
-		$config{"lgt_bwa recipient"}->{'$;PAIRED$;'} = 1;
+	if ($skip_alignment) {
+		if ( $donor_only ) {
+			$config{"lgt_bwa_post_process default"}->{'$;DONOR_FILE_LIST$;'} = '';
+			$config{"lgt_bwa_post_process default"}->{'$;DONOR_FILE$;'} = $options{bam_input};
+		} elsif ( $host_only ) {
+			$config{"lgt_bwa_post_process default"}->{'$;RECIPIENT_FILE_LIST$;'} = '';
+			$config{"lgt_bwa_post_process default"}->{'$;RECIPIENT_FILE$;'} = $options{bam_input};
+		} else {
+			&_log($ERROR, "ERROR: --skip_alignment only works with the good donor/unknown recipient use-case or the good recipient/unknown donor use-case. Exiting: $!");
+		}
 	} else {
-		$config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = $options{bam_input};
-		$config{"lgt_bwa donor"}->{'$;PAIRED$;'} = 1;
+		if (! $donor_only) {
+			$config{"lgt_bwa recipient"}->{'$;QUERY_FILE$;'} = $options{bam_input};
+			$config{"lgt_bwa recipient"}->{'$;PAIRED$;'} = 1;
+		} else {
+			$config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = $options{bam_input};
+			$config{"lgt_bwa donor"}->{'$;PAIRED$;'} = 1;
+		}
 	}
 } elsif ($options{fastq_input}) { 
+	&_log($WARN, "WARNING: Ignoring --skip_alignment option since input file was not BAM") if ($skip_alignment);
 	# If starting from FASTQ then change QUERY_FILE to use FASTQ input
 	if (! $donor_only) {
 		$config{"lgt_bwa recipient"}->{'$;QUERY_FILE$;'} = $options{fastq_input};
@@ -232,6 +253,7 @@ if ($options{bam_input}) {
 		$config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = $options{fastq_input};
 	}
 } else {
+	&_log($WARN, "WARNING: Ignoring --skip_alignment option since input file was not BAM") if ($skip_alignment);
 	$config{"global"}->{'$;SRA_RUN_ID$;'} = $options{sra_id};
 	$config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = '$;REPOSITORY_ROOT$;/output_repository/sra2fastq/$;PIPELINEID$;_default/sra2fastq.list' if $donor_only;
 }
@@ -320,9 +342,11 @@ if ($options{bam_input}) {
 			$config{'lgt_bwa validation'}->{'$;INPUT_FILE$;'} = '';
 			$config{'lgt_bwa validation'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_donor/lgt_build_bwa_index.fsa.list';
 		} else {
-			# Change the host reference for lgt_bwa
-			$config{'lgt_bwa recipient'}->{'$;INPUT_FILE$;'} = '';
-			$config{'lgt_bwa recipient'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_recipient/lgt_build_bwa_index.fsa.list';
+			unless ($skip_alignment) {
+				# Change the host reference for lgt_bwa
+				$config{'lgt_bwa recipient'}->{'$;INPUT_FILE$;'} = '';
+				$config{'lgt_bwa recipient'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_recipient/lgt_build_bwa_index.fsa.list';
+			}
 		}
 
 		# If host only, add no-mapped alignment and post-NT blast alignment
@@ -337,9 +361,11 @@ if ($options{bam_input}) {
 			$config{'lgt_bwa lgt'}->{'$;INPUT_FILE$;'} = '';
 			$config{'lgt_bwa lgt'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_refseq/lgt_build_bwa_index.fsa.list';
 		} else {
-			# Change the donor reference for lgt_bwa if not host-only run
-			$config{'lgt_bwa donor'}->{'$;INPUT_FILE$;'} = '';
-			$config{'lgt_bwa donor'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_donor/lgt_build_bwa_index.fsa.list';
+			unless ($skip_alignment) {
+				# Change the donor reference for lgt_bwa if not host-only run
+				$config{'lgt_bwa donor'}->{'$;INPUT_FILE$;'} = '';
+				$config{'lgt_bwa donor'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_donor/lgt_build_bwa_index.fsa.list';
+			}
 		}
 	}
 
@@ -502,6 +528,7 @@ sub check_options {
 
 	# If we need to build BWA reference indexes, then set option
 	$included_subpipelines{indexing} = 1 if ( $opts->{'build_indexes'} );
+	$skip_alignment = 1 if ( $opts->{'skip_alignment'} );
 
 	&_log($ERROR, "ERROR - Need either a host_reference, a donor_reference or both provided") if ($donor_only && $host_only);
 
