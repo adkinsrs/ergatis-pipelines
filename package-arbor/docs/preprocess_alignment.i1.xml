@@ -22,7 +22,7 @@
             </param>
             <param>
                 <key>--picard_jar</key>
-                <value>$;PICARd_JAR$;</value>
+                <value>$;PICARD_JAR$;</value>
             </param>
             <param>
                 <key>stdout</key>
