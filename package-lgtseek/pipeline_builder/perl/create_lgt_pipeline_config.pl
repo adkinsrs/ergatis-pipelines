@@ -168,13 +168,15 @@ sub main {
 		if ($donor_only) {
 				&write_include($writer, $pipelines->{'indexing'}, "pipeline.donor_only.layout") if( $included_subpipelines{'indexing'} );
 				unless ($skip_alignment) {
-					&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.donor_only.layout") if( $included_subpipelines{'lgtseek'} );
+					&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.donor_aln.layout") if( $included_subpipelines{'lgtseek'} );
 				}
+				&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.donor_only.layout") if( $included_subpipelines{'lgtseek'} );
 		} elsif ($host_only) {
 				&write_include($writer, $pipelines->{'indexing'}, "pipeline.recipient_only.layout") if( $included_subpipelines{'indexing'} );
 				unless ($skip_alignment) {
-					&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.recipient_only.layout") if( $included_subpipelines{'lgtseek'} );
+					&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.recipient_aln.layout") if( $included_subpipelines{'lgtseek'} );
 				}
+					&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.recipient_only.layout") if( $included_subpipelines{'lgtseek'} );
 		} else {
 			&write_include($writer, $pipelines->{'indexing'}) if( $included_subpipelines{'indexing'} );
 			if ($lgt_infected){
@@ -229,9 +231,11 @@ if ($options{bam_input}) {
 		if ( $donor_only ) {
 			$config{"lgt_bwa_post_process default"}->{'$;DONOR_FILE_LIST$;'} = '';
 			$config{"lgt_bwa_post_process default"}->{'$;DONOR_FILE$;'} = $options{bam_input};
+			delete $config{"lgt_bwa donor"};
 		} elsif ( $host_only ) {
 			$config{"lgt_bwa_post_process default"}->{'$;RECIPIENT_FILE_LIST$;'} = '';
 			$config{"lgt_bwa_post_process default"}->{'$;RECIPIENT_FILE$;'} = $options{bam_input};
+			delete $config{"lgt_bwa recipient"};
 		} else {
 			&_log($ERROR, "ERROR: --skip_alignment only works with the good donor/unknown recipient use-case or the good recipient/unknown donor use-case. Exiting: $!");
 		}
