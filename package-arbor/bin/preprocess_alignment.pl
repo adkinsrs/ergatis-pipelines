@@ -65,7 +65,7 @@ use strict;
 use warnings;
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
 use Pod::Usage;
-use List::Util;
+use List::MoreUtils qw(none);
 use File::Spec;
 use NICU::Config;
 
@@ -103,8 +103,8 @@ sub main {
 
     read_config(\%options, \%config);
 	my $prefix = $config{'preprocess_alignment'}{'Prefix'}[0];
-	my $stringency = uc($config{'picard_processing'}{'validation_stringency'}[0]);
-	my $max_records = $config{'picard_processing'}{'max_records_stored'}[0];
+	my $stringency = uc($config{'preprocess_alignment'}{'VALIDATION_STRINGENCY'}[0]);
+	my $max_records = $config{'preprocess_alignment'}{'MAX_RECORDS_STORED'}[0];
 
     if ( defined $stringency && none{$_ eq $stringency} @stringency_arr ) {
         &_log($ERROR, $stringency." is not a valid option.  Choose from 'SILENT', 'LENIENT', or 'STRICT'");

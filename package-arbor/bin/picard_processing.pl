@@ -66,7 +66,7 @@ use strict;
 use warnings;
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
 use Pod::Usage;
-use List::Util;
+use List::MoreUtils qw(none);
 use File::Spec;
 use NICU::Config;
 
