@@ -61,15 +61,12 @@ umask 0000
 unset PERL5LIB
 unset LD_LIBRARY_PATH
 
+export LD_LIBRARY_PATH=/usr/local/packages/tbb/lib/intel64/gcc4.7
+
 LANG=C
 export LANG
 LC_ALL=C
 export LC_ALL
-
-PERL_MOD_DIR=$instdir/lib/5.8.8
-export PERL_MOD_DIR
-
-export PERL5LIB=$instdir/lib/perl5/
 
     $julia_path $instdir/bin/$fname $shell_args    
 
