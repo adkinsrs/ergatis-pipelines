@@ -173,7 +173,6 @@ sub main {
     exec_command($cmd);
     my $config_out = "$outdir/picard_processing." .$prefix.".config" ;
     $config{'split_spliced_reads'}{'INPUT_FILE'}[0] = $outdir."/$prefix.mark_dups.bam";
-    $config{'split_spliced_reads'}{'Prefix'}[0] = $prefix;
     write_config(\%options, \%config, $config_out);
 
 }

@@ -108,8 +108,12 @@ sub main {
 			'--standard_min_confidence_threshold_for_calling' => $config{'haplotype_caller'}{'STAND_CALL_CONF'}[0]
     );
 
+	my $cmd = $options{'java_path'};
+    if (defined $hConfig{'haplotype_caller'}{'Java_Memory'}) {
+	    $Cmd .= " $hConfig{'haplotype_caller'}{'Java_Memory'}[0]" ;
+    }
     # Start building the Picard tools command
-    my $cmd = $options{'java_path'}." ".$options{'gatk_jar'}." --analysis_type HaplotypeCaller ";
+    $cmd .= " ".$options{'gatk_jar'}." --analysis_type HaplotypeCaller ";
 
 
     # Add only passed in options to command
@@ -123,7 +127,6 @@ sub main {
 
     my $config_out = "$outdir/haplotype_caller." .$prefix.".config" ;
     $config{'variant_filtration'}{'INPUT_FILE'}[0] = $outdir."/$prefix.haplotype_caller.vcf";
-    $config{'variant_filtration'}{'Prefix'}[0] = $prefix;
     write_config(\%options, \%config, $config_out);
 }
 

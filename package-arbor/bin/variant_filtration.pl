@@ -109,8 +109,12 @@ sub main {
 			'--standard_min_confidence_threshold_for_calling' => $config{'variant_filtration'}{'STAND_CALL_CONF'}[0]
     );
 
+	my $cmd = $options{'java_path'};
+    if (defined $hConfig{'variant_filtration'}{'Java_Memory'}) {
+	    $Cmd .= " $hConfig{'variant_filtration'}{'Java_Memory'}[0]" ;
+    }
     # Start building the Picard tools command
-    my $cmd = $options{'java_path'}." ".$options{'gatk_jar'}." --analysis_type VariantFiltration ";
+    my $cmd .= " ".$options{'gatk_jar'}." --analysis_type VariantFiltration ";
 
 
     # Add only passed in options to command
@@ -125,7 +129,6 @@ sub main {
 
     my $config_out = "$outdir/variant_filtration." .$prefix.".config" ;
     $config{'annovar'}{'INPUT_FILE'}[0] = $outdir."/$prefix.variant_filtration.vcf";
-    $config{'annovar'}{'Prefix'}[0] = $prefix;
     write_config(\%options, \%config, $config_out);
 }
 

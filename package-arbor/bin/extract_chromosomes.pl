@@ -121,7 +121,6 @@ sub main {
 
     my $config_out = "$outdir/extract_chromosomes." .$prefix.".config" ;
     $config{'preprocess_alignment'}{'INPUT_FILE'}[0] = $outdir."/$prefix.extract_chromosomes.bam";
-    $config{'preprocess_alignment'}{'Prefix'}[0] = $prefix;
     write_config(\%options, \%config, $config_out);
 }
 

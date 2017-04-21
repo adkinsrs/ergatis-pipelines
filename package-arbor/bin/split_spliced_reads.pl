@@ -110,8 +110,12 @@ sub main {
             '--reassign_mapping_quality_to' => $config{'split_spliced_reads'}{'DESIRED_MAPPING_QUALITY'}[0]
     );
 
+	my $cmd = $options{'java_path'};
+    if (defined $hConfig{'split_spliced_reads'}{'Java_Memory'}) {
+	    $Cmd .= " $hConfig{'split_spliced_reads'}{'Java_Memory'}[0]" ;
+    }
     # Start building the Picard tools command
-    my $cmd = $options{'java_path'}." ".$options{'gatk_jar'}." --analysis_type SplitNCigarReads -rf ReassignOneMappingQuality ";
+    $cmd .= " ".$options{'gatk_jar'}." --analysis_type SplitNCigarReads -rf ReassignOneMappingQuality ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
@@ -125,7 +129,6 @@ sub main {
 
     my $config_out = "$outdir/split_spliced_reads." .$prefix.".config" ;
     $config{'realigner_target_creator'}{'INPUT_FILE'}[0] = $outdir."/$prefix.split.bam";
-    $config{'realigner_target_creator'}{'Prefix'}[0] = $prefix;
     write_config(\%options, \%config, $config_out);
 }
 

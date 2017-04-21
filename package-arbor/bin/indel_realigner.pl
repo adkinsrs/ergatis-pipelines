@@ -150,8 +150,7 @@ if (defined $hConfig{'indel_realigner'}{'OTHER_PARAMETERS'}) {
 exec_command($sCmd);
 
 $config_out = "$sOutDir/indel_realigner.$hConfig{'indel_realigner'}{'Prefix'}[0].config" ;
-$hConfig{'fix_mate'}{'Infile'}[0] = "$sOutDir/$hConfig{'indel_realigner'}{'Prefix'}[0].realigned.bam" ;
-$hConfig{'fix_mate'}{'Prefix'}[0] = $hConfig{'indel_realigner'}{'Prefix'}[0] ;
+$hConfig{'base_recalibration'}{'Infile'}[0] = "$sOutDir/$hConfig{'indel_realigner'}{'Prefix'}[0].realigned.bam" ;
 
 write_config(\%hCmdLineOption,\%hConfig,$config_out);
 

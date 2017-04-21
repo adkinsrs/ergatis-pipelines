@@ -151,7 +151,6 @@ sub main {
 
     my $config_out = "$outdir/preprocess_alignment." .$prefix.".config" ;
     $config{'picard_processing'}{'INPUT_FILE'}[0] = $outdir."/$prefix.sorted.bam";
-    $config{'picard_processing'}{'Prefix'}[0] = $prefix;
     write_config(\%options, \%config, $config_out);
 
 }

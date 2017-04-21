@@ -143,7 +143,6 @@ while(<$fh>) {
     $config_out = "$sOutDir/base_recalibration.$hConfig{'base_recalibration'}{'Prefix'}[0].config" ;
     $hConfig{'print_reads'}{'Infile'}[0] = $hConfig{'merge_bam'}{'Infile'}[0];
     $hConfig{'print_reads'}{'BQSR'}[0] = "$sOutDir/Merged.base.recal.grp" ;
-    $hConfig{'print_reads'}{'Prefix'}[0] = $hConfig{'base_recalibration'}{'Prefix'}[0] ;
     write_config(\%hCmdLineOption,\%hConfig,$config_out);
 }
 
