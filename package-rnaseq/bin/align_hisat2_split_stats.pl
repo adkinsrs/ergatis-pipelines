@@ -86,7 +86,7 @@ pod2usage( -msg => $sHelpHeader, -exitval => 1) if $hCmdLineOption{'help'};
 check_parameters(\%hCmdLineOption);
 
 my ($sOutDir,$prefix, $sPrefix, $sfile, $mapstats);
-my ($mergebam_file, $bam_file, $mapstat_list, $mapstat_file, $f1, $path,$sf1, $sPath, $key,$pipeline1,$pipeline2);
+my ($bam_file, $mapstat_list, $mapstat_file, $f1, $path,$sf1, $sPath, $key,$pipeline1,$pipeline2);
 my %bam; 
 my ($cfile,$mfile,$lfile,$rfile,$pfile,$readcount,@arr,@arr1,$p_paired,$left_count,$tot_reads,$p_mapped,$fout,$out_all);
 my $right_count=0;
@@ -157,7 +157,6 @@ while (<$mapstat_file>) {
 		}
 }
 
-close $mergebam_file;
 close $mapstat_file; 
 
 
