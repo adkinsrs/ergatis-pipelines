@@ -1189,6 +1189,7 @@ sub _bwaPostProcessSingle {
      my $samtools = $self->{samtools_bin};
      my $output_dir =
        $config->{output_dir} ? $config->{output_dir} : $self->{output_dir};
+	my $counts_only = $config->{counts_only} ? $config->{counts_only} : 0;
 
      my $classes_each = {
          'MM' => 'paired',
@@ -1197,97 +1198,100 @@ sub _bwaPostProcessSingle {
          'UU' => 'none'
      };
 
-     my $prefix = $config->{output_prefix} ? $config->{output_prefix} : '';
-
-     my $class_to_file_name = {
-		 'single_map' => "$output_dir/" . $prefix . ".single_map.bam",
-		 'no_map'	=> "$output_dir/" . $prefix . ".no_map.bam",
-		 'paired_map' => "$output_dir/" . $prefix . ".all_map.bam",
-	 };
-
      my $class_counts = {
          'paired'  => undef,
          'single'  => undef,
          'none' => undef,
      };
+     my $class_to_file_name = ();
 
-     # Here are a bunch of file handles we'll use later.
-     if ( $self->{verbose} ) {
-         print STDERR "$output_dir/" . $prefix . ".single_map.bam\n";
-         print STDERR "$output_dir/" . $prefix . ".no_map.bam\n";
-         print STDERR "$output_dir/" . $prefix . ".all_map.bam\n";
-     }
-     open(
-         my $single_map_fh,
-         "| $samtools view -S -b -o $output_dir/" . $prefix . ".single_map.bam -"
-     ) or die "Unable to open LGT single map file for writing\n";
+    unless ($counts_only) {
+		 my $prefix = $config->{output_prefix} ? $config->{output_prefix} : '';
+		 
+		 $class_to_file_name = {
+			 'single_map' => "$output_dir/" . $prefix . ".single_map.bam",
+			 'no_map'	=> "$output_dir/" . $prefix . ".no_map.bam",
+			 'paired_map' => "$output_dir/" . $prefix . ".all_map.bam",
+		 };
 
-     open(
-         my $no_map_fh,
-         "| $samtools view -S -b -o $output_dir/" . $prefix . ".no_map.bam -"
-     ) or die "Unable to open 'no' map file for writing\n";
+		 # Here are a bunch of file handles we'll use later.
+		 if ( $self->{verbose} ) {
+			 print STDERR "$output_dir/" . $prefix . ".single_map.bam\n";
+			 print STDERR "$output_dir/" . $prefix . ".no_map.bam\n";
+			 print STDERR "$output_dir/" . $prefix . ".all_map.bam\n";
+		 }
+		 open(
+			 my $single_map_fh,
+			 "| $samtools view -S -b -o $output_dir/" . $prefix . ".single_map.bam -"
+		 ) or die "Unable to open LGT single map file for writing\n";
 
-     open(
-         my $paired_map_fh,
-         "| $samtools view -S -b -o $output_dir/" . $prefix . ".all_map.bam -"
-     ) or die "Unable to open 'all' map file for writing\n";
+		 open(
+			 my $no_map_fh,
+			 "| $samtools view -S -b -o $output_dir/" . $prefix . ".no_map.bam -"
+		 ) or die "Unable to open 'no' map file for writing\n";
 
-	 # Perhaps in the future I can change these file names to rely on extensions like the Donor/Host subroutine relies on _donor and _host for assigning to the right file - SAdkins
-     my $class_to_file = {
-         'single_map'  => $single_map_fh,
-         'no_map'      => $no_map_fh,
-         'paired_map'  => $paired_map_fh
-     };
+		 open(
+			 my $paired_map_fh,
+			 "| $samtools view -S -b -o $output_dir/" . $prefix . ".all_map.bam -"
+		 ) or die "Unable to open 'all' map file for writing\n";
 
-     my $bam = defined $config->{donor_bam} ? $config->{donor_bam} : $config->{host_bam};
-	 if (! $bam) {
-		confess "***ERROR*** Passed config neither has a defined donor nor host BAM";
-	 }
-     my $fh;
-     my $head;
+		 # Perhaps in the future I can change these file names to rely on extensions like the Donor/Host subroutine relies on _donor and _host for assigning to the right file - SAdkins
+		 my $class_to_file = {
+			 'single_map'  => $single_map_fh,
+			 'no_map'      => $no_map_fh,
+			 'paired_map'  => $paired_map_fh
+		 };
 
-     # Open the BAM file for reading
-     if ( $self->{verbose} ) { print STDERR "Opening $bam\n"; }
-     if ( $bam =~ /.bam$/ ) {
-         $head = `$samtools view -H $bam`;
-         open( $fh, "-|", "$samtools view $bam" );
-     }
-     elsif ( $bam =~ /.sam.gz$/ ) {
-         $head = `zcat $bam | $samtools view -H -S -`;
-         open( $fh, "-|", "zcat $bam | $samtools view -S -" );
-     }
+		 my $bam = defined $config->{donor_bam} ? $config->{donor_bam} : $config->{host_bam};
+		 if (! $bam) {
+			confess "***ERROR*** Passed config neither has a defined donor nor host BAM";
+		 }
+		 my $fh;
+		 my $head;
 
-     # Prime the files with headers.
-     map {
-        my @headers = split( /\n/, $head );
-        print STDERR "Printing header to $_ file\n";
-        print { $class_to_file->{$_} }
-        join( "\n", grep( /^\@SQ/, @headers ) );
-        print { $class_to_file->{$_} } "\n";
-        my @pg_headers = grep( /^\@PG|^\@CO/, @headers );
-        my %pg_hash;
-        foreach my $pgs (@pg_headers) {
-            chomp($pgs);
-            $pg_hash{$pgs}++;
-        }
-		my $last_pg_id;
-        if ( $headers[-1] =~ /^\@PG|^\@CO/ ) {
-            my $last_pg = $headers[-1];
-            $last_pg_id = ( split /\t/, $last_pg )[1];
-            $last_pg_id =~ s/ID\:/PP\:/;
-            $last_pg_id = "\t" . $last_pg_id;
-        }
-        foreach my $pgs ( keys %pg_hash ) {
-            print { $class_to_file->{$_} } "$pgs\n";
-        }
-        print { $class_to_file->{$_} } "\@CO\tID:PostProcess\tPN:LGTseek\tVN:$VERSION";
-		# Sometimes there are no previous PG-ID's so check for that.
-		if (defined $last_pg_id) {
-			print {$class_to_file->{$_}} "$last_pg_id\n";
-		} else {
-			print {$class_to_file->{$_}} "\n";
-		}
-     } keys %$class_to_file;
+		 # Open the BAM file for reading
+		 if ( $self->{verbose} ) { print STDERR "Opening $bam\n"; }
+		 if ( $bam =~ /.bam$/ ) {
+			 $head = `$samtools view -H $bam`;
+			 open( $fh, "-|", "$samtools view $bam" );
+		 }
+		 elsif ( $bam =~ /.sam.gz$/ ) {
+			 $head = `zcat $bam | $samtools view -H -S -`;
+			 open( $fh, "-|", "zcat $bam | $samtools view -S -" );
+		 }
+
+		 # Prime the files with headers.
+		 map {
+			my @headers = split( /\n/, $head );
+			print STDERR "Printing header to $_ file\n";
+			print { $class_to_file->{$_} }
+			join( "\n", grep( /^\@SQ/, @headers ) );
+			print { $class_to_file->{$_} } "\n";
+			my @pg_headers = grep( /^\@PG|^\@CO/, @headers );
+			my %pg_hash;
+			foreach my $pgs (@pg_headers) {
+				chomp($pgs);
+				$pg_hash{$pgs}++;
+			}
+			my $last_pg_id;
+			if ( $headers[-1] =~ /^\@PG|^\@CO/ ) {
+				my $last_pg = $headers[-1];
+				$last_pg_id = ( split /\t/, $last_pg )[1];
+				$last_pg_id =~ s/ID\:/PP\:/;
+				$last_pg_id = "\t" . $last_pg_id;
+			}
+			foreach my $pgs ( keys %pg_hash ) {
+				print { $class_to_file->{$_} } "$pgs\n";
+			}
+			print { $class_to_file->{$_} } "\@CO\tID:PostProcess\tPN:LGTseek\tVN:$VERSION";
+			# Sometimes there are no previous PG-ID's so check for that.
+			if (defined $last_pg_id) {
+				print {$class_to_file->{$_}} "$last_pg_id\n";
+			} else {
+				print {$class_to_file->{$_}} "\n";
+			}
+		 } keys %$class_to_file;
+    }
 
      my $more_lines = 1;
      my $line_num = 0;
@@ -1302,20 +1306,21 @@ sub _bwaPostProcessSingle {
 
          if ($more_lines) {
              my $paired_class = $class;
+			
+			 unless ($counts_only) {
+				 # print the single lines to the single_map file (if we are keeping this output file)
+				 if ( $classes_each->{$paired_class} eq "single" ) {
+					 print { $class_to_file->{"single_map"} } "$r1_line\n$r2_line\n";
+				 }
 
-  			 # print the single lines to the single_map file (if we are keeping this output file)
-             if ( $classes_each->{$paired_class} eq "single" ) {
-				 print { $class_to_file->{"single_map"} } "$r1_line\n$r2_line\n";
-             }
+				 if ( $classes_each->{$paired_class} eq "none" ) {
+					 print { $class_to_file->{"no_map"} } "$r1_line\n$r2_line\n";
+				 }
 
-             if ( $classes_each->{$paired_class} eq "none" ) {
-                 print { $class_to_file->{"no_map"} } "$r1_line\n$r2_line\n";
-             }
-
-             if ( $classes_each->{$paired_class} eq "paired" ) {
-                 print { $class_to_file->{"paired_map"} } "$r1_line\n$r2_line\n";
-             }
-
+				 if ( $classes_each->{$paired_class} eq "paired" ) {
+					 print { $class_to_file->{"paired_map"} } "$r1_line\n$r2_line\n";
+				 }
+			 }
              # Increment the count for this class
              if ( $classes_each->{$paired_class} ) {
                  $class_counts->{ $classes_each->{$paired_class} }++;
@@ -1332,7 +1337,7 @@ sub _bwaPostProcessSingle {
              if ( $self->{verbose} ) { print STDERR "closing $_ file\n"; }
              close $class_to_file->{$_};
          }
-     } keys %$class_to_file;
+     } keys %$class_to_file unless $counts_only;
 
      # Set the total
      $class_counts->{total} = $line_num;
@@ -1352,6 +1357,7 @@ sub _bwaPostProcessDonorHostPaired {
     my $samtools = $self->{samtools_bin};
     my $output_dir =
        $config->{output_dir} ? $config->{output_dir} : $self->{output_dir};
+	my $counts_only = $config->{counts_only} ? $config->{counts_only} : 0;
 
     # Classes have the donor on the left and the host on the right
     my $classes_both = {
