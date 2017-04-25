@@ -1204,6 +1204,25 @@ sub _bwaPostProcessSingle {
          'none' => undef,
      };
      my $class_to_file_name = ();
+	 my $class_to_file = ();
+
+	 my $bam = defined $config->{donor_bam} ? $config->{donor_bam} : $config->{host_bam};
+	 if (! $bam) {
+		confess "***ERROR*** Passed config neither has a defined donor nor host BAM";
+	 }
+	 my $fh;
+	 my $head;
+
+	 # Open the BAM file for reading
+	 if ( $self->{verbose} ) { print STDERR "Opening $bam\n"; }
+	 if ( $bam =~ /.bam$/ ) {
+		 $head = `$samtools view -H $bam`;
+		 open( $fh, "-|", "$samtools view $bam" );
+	 }
+	 elsif ( $bam =~ /.sam.gz$/ ) {
+		 $head = `zcat $bam | $samtools view -H -S -`;
+		 open( $fh, "-|", "zcat $bam | $samtools view -S -" );
+	 }
 
     unless ($counts_only) {
 		 my $prefix = $config->{output_prefix} ? $config->{output_prefix} : '';
@@ -1236,29 +1255,11 @@ sub _bwaPostProcessSingle {
 		 ) or die "Unable to open 'all' map file for writing\n";
 
 		 # Perhaps in the future I can change these file names to rely on extensions like the Donor/Host subroutine relies on _donor and _host for assigning to the right file - SAdkins
-		 my $class_to_file = {
+		 $class_to_file = {
 			 'single_map'  => $single_map_fh,
 			 'no_map'      => $no_map_fh,
 			 'paired_map'  => $paired_map_fh
 		 };
-
-		 my $bam = defined $config->{donor_bam} ? $config->{donor_bam} : $config->{host_bam};
-		 if (! $bam) {
-			confess "***ERROR*** Passed config neither has a defined donor nor host BAM";
-		 }
-		 my $fh;
-		 my $head;
-
-		 # Open the BAM file for reading
-		 if ( $self->{verbose} ) { print STDERR "Opening $bam\n"; }
-		 if ( $bam =~ /.bam$/ ) {
-			 $head = `$samtools view -H $bam`;
-			 open( $fh, "-|", "$samtools view $bam" );
-		 }
-		 elsif ( $bam =~ /.sam.gz$/ ) {
-			 $head = `zcat $bam | $samtools view -H -S -`;
-			 open( $fh, "-|", "zcat $bam | $samtools view -S -" );
-		 }
 
 		 # Prime the files with headers.
 		 map {
