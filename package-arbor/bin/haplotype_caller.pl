@@ -110,7 +110,7 @@ sub main {
 
 	my $cmd = $options{'java_path'};
     if (defined $hConfig{'haplotype_caller'}{'Java_Memory'}) {
-	    $Cmd .= " $hConfig{'haplotype_caller'}{'Java_Memory'}[0]" ;
+	    $cmd .= " $hConfig{'haplotype_caller'}{'Java_Memory'}[0]" ;
     }
     # Start building the Picard tools command
     $cmd .= " ".$options{'gatk_jar'}." --analysis_type HaplotypeCaller ";

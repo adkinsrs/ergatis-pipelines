@@ -125,8 +125,12 @@ sub main {
 			'MAX_RECORDS_IN_RAM' => $max_records
     );
 
+    my $cmd = $options{'java_path'};
+    if (defined $hConfig{'preprocess_alignment'}{'Java_Memory'}) {
+	    $cmd .= " $hConfig{'preprocess_alignment'}{'Java_Memory'}[0]" ;
+    }
     # Start building the Picard tools command
-    my $cmd = $options{'java_path'}." ".$options{'picard_jar'}." AddOrReplaceReadGroups ";
+    $cmd .=" ".$options{'picard_jar'}." AddOrReplaceReadGroups ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
@@ -144,8 +148,12 @@ sub main {
 			'MAX_RECORDS_IN_RAM' => $max_records
     );
 
+    $cmd = $options{'java_path'};
+    if (defined $hConfig{'preprocess_alignment'}{'Java_Memory'}) {
+	    $cmd .= " $hConfig{'preprocess_alignment'}{'Java_Memory'}[0]" ;
+    }
     # Start building the Picard tools command
-    $cmd = $options{'java_path'}." ".$options{'picard_jar'}." MarkDuplicates ";
+    $cmd .= " ".$options{'picard_jar'}." MarkDuplicates ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
@@ -162,8 +170,12 @@ sub main {
 			'MAX_RECORDS_IN_RAM' => $max_records
     );
 
+    $cmd = $options{'java_path'};
+    if (defined $hConfig{'preprocess_alignment'}{'Java_Memory'}) {
+	    $cmd .= " $hConfig{'preprocess_alignment'}{'Java_Memory'}[0]" ;
+    }
     # Start building the Picard tools command
-    $cmd = $options{'java_path'}." ".$options{'picard_jar'}." BuildBamIndex ";
+    $cmd .= " ".$options{'picard_jar'}." BuildBamIndex ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
