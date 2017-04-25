@@ -126,8 +126,8 @@ sub main {
     );
 
     my $cmd = $options{'java_path'};
-    if (defined $hConfig{'preprocess_alignment'}{'Java_Memory'}) {
-	    $cmd .= " $hConfig{'preprocess_alignment'}{'Java_Memory'}[0]" ;
+    if (defined $config{'preprocess_alignment'}{'Java_Memory'}) {
+	    $cmd .= " $config{'preprocess_alignment'}{'Java_Memory'}[0]" ;
     }
     # Start building the Picard tools command
     $cmd .=" ".$options{'picard_jar'}." AddOrReplaceReadGroups ";
@@ -149,8 +149,8 @@ sub main {
     );
 
     $cmd = $options{'java_path'};
-    if (defined $hConfig{'preprocess_alignment'}{'Java_Memory'}) {
-	    $cmd .= " $hConfig{'preprocess_alignment'}{'Java_Memory'}[0]" ;
+    if (defined $config{'preprocess_alignment'}{'Java_Memory'}) {
+	    $cmd .= " $config{'preprocess_alignment'}{'Java_Memory'}[0]" ;
     }
     # Start building the Picard tools command
     $cmd .= " ".$options{'picard_jar'}." MarkDuplicates ";
@@ -171,8 +171,8 @@ sub main {
     );
 
     $cmd = $options{'java_path'};
-    if (defined $hConfig{'preprocess_alignment'}{'Java_Memory'}) {
-	    $cmd .= " $hConfig{'preprocess_alignment'}{'Java_Memory'}[0]" ;
+    if (defined $config{'preprocess_alignment'}{'Java_Memory'}) {
+	    $cmd .= " $config{'preprocess_alignment'}{'Java_Memory'}[0]" ;
     }
     # Start building the Picard tools command
     $cmd .= " ".$options{'picard_jar'}." BuildBamIndex ";

@@ -111,8 +111,8 @@ sub main {
     );
 
 	my $cmd = $options{'java_path'};
-    if (defined $hConfig{'split_spliced_reads'}{'Java_Memory'}) {
-	    $cmd .= " $hConfig{'split_spliced_reads'}{'Java_Memory'}[0]" ;
+    if (defined $config{'split_spliced_reads'}{'Java_Memory'}) {
+	    $cmd .= " $config{'split_spliced_reads'}{'Java_Memory'}[0]" ;
     }
     # Start building the Picard tools command
     $cmd .= " ".$options{'gatk_jar'}." --analysis_type SplitNCigarReads -rf ReassignOneMappingQuality ";

@@ -110,11 +110,11 @@ sub main {
     );
 
 	my $cmd = $options{'java_path'};
-    if (defined $hConfig{'variant_filtration'}{'Java_Memory'}) {
-	    $cmd .= " $hConfig{'variant_filtration'}{'Java_Memory'}[0]" ;
+    if (defined $config{'variant_filtration'}{'Java_Memory'}) {
+	    $cmd .= " $config{'variant_filtration'}{'Java_Memory'}[0]" ;
     }
     # Start building the Picard tools command
-    my $cmd .= " ".$options{'gatk_jar'}." --analysis_type VariantFiltration ";
+    $cmd .= " ".$options{'gatk_jar'}." --analysis_type VariantFiltration ";
 
 
     # Add only passed in options to command

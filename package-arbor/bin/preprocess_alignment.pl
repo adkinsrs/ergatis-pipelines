@@ -122,8 +122,8 @@ sub main {
 
     # Start building the Picard tools command
     my $cmd = $options{'java_path'};
-    if (defined $hConfig{'preprocess_alignment'}{'Java_Memory'}) {
-	    $cmd .= " $hConfig{'preprocess_alignment'}{'Java_Memory'}[0]" ;
+    if (defined $config{'preprocess_alignment'}{'Java_Memory'}) {
+	    $cmd .= " $config{'preprocess_alignment'}{'Java_Memory'}[0]" ;
     }
 	$cmd .= " ".$options{'picard_jar'}." ReorderSam ";
 
@@ -144,8 +144,8 @@ sub main {
     );
 
     $cmd = $options{'java_path'};
-    if (defined $hConfig{'preprocess_alignment'}{'Java_Memory'}) {
-	    $cmd .= " $hConfig{'preprocess_alignment'}{'Java_Memory'}[0]" ;
+    if (defined $config{'preprocess_alignment'}{'Java_Memory'}) {
+	    $cmd .= " $config{'preprocess_alignment'}{'Java_Memory'}[0]" ;
     }
     # Start building the Picard tools command
     $cmd .= " ".$options{'picard_jar'}." SortSam ";

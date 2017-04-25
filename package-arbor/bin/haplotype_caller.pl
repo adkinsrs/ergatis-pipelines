@@ -98,7 +98,7 @@ sub main {
     &check_options(\%options);
     read_config(\%options, \%config);
 
-	my $prefix = $config{'haplotype_caller'}['Prefix'}[0];
+	my $prefix = $config{'haplotype_caller'}{'Prefix'}[0];
 
     my %args = ( 
 			'--input_file' => $config{'haplotype_caller'}{'INPUT_FILE'}[0],
@@ -109,8 +109,8 @@ sub main {
     );
 
 	my $cmd = $options{'java_path'};
-    if (defined $hConfig{'haplotype_caller'}{'Java_Memory'}) {
-	    $cmd .= " $hConfig{'haplotype_caller'}{'Java_Memory'}[0]" ;
+    if (defined $config{'haplotype_caller'}{'Java_Memory'}) {
+	    $cmd .= " $config{'haplotype_caller'}{'Java_Memory'}[0]" ;
     }
     # Start building the Picard tools command
     $cmd .= " ".$options{'gatk_jar'}." --analysis_type HaplotypeCaller ";
