@@ -1,4 +1,8 @@
 # CHANGELOG
+4/27/17
+* Fixed bug in 'concatenate_files' component where it was passing in the wrong argument name to the Perl script
+* Added option to skip alignments and go straight to 'lgt_bwa_post_process' component (with caveats)
+* Modifications to software.config
 
 3/23/17
 * Fixed bug with missing param in XML file for blastn_plus
