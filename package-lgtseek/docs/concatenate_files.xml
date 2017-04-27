@@ -26,7 +26,7 @@
                 <value>$;INPUT_FILES$;</value>
             </param>
             <param>
-                <key>--input_list</key>
+                <key>--input_lists</key>
                 <value>$;INPUT_FILE_LIST$;</value>
             </param>
             <param>
