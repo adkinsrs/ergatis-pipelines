@@ -115,7 +115,7 @@ sub main {
 	    $cmd .= " $config{'split_spliced_reads'}{'Java_Memory'}[0]" ;
     }
     # Start building the Picard tools command
-    $cmd .= " ".$options{'gatk_jar'}." --analysis_type SplitNCigarReads -rf ReassignOneMappingQuality ";
+    $cmd .= " -jar ".$options{'gatk_jar'}." --analysis_type SplitNCigarReads -rf ReassignOneMappingQuality ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {

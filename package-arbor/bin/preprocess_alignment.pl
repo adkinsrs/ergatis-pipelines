@@ -125,7 +125,7 @@ sub main {
     if (defined $config{'preprocess_alignment'}{'Java_Memory'}) {
 	    $cmd .= " $config{'preprocess_alignment'}{'Java_Memory'}[0]" ;
     }
-	$cmd .= " ".$options{'picard_jar'}." ReorderSam ";
+	$cmd .= " -jar ".$options{'picard_jar'}." ReorderSam ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
@@ -148,7 +148,7 @@ sub main {
 	    $cmd .= " $config{'preprocess_alignment'}{'Java_Memory'}[0]" ;
     }
     # Start building the Picard tools command
-    $cmd .= " ".$options{'picard_jar'}." SortSam ";
+    $cmd .= " -jar ".$options{'picard_jar'}." SortSam ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {

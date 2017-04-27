@@ -130,7 +130,7 @@ sub main {
 	    $cmd .= " $config{'preprocess_alignment'}{'Java_Memory'}[0]" ;
     }
     # Start building the Picard tools command
-    $cmd .=" ".$options{'picard_jar'}." AddOrReplaceReadGroups ";
+    $cmd .=" -jar ".$options{'picard_jar'}." AddOrReplaceReadGroups ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
@@ -153,7 +153,7 @@ sub main {
 	    $cmd .= " $config{'preprocess_alignment'}{'Java_Memory'}[0]" ;
     }
     # Start building the Picard tools command
-    $cmd .= " ".$options{'picard_jar'}." MarkDuplicates ";
+    $cmd .= " -jar ".$options{'picard_jar'}." MarkDuplicates ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
@@ -175,7 +175,7 @@ sub main {
 	    $cmd .= " $config{'preprocess_alignment'}{'Java_Memory'}[0]" ;
     }
     # Start building the Picard tools command
-    $cmd .= " ".$options{'picard_jar'}." BuildBamIndex ";
+    $cmd .= " -jar ".$options{'picard_jar'}." BuildBamIndex ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
