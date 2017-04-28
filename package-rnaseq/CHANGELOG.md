@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 4/28/17
+* Updated 'samtools_file_convert' to be compatible with modern versions of SAMtools
+
 ## 4/13/17
 * Changed various options in pipeline configuration scripts
 * Fixed various bugs

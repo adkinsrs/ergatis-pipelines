@@ -243,7 +243,7 @@ sub bam2sorted_bam {
 	
     $sCmd  = $phOptions->{'samtools_bin_dir'}."/samtools sort";
 	$sCmd .= " ".$phOptions->{'samtools_sort_options'} if (defined $phOptions->{'samtools_sort_options'});
-	$sCmd .= " ".$sFile." ".$sOutFile;
+	$sCmd .= " -o $sOutFile ".$sFile.;
 	
 	exec_command($sCmd);
 	
