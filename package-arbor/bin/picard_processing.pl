@@ -95,6 +95,7 @@ sub main {
 						 "output_dir|o=s",
 						 "picard_jar=s",
 						 "java_path=s",
+						 "tmpdir|t=s",
                          "log|l=s",
                          "debug|d=s",
                          "help|h"
@@ -125,7 +126,7 @@ sub main {
 			'MAX_RECORDS_IN_RAM' => $max_records
     );
 
-    my $cmd = $options{'java_path'};
+	my $cmd = $options{'java_path'} . " -Djava.io.tmpdir=" .$options{tmpdir};
     if (defined $config{'preprocess_alignment'}{'Java_Memory'}) {
 	    $cmd .= " $config{'preprocess_alignment'}{'Java_Memory'}[0]" ;
     }
@@ -148,7 +149,7 @@ sub main {
 			'MAX_RECORDS_IN_RAM' => $max_records
     );
 
-    $cmd = $options{'java_path'};
+	$cmd = $options{'java_path'} . " -Djava.io.tmpdir=" .$options{tmpdir};
     if (defined $config{'preprocess_alignment'}{'Java_Memory'}) {
 	    $cmd .= " $config{'preprocess_alignment'}{'Java_Memory'}[0]" ;
     }
@@ -170,7 +171,7 @@ sub main {
 			'MAX_RECORDS_IN_RAM' => $max_records
     );
 
-    $cmd = $options{'java_path'};
+	$cmd = $options{'java_path'} . " -Djava.io.tmpdir=" .$options{tmpdir};
     if (defined $config{'preprocess_alignment'}{'Java_Memory'}) {
 	    $cmd .= " $config{'preprocess_alignment'}{'Java_Memory'}[0]" ;
     }

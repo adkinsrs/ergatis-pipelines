@@ -10,7 +10,7 @@ run_annovar.pl - Wrapper script for table_annovar.pl, which annotates filtered v
        --config_file=/path/to/some/config.txt
        --output_dir=/path/to/output/dir
      [ 
-	   --tmp_dir=/path/to/tmp
+	   --tmpdir=/path/to/tmp
 	   --annovar_bin=/usr/bin/annovar
 	   --log=/path/to/file.log
        --debug=3
@@ -84,7 +84,7 @@ sub main {
     my $results = GetOptions (\%options,
 						 "config_file|c=s",
 						 "output_dir|o=s",
-						 "tmp_dir|t=s",
+						 "tmpdir|t=s",
 						 "annovar_bin=s",
                          "log|l=s",
                          "debug|d=s",

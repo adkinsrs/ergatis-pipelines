@@ -25,7 +25,7 @@ B<--config_file,-c>
 B<--output_dir,-o>
 	Optional. Path to directory to write output to.  If not provided, use current directory
 
-B<--tmp_dir,-t>
+B<--tmpdir,-t>
 	Optional. Path to directory to write temporary files to.  If not provided, use /tmp
 
 B<--samtools_bin>
@@ -88,7 +88,7 @@ sub main {
     my $results = GetOptions (\%options,
 						 "config_file|c=s",
 						 "output_dir|o=s",
-						 "tmp_dir|t=s",
+						 "tmpdir|t=s",
 						 "samtools_bin=s",
                          "log|l=s",
                          "debug|d=s",
@@ -105,7 +105,7 @@ sub main {
     );
 
     # Start building the Samtools command
-	my $tmp_dir_env = "TMP_DIR=".$options{'tmp_dir'} . " ";
+	my $tmp_dir_env = "TMP_DIR=".$options{'tmpdir'} . " ";
 	my $groups_str = " 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y MT";
 
     my $cmd = $tmp_dir_env . $options{'samtools_bin'}."/samtools view -b ";

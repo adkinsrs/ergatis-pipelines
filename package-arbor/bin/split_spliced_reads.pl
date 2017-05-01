@@ -90,6 +90,7 @@ sub main {
 						 "output_file|o=s",
 						 "gatk_jar=s",
 						 "java_path=s",
+						 "tmpdir|t=s",
                          "log|l=s",
                          "debug|d=s",
                          "help|h"
@@ -110,7 +111,7 @@ sub main {
             '--reassign_mapping_quality_to' => $config{'split_spliced_reads'}{'DESIRED_MAPPING_QUALITY'}[0]
     );
 
-	my $cmd = $options{'java_path'};
+	my $cmd = $options{'java_path'} . " -Djava.io.tmpdir=" .$options{tmpdir};
     if (defined $config{'split_spliced_reads'}{'Java_Memory'}) {
 	    $cmd .= " $config{'split_spliced_reads'}{'Java_Memory'}[0]" ;
     }

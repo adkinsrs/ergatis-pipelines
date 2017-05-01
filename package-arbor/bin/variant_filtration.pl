@@ -90,6 +90,7 @@ sub main {
 						 "output_dir|o=s",
 						 "gatk_jar=s",
 						 "java_path=s",
+						 "tmpdir|t=s",
                          "log|l=s",
                          "debug|d=s",
                          "help|h"
@@ -109,7 +110,7 @@ sub main {
 			'--standard_min_confidence_threshold_for_calling' => $config{'variant_filtration'}{'STAND_CALL_CONF'}[0]
     );
 
-	my $cmd = $options{'java_path'};
+	my $cmd = $options{'java_path'} . " -Djava.io.tmpdir=" .$options{tmpdir};
     if (defined $config{'variant_filtration'}{'Java_Memory'}) {
 	    $cmd .= " $config{'variant_filtration'}{'Java_Memory'}[0]" ;
     }
