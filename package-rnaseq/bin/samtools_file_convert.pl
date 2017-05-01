@@ -236,23 +236,25 @@ sub bam2sorted_bam {
 			$sOutFile = $sOutDir."/".$sPrefix.".sorted_by_name";
 		}
 	}
+
+	$sOutFile .= ".bam";
 	
     ## samtools execution
     ($bDebug || $bVerbose) ? 
-		print STDERR "\nConverting $sFile to $sOutFile.bam ...\n" : ();
+		print STDERR "\nConverting $sFile to $sOutFile ...\n" : ();
 	
     $sCmd  = $phOptions->{'samtools_bin_dir'}."/samtools sort";
 	$sCmd .= " ".$phOptions->{'samtools_sort_options'} if (defined $phOptions->{'samtools_sort_options'});
-	$sCmd .= " -o $sOutFile ".$sFile.;
+	$sCmd .= " -o $sOutFile ".$sFile;
 	
 	exec_command($sCmd);
 	
 	($bDebug || $bVerbose) ? 
-		print STDERR "\nConverting $sFile to $sOutFile.bam ... done\n" : ();
+		print STDERR "\nConverting $sFile to $sOutFile ... done\n" : ();
 	
 	$sFormat = "BAM";
 	
-	return ("$sOutFile.bam", $sFormat);
+	return ($sOutFile, $sFormat);
 }
 
 sub sorted_bam2indexed_bam {
