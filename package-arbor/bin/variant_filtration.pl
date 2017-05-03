@@ -107,7 +107,6 @@ sub main {
 			'--clusterWindowSize' => $config{'variant_filtration'}{'WINDOW_SIZE'}[0],
 			'--clusterSize'	=> $config{'variant_filtration'}{'CLUSTER_SIZE'}[0],
 			'--maxReadsInMemory' => $config{'variant_filtration'}{'MAX_READS_STORED'}[0],
-			'--standard_min_confidence_threshold_for_calling' => $config{'variant_filtration'}{'STAND_CALL_CONF'}[0]
     );
 
 	my $cmd = $options{'java_path'} . " -Djava.io.tmpdir=" .$options{tmpdir};
