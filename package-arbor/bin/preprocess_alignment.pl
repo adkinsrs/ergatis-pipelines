@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-preprocess_alignment.pl - Wrapper script for several Picard utilities in the dRNASeq SNP pipeline
+preprocess_alignment.pl - Wrapper script for several Picard utilities in the RNASeq SNP pipeline
 
 =head1 SYNOPSIS
 

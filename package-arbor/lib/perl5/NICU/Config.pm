@@ -40,7 +40,7 @@ sub read_config {
                     $sDesc .= "$1.";
                     next;
                 }
-                elsif ($_ =~ m/\$;(\S+)\$;\s*=\s*(.*)/) {
+                elsif ($_ =~ m/^\s*\$;(\S+)\$;\s*=\s*(.*)/) {
                     $sParam = $1;
                     $sValue = $2;
                     

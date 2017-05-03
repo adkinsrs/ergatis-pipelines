@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-picard_processing.pl - Wrapper script for several Picard utilities in the dRNASeq SNP pipeline
+picard_processing.pl - Wrapper script for several Picard utilities in the RNASeq SNP pipeline
 
 =head1 SYNOPSIS
 
