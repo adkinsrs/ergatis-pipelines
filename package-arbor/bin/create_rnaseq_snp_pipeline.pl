@@ -133,7 +133,7 @@ sub main {
 
 	# Write sample.config file
 	my %input_config;
-	NICU::Config::read_config(\%options, \%input_config);
+	NICU::Config::read_config(\%options, \%input_config, 'ignore_empty');
 	# Add BAM input file into 'extract_chromosomes' config section
 	$input_config{'extract_chromosomes'}{'INPUT_FILE'}[0] = $options{'input_file'};
 	NICU::Config::write_config(\%options, \%input_config, $sample_config);

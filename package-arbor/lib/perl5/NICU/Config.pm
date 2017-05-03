@@ -9,6 +9,7 @@ use Exporter qw(import);
 sub read_config {
     my $phOptions       = shift;
     my $phConfig        = shift;
+    my $ignore_empty    = shift;	# Flag to add params with empty fields
     
     ## make sure config file and config hash are provided
     if ((!(defined $phOptions->{'config_file'})) || 
@@ -32,23 +33,24 @@ sub read_config {
                 next if ($_ =~ /^$/);
                 
                 if ($_ =~ m/^\[(\S+)\]$/) {
-                        $sComponent = $1;
-                        next;
+                    $sComponent = $1;
+                    next;
                 }
                 elsif ($_ =~ m/^;;\s*(.*)/) {
-                        $sDesc .= "$1.";
-                        next;
+                    $sDesc .= "$1.";
+                    next;
                 }
                 elsif ($_ =~ m/\$;(\S+)\$;\s*=\s*(.*)/) {
-                        $sParam = $1;
-                        $sValue = $2;
-                        
-                        if ((defined $sValue) && ($sValue !~ m/^\s*$/)) {
-                                $phConfig->{$sComponent}{$sParam} = ["$sValue", "$sDesc"];
-                        }
-                        
-                        $sParam = $sValue = $sDesc = "";
-                        next;
+                    $sParam = $1;
+                    $sValue = $2;
+                    
+                    if ((defined $sValue) && ($sValue !~ m/^\s*$/)) {
+                        $phConfig->{$sComponent}{$sParam} = ["$sValue", "$sDesc"];
+                    }
+                    $phConfig->{$sComponent}{$sParam} = ["$sValue", "$sDesc"] if (defined $ignore_empty);
+                    
+                    $sParam = $sValue = $sDesc = "";
+                    next;
                 }
         }
         
