@@ -64,6 +64,7 @@ use Pod::Usage;
 use File::Basename;
 use XML::Writer;
 use Time::localtime;
+use NICU::Config;
 
 ############# GLOBALS AND CONSTANTS ################
 my $debug = 1;
@@ -123,7 +124,7 @@ sub main {
 	# open config file for writing
 	open( my $pcfh, "> $pipeline_config") or &_log($ERROR, "Could not open $pipeline_config for writing: $!");
 	# Write the config
-	&write_config( \%config, $pcfh );
+	&write_pipeline_config( \%config, $pcfh );
 
 	# close the file handles
 	close($plfh);
@@ -131,13 +132,10 @@ sub main {
 
 	# Write sample.config file
 	my %input_config;
-	&add_config( \%input_config, $pipelines->{'rnaseq'}, basename($sample_config));
+	NICU::Config::read_config(\%options, \%input_config);
 	# Add BAM input file into 'extract_chromosomes' config section
-	$input_config{'extract_chromosomes map'}{'$;INPUT_FILE$;'} = $options{'input_file'};
-	# Write sample config file
-	open( my $sfh, "> $sample_config") or &_log($ERROR, "Could not open $sample_config for writing: $!");
-	&write_config(\%input_config, $sfh);
-	close ($sfh);
+	$input_config{'extract_chromosomes'}{'INPUT_FILE'}[0] = $options{'input_file'};
+	NICU::Config::write_config(\%options, \%input_config, $sample_config);
 
 	my $mode = 0755;
 	chmod $mode, $pipeline_config;
@@ -150,7 +148,7 @@ sub main {
 
 ### UTILITY SUBROUTINES ###
 
-sub write_config {
+sub write_pipeline_config {
     my ($config, $fh) = @_;
 
     # Make sure this section is first

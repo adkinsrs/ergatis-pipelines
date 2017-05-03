@@ -60,8 +60,8 @@ sub read_config {
 # write_config - Write an ergatis-formatted config file using hash keys
 sub write_config {
     my $phCmdLineOption = shift;
-    my $phConfig            = shift;
-    my $sConfigFile             = shift;
+    my $phConfig = shift;
+    my $sConfigFile = shift;
     
     ## make sure config file and config hash are provided
     if ((!(defined $phCmdLineOption)) ||  
