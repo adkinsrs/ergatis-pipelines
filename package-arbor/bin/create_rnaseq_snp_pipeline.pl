@@ -59,6 +59,7 @@ B<--help,-h>
 
 use strict;
 use warnings;
+use lib "../lib/perl5";
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
 use Pod::Usage;
 use File::Basename;
