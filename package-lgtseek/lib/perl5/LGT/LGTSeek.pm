@@ -425,7 +425,7 @@ sub _prinseqFilterPaired {
         }
 
         # Merge bad ids from derep and lc filtering
-        $cmd = "TMP_DIR=$tmp_dir cat";
+        $cmd = "cat";
         if ( $dedup == 1 ) {
             $cmd = $cmd . " $tmp_dir/$name\_derep_bad_ids.out";
         }
@@ -433,7 +433,7 @@ sub _prinseqFilterPaired {
             $cmd = $cmd
               . " $tmp_dir/$name\_lc_1_bad_ids.out $tmp_dir/$name\_lc_2_bad_ids.out";
         }
-        $cmd = $cmd . " | sort -u -o $tmp_dir/$name\_prinseq-bad-ids.out";
+        $cmd = $cmd . " | TMP_DIR=$tmp_dir sort -u -o $tmp_dir/$name\_prinseq-bad-ids.out";
         $self->_run_cmd($cmd);
 
         # Finally, filter based on dedup & lc bad ids
