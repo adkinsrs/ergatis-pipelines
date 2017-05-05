@@ -78,6 +78,7 @@ use constant JAVA_PATH => "/usr/bin/java";
 use constant PICARD_JAR => "/usr/local/packages/picard/bin/picard.jar";
 
 my @stringency_arr = qw(STRICT LENIENT SILENT);
+my $java_mem = "-Xmx5g";
 ####################################################
 
 my %options;
@@ -105,10 +106,14 @@ sub main {
     read_config(\%options, \%config);
 	my $prefix = $config{'preprocess_alignment'}{'Prefix'}[0];
 	my $stringency = uc($config{'preprocess_alignment'}{'VALIDATION_STRINGENCY'}[0]);
-	my $max_records = $config{'preprocess_alignment'}{'MAX_RECORDS_STORED'}[0];
+	my $max_records = $config{'preprocess_alignment'}{'MAX_READS_STORED'}[0];
 
     if ( defined $stringency && none{$_ eq $stringency} @stringency_arr ) {
         &_log($ERROR, $stringency." is not a valid option.  Choose from 'SILENT', 'LENIENT', or 'STRICT'");
+    }
+
+    if (defined $config{'preprocess_alignment'}{'Java_Memory'}) {
+	    $java_mem = $config{'preprocess_alignment'}{'Java_Memory'}[0] ;
     }
 
 	### ReorderSam ###
@@ -122,10 +127,8 @@ sub main {
     );
 
     # Start building the Picard tools command
-	my $cmd = $options{'java_path'} . " -Djava.io.tmpdir=" .$options{tmpdir};
-    if (defined $config{'preprocess_alignment'}{'Java_Memory'}) {
-	    $cmd .= " $config{'preprocess_alignment'}{'Java_Memory'}[0]" ;
-    }
+	my $cmd = $options{'java_path'} . " $java_mem -Djava.io.tmpdir=" .$options{tmpdir};
+
 	$cmd .= " -jar ".$options{'picard_jar'}." ReorderSam ";
 
     # Add only passed in options to command
@@ -144,10 +147,8 @@ sub main {
 			'SORT_ORDER' => "coordinate"
     );
 
-	$cmd = $options{'java_path'} . " -Djava.io.tmpdir=" .$options{tmpdir};
-    if (defined $config{'preprocess_alignment'}{'Java_Memory'}) {
-	    $cmd .= " $config{'preprocess_alignment'}{'Java_Memory'}[0]" ;
-    }
+	$cmd = $options{'java_path'} . " $java_mem -Djava.io.tmpdir=" .$options{tmpdir};
+
     # Start building the Picard tools command
     $cmd .= " -jar ".$options{'picard_jar'}." SortSam ";
 

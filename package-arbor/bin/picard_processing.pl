@@ -79,6 +79,7 @@ use constant JAVA_PATH => "/usr/bin/java";
 use constant PICARD_JAR => "/usr/local/packages/picard/bin/picard.jar";
 
 my @stringency_arr = qw(STRICT LENIENT SILENT);
+my $java_mem = "-Xmx5g";
 ####################################################
 
 my %options;
@@ -107,10 +108,14 @@ sub main {
 	my $prefix = $config{'picard_processing'}{'Prefix'}[0];
 
 	my $stringency = uc($config{'picard_processing'}{'VALIDATION_STRINGENCY'}[0]);
-	my $max_records = $config{'picard_processing'}{'MAX_RECORDS_STORED'}[0];
+	my $max_records = $config{'picard_processing'}{'MAX_READS_STORED'}[0];
 
     if ( defined $stringency && none{$_ eq $stringency} @stringency_arr ) {
         &_log($ERROR, $stringency." is not a valid option.  Choose from 'SILENT', 'LENIENT', or 'STRICT'");
+    }
+
+    if (defined $config{'picard_processing'}{'Java_Memory'}) {
+	    $java_mem = $config{'picard_processing'}{'Java_Memory'}[0] ;
     }
 
 	### AddOrReplaceReadGroups ###
@@ -126,12 +131,10 @@ sub main {
 			'MAX_RECORDS_IN_RAM' => $max_records
     );
 
-	my $cmd = $options{'java_path'} . " -Djava.io.tmpdir=" .$options{tmpdir};
-    if (defined $config{'preprocess_alignment'}{'Java_Memory'}) {
-	    $cmd .= " $config{'preprocess_alignment'}{'Java_Memory'}[0]" ;
-    }
+	my $cmd = $options{'java_path'} . " $java_mem -Djava.io.tmpdir=" .$options{tmpdir};
+
     # Start building the Picard tools command
-    $cmd .=" -jar ".$options{'picard_jar'}." AddOrReplaceReadGroups ";
+    $cmd .=" -jar ".$options{'picard_jar'}." AddOrReplaceReadGroupsa ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
@@ -149,10 +152,8 @@ sub main {
 			'MAX_RECORDS_IN_RAM' => $max_records
     );
 
-	$cmd = $options{'java_path'} . " -Djava.io.tmpdir=" .$options{tmpdir};
-    if (defined $config{'preprocess_alignment'}{'Java_Memory'}) {
-	    $cmd .= " $config{'preprocess_alignment'}{'Java_Memory'}[0]" ;
-    }
+	$cmd = $options{'java_path'} . " $java_mem -Djava.io.tmpdir=" .$options{tmpdir};
+
     # Start building the Picard tools command
     $cmd .= " -jar ".$options{'picard_jar'}." MarkDuplicates ";
 
@@ -171,10 +172,8 @@ sub main {
 			'MAX_RECORDS_IN_RAM' => $max_records
     );
 
-	$cmd = $options{'java_path'} . " -Djava.io.tmpdir=" .$options{tmpdir};
-    if (defined $config{'preprocess_alignment'}{'Java_Memory'}) {
-	    $cmd .= " $config{'preprocess_alignment'}{'Java_Memory'}[0]" ;
-    }
+	$cmd = $options{'java_path'} . " $java_mem -Djava.io.tmpdir=" .$options{tmpdir};
+
     # Start building the Picard tools command
     $cmd .= " -jar ".$options{'picard_jar'}." BuildBamIndex ";
 
