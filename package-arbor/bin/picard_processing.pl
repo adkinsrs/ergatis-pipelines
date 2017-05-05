@@ -134,7 +134,7 @@ sub main {
 	my $cmd = $options{'java_path'} . " $java_mem -Djava.io.tmpdir=" .$options{tmpdir};
 
     # Start building the Picard tools command
-    $cmd .=" -jar ".$options{'picard_jar'}." AddOrReplaceReadGroupsa ";
+    $cmd .=" -jar ".$options{'picard_jar'}." AddOrReplaceReadGroups ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
