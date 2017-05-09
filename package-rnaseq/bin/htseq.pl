@@ -77,7 +77,7 @@ use File::Spec;
 use constant FALSE => 0;
 use constant TRUE  => 1;
 
-use constant PYTHON_BIN_DIR => '/usr/local/packages/python-2.7.12/bin';
+use constant PYTHON_BIN_DIR => '/usr/bin';
 use constant PYTHON_LIB_DIR => '/usr/lib/python2.7';
 
 use constant VERSION => '1.0.0';
