@@ -77,8 +77,8 @@ use File::Spec;
 use constant FALSE => 0;
 use constant TRUE  => 1;
 
-use constant PYTHON_BIN_DIR => '/usr/local/packages/Python-2.6.4/bin';
-use constant PYTHON_LIB_DIR => '/usr/local/packages/pythonlib/2.6';
+use constant PYTHON_BIN_DIR => '/usr/local/packages/python-2.7.12/bin';
+use constant PYTHON_LIB_DIR => '/usr/lib/python2.7';
 
 use constant VERSION => '1.0.0';
 use constant PROGRAM => eval { ($0 =~ m/(\w+\.pl)$/) ? $1 : $0 };
