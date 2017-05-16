@@ -21,6 +21,8 @@ use Bio::DB::Taxonomy;
 use Bio::DB::EUtilities;
 use File::Find;
 
+my $EUTILS_PATH = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/';
+
 my $NODES = '/local/db/repository/ncbi/blast/20120414_001321/taxonomy/taxdump/nodes.dmp';
 my $NAMES =  '/local/db/repository/ncbi/blast/20120414_001321/taxonomy/taxdump/names.dmp';
 my $GI2TAX = '/local/db/repository/ncbi/blast/20120414_001321/taxonomy/gi_taxid_nucl.dmp';
@@ -213,7 +215,7 @@ sub getTaxon {
         else {
 			# SAdkins 1/13/16 - URL in Entrez module is obsolete and incorrect
 			# We really should update BioPerl
-            my $db = Bio::DB::Taxonomy->new( -source => 'entrez', -location => 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/');
+            my $db = Bio::DB::Taxonomy->new( -source => 'entrez', -location => $EUTILS_PATH );
             my $taxon = $db->get_taxon( -taxonid => $taxonid );
             if (defined($taxon) && $taxon->isa('Bio::Taxon') ) {
                 my $name    = $taxon->scientific_name;
