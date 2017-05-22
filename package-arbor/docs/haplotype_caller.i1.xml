@@ -44,7 +44,7 @@
             </param>
             <param>
                 <key>--gatk_jar</key>
-                <value>$;GATK_JAR$;</value>
+                <value>$;GATK_BIN$;</value>
             </param>
             <param>
                 <key>--tmpdir</key>
