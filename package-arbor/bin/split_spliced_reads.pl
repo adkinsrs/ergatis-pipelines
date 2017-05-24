@@ -87,7 +87,7 @@ exit(0);
 sub main {
     my $results = GetOptions (\%options,
 						 "config_file|c=s",
-						 "output_file|o=s",
+						 "output_dir|o=s",
 						 "gatk_jar=s",
 						 "java_path=s",
 						 "tmpdir|t=s",
@@ -111,6 +111,8 @@ sub main {
             '--reassign_mapping_quality_to' => $config{'split_spliced_reads'}{'DESIRED_MAPPING_QUALITY'}[0]
     );
 
+	$config{'split_spliced_reads'}{'OTHER_OPTS'}[0] = '' if ! $config{'split_spliced_reads'}{'OTHER_OPTS'}[0];
+
 	my $cmd = $options{'java_path'} . " -Djava.io.tmpdir=" .$options{tmpdir};
     if (defined $config{'split_spliced_reads'}{'Java_Memory'}) {
 	    $cmd .= " $config{'split_spliced_reads'}{'Java_Memory'}[0]" ;
@@ -128,8 +130,9 @@ sub main {
 
     exec_command($cmd);
 
+	print STDOUT "GATK finished.  Now writing config file\n";
     my $config_out = "$outdir/split_spliced_reads." .$prefix.".config" ;
-    $config{'realigner_target_creator'}{'INPUT_FILE'}[0] = $outdir."/$prefix.split.bam";
+    $config{'realigner_target_creator'}{'Infile'}[0] = $outdir."/$prefix.split.bam";
     write_config(\%options, \%config, $config_out);
 }
 

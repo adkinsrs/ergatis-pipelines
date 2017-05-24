@@ -29,7 +29,7 @@
             <type>RunUnixCommand</type>
             <name>split spliced reads</name>
             <state>incomplete</state>
-            <executable>$;BIN_DIR$;/split_splied_reads</executable>
+            <executable>$;BIN_DIR$;/split_spliced_reads</executable>
             <param>
                 <key>--config_file</key>
                 <value>$;I_FILE_PATH$;.final</value>
@@ -44,7 +44,7 @@
             </param>
             <param>
                 <key>--gatk_jar</key>
-                <value>$;GATK_BIN$;</value>
+				<value>$;GATK_BIN$;/GenomeAnalysisTK.jar</value>
             </param>
             <param>
                 <key>--tmpdir</key>

@@ -101,7 +101,7 @@ my ($prefix);
 ################################################################################
 
 if ($bDebug || $bVerbose) { 
-	print STDERR "\nProcessing $hCmdLineOption{'config'} ";
+	print STDERR "\nProcessing $hCmdLineOption{'config_file'} ";
 	print STDERR "...\n";
 }
 
@@ -136,9 +136,8 @@ if (defined $hConfig{'realigner_target_creator'}{'Java_Memory'}) {
 	$sCmd .= "$hConfig{'realigner_target_creator'}{'Java_Memory'}[0]" ;
 }
 
-
 $sCmd  .= " -Djava.io.tmpdir=$hCmdLineOption{tmpdir} -jar " . $hConfig{'realigner_target_creator'}{'GATK_BIN'}[0] . "/GenomeAnalysisTK.jar -T RealignerTargetCreator " . 
-		  " -I $hConfig{'realigner_target_creator'}{'INPUT_FILE'}[0] -o $sOutDir/$hConfig{'realigner_target_creator'}{'Prefix'}[0].bam.indels.list ".
+		  " -I $hConfig{'realigner_target_creator'}{'Infile'}[0] -o $sOutDir/$hConfig{'realigner_target_creator'}{'Prefix'}[0].bam.indels.list ".
 		  " -R $hConfig{'realigner_target_creator'}{'Reference'}[0] " ;
 
 if (defined $hConfig{'realigner_target_creator'}{'OTHER_PARAMETERS'}) {

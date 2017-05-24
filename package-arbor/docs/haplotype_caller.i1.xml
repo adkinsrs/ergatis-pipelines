@@ -44,7 +44,7 @@
             </param>
             <param>
                 <key>--gatk_jar</key>
-                <value>$;GATK_BIN$;</value>
+				<value>$;GATK_BIN$;/GenomeAnalysisTK.jar</value>
             </param>
             <param>
                 <key>--tmpdir</key>
