@@ -101,7 +101,7 @@ my ($prefix);
 ################################################################################
 
 if ($bDebug || $bVerbose) { 
-	print STDERR "\nProcessing $hCmdLineOption{'config'} ";
+	print STDERR "\nProcessing $hCmdLineOption{'config_file'} ";
 	print STDERR "...\n";
 }
 
@@ -129,7 +129,7 @@ if (defined $hConfig{'base_recalibration'}{'Java_Memory'}) {
         $sCmd .= " $hConfig{'base_recalibration'}{'Java_Memory'}[0] " ;
 }
 
-open($fh, "<$hCmdLineOption{'config'}") or die "Error Cannot Open List of Config files." ;
+open($fh, "<$hCmdLineOption{'config_file'}") or die "Error Cannot Open List of Config files." ;
 
 while(<$fh>) {
 	next if ($_ =~ /^\#/) ;
