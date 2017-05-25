@@ -129,25 +129,8 @@ if (defined $hConfig{'base_recalibration'}{'Java_Memory'}) {
         $sCmd .= " $hConfig{'base_recalibration'}{'Java_Memory'}[0] " ;
 }
 
-open($fh, "<$hCmdLineOption{'config_file'}") or die "Error Cannot Open List of Config files." ;
-
-while(<$fh>) {
-	next if ($_ =~ /^\#/) ;
-	next if ($_ =~ /^\s+$/);
-	chomp($_);
-	%hConfig = ();
-	read_config($_, \%hConfig);
-	
-
-    #Write config file out..
-    $config_out = "$sOutDir/base_recalibration.$hConfig{'base_recalibration'}{'Prefix'}[0].config" ;
-    $hConfig{'print_reads'}{'Infile'}[0] = $hConfig{'merge_bam'}{'Infile'}[0];
-    $hConfig{'print_reads'}{'BQSR'}[0] = "$sOutDir/Merged.base.recal.grp" ;
-    write_config(\%hCmdLineOption,\%hConfig,$config_out);
-}
-
 ##Read config file 
-
+read_config($hCmdLineOption, \%hConfig);
 
 if (!defined $hConfig{'base_recalibration'}{'GATK_BIN'}[0]) {
     $hConfig{'base_recalibration'}{'GATK_BIN'}[0] = GATK_BIN;
@@ -163,19 +146,18 @@ $sCmd  .= " -Djava.io.tmpdir=$hCmdLineOption{tmpdir} -jar " .  $hConfig{'base_re
 		  " -I $hConfig{'base_recalibration'}{'Infile'}[0] -o $sOutDir/Merged.base.recal.grp ".
 		  " -knownSites $hConfig{'base_recalibration'}{'KnownSites'}[0] -R $hConfig{'base_recalibration'}{'Reference'}[0] " ;
 
-
-
 if (defined $hConfig{'base_recalibration'}{'OTHER_PARAMETERS'}) {
 	$sCmd .= $hConfig{'base_recalibration'}{'OTHER_PARAMETERS'}[0] ;
 }
 
-
-
 #print "$sCmd\n";
 exec_command($sCmd);
 
-
-
+#Write config file out..
+$config_out = "$sOutDir/base_recalibration.$hConfig{'base_recalibration'}{'Prefix'}[0].config" ;
+$hConfig{'print_reads'}{'Infile'}[0] = $hConfig{'merge_bam'}{'Infile'}[0];
+$hConfig{'print_reads'}{'BQSR'}[0] = "$sOutDir/Merged.base.recal.grp" ;
+write_config(\%hCmdLineOption,\%hConfig,$config_out);
 
 ################################################################################
 ### Subroutines

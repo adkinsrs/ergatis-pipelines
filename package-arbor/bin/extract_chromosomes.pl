@@ -6,7 +6,7 @@ extract_chromosomes.pl - Use samtools view to filter reads to those only from ch
 
 =head1 SYNOPSIS
 
- USAGE: haplotype_caller.pl
+ USAGE: extract_chromosomes.pl
        --config_file=/path/to/some/config.txt
        --output_dir=/path/to/output/dir
      [ 
