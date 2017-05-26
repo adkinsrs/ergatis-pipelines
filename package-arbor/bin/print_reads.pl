@@ -101,7 +101,7 @@ my ($prefix);
 ################################################################################
 
 if ($bDebug || $bVerbose) { 
-	print STDERR "\nProcessing $hCmdLineOption{'config'} ";
+	print STDERR "\nProcessing $hCmdLineOption{'config_file'} ";
 	print STDERR "...\n";
 }
 
