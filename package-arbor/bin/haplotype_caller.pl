@@ -105,7 +105,7 @@ sub main {
 			'--input_file' => $config{'haplotype_caller'}{'INPUT_FILE'}[0],
 			'--out' => $outdir."/$prefix.haplotype_caller.vcf",
 			'--reference_sequence' => $config{'haplotype_caller'}{'REFERENCE_FILE'}[0],
-			'--maxReadsInMemory' => $config{'haplotype_caller'}{'MAX_READS_STORED'}[0],
+			'--maxTotalReadsInMemory' => $config{'haplotype_caller'}{'MAX_READS_STORED'}[0],
 			'--standard_min_confidence_threshold_for_calling' => $config{'haplotype_caller'}{'STAND_CALL_CONF'}[0]
     );
 
@@ -122,7 +122,7 @@ sub main {
         $cmd .= "${arg} ".$args{$arg}." " if defined $args{$arg};
     }
 
-	$cmd = "--dontUseSoftClippedBases " if ($config{'haplotype_caller'}{"NO_SOFT_CLIPPED_BASES"}[0] == 1);
+	$cmd .= "--dontUseSoftClippedBases " if ($config{'haplotype_caller'}{"NO_SOFT_CLIPPED_BASES"}[0] == 1);
 
     exec_command($cmd);
 
