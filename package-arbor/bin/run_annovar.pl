@@ -108,7 +108,8 @@ sub main {
 	&_log($DEBUG, "Now running convert2annovar.pl");
 	my $avinput = "$outdir/$prefix.avinput";
 	my $cmd  = $options{'annovar_bin'}."/convert2annovar.pl --includeinfo --format vcf4 ";
-	$cmd .=  $options{'annovar'}{'INPUT_FILE'}[0] . " > $avinput";
+	$cmd .= "--outfile $avinput ";
+	$cmd .= $config{'annovar'}{'INPUT_FILE'}[0];
 	exec_command($cmd);
 
     # Start building the annovar command
