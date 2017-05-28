@@ -106,7 +106,6 @@ sub main {
 			'--reference_sequence' => $config{'variant_filtration'}{'REFERENCE'}[0],
 			'--clusterWindowSize' => $config{'variant_filtration'}{'WINDOW_SIZE'}[0],
 			'--clusterSize'	=> $config{'variant_filtration'}{'CLUSTER_SIZE'}[0],
-			'--maxReadsInMemory' => $config{'variant_filtration'}{'MAX_READS_STORED'}[0],
     );
 
 	my $cmd = $options{'java_path'} . " -Djava.io.tmpdir=" .$options{tmpdir};

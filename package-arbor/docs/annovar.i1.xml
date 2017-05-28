@@ -40,7 +40,7 @@
             </param>
             <param>
                 <key>--annovar_bin</key>
-                <value>$;ANNOVAR_BIN_DIR$;</value>
+                <value>$;ANNOVAR_BIN$;</value>
             </param>
             <param>
                 <key>--tmpdir</key>

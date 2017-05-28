@@ -104,10 +104,18 @@ sub main {
 			'-nastring' => $config{'annovar'}{'NASTRING'}[0]
     );
 
-    # Start building the annovar command
-    my $cmd =  $options{'annovar_bin'}."/table_annovar.pl ";
+	# First run convert2annovar to convert VCF into readable annovar input
+	&_log($DEBUG, "Now running convert2annovar.pl");
+	my $avinput = "$outdir/$prefix.avinput";
+	my $cmd  = $options{'annovar_bin'}."/convert2annovar.pl --includeinfo --format vcf4 ";
+	$cmd .=  $options{'annovar'}{'INPUT_FILE'}[0] . " > $avinput";
+	exec_command($cmd);
 
-	$cmd .= $config{'annovar'}{'INPUT_FILE'}[0] . ' ';
+    # Start building the annovar command
+	&_log($DEBUG, "Now running table_annovar.pl");
+    $cmd =  $options{'annovar_bin'}."/table_annovar.pl ";
+
+	$cmd .= $avinput . ' ';
 	$cmd .= $config{'annovar'}{'DB_PATH'}[0] . ' ';
 
     # Add only passed in options to command
