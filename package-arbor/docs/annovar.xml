@@ -24,7 +24,7 @@
 		<!--Postprocessing-->
         <command>
             <type>RunUnixCommand</type>
-            <name>create annovar VCF file list</name>
+            <name>create annovar annotation file list</name>
             <state>incomplete</state>
             <executable>$;BIN_DIR$;/generate_list_file</executable>
             <param>  
@@ -33,11 +33,11 @@
             </param>
             <param>  
                 <key>--regex</key>
-                <value>".*\.vcf"</value>
+                <value>".*\.multianno\.txt"</value>
             </param>
             <param>  
                 <key>--output_list</key>
-                <value>$;VCF_LIST$;</value>
+                <value>$;MULTIANNO_LIST$;</value>
             </param>
             <param>
 				<key>stdout</key>
