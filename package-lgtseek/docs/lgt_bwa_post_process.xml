@@ -65,6 +65,24 @@
 	<!--Iterator Done-->
         <command>
             <type>RunUnixCommand</type>
+            <name>create LGT-donor BAM file list</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/create_list_file</executable>
+            <param>
+                <key>--directory</key>
+                <value>$;OUTPUT_DIRECTORY$;</value>
+            </param>
+            <param>
+                <key>--regex</key>
+                <value>".*$;LGT_DONOR_TOKEN$;\.bam"</value>
+            </param>
+            <param>
+                <key>--output_list</key>
+                <value>$;LGT_DONOR_BAM_OUTPUT_LIST$;</value>
+            </param>
+        </command>
+        <command>
+            <type>RunUnixCommand</type>
             <name>create LGT-recipient BAM file list</name>
             <state>incomplete</state>
             <executable>$;BIN_DIR$;/create_list_file</executable>
@@ -74,11 +92,11 @@
             </param>
             <param>
                 <key>--regex</key>
-                <value>".*$;LGT_TOKEN$;\.bam"</value>
+                <value>".*$;LGT_RECIPIENT_TOKEN$;\.bam"</value>
             </param>
             <param>
                 <key>--output_list</key>
-                <value>$;LGT_BAM_OUTPUT_LIST$;</value>
+                <value>$;LGT_RECIPIENT_BAM_OUTPUT_LIST$;</value>
             </param>
         </command>
         <command>

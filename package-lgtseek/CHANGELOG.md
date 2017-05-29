@@ -1,4 +1,10 @@
 # CHANGELOG
+5/29/17
+* lgt_mpileup.lgt_donor now reads from a 'lgt_donor' BAM instead of an 'lgt_recipient' file
+* Changed mpileup output to note the name of the reference in the output file in addition to the input file
+* Renamed several component output tokens since the 'lgt_bwa_post_process' output 'lgt_donor' file is being used downstream
+* Fixed TMP_DIR being full when doing a Unix sort in the prinseq section of 'filter_dups_lc_seqs' (usually from the 'all_recipient' side)
+
 4/27/17
 * Fixed bug in 'concatenate_files' component where it was passing in the wrong argument name to the Perl script
 * Added option to skip alignments and go straight to 'lgt_bwa_post_process' component (with caveats)

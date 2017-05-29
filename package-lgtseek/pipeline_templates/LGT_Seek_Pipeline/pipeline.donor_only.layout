@@ -15,7 +15,7 @@
 					<state>incomplete</state>
 					<commandSet type="serial">
 						<state>incomplete</state>
-						<name>filter_dups_lc_seqs.lgt</name>
+						<name>filter_dups_lc_seqs.lgt_donor</name>
 					</commandSet>
 					<commandSet type="parallel">
 						<state>incomplete</state>
@@ -66,7 +66,7 @@
 					<state>incomplete</state>
 					<commandSet type="serial">
 						<state>incomplete</state>
-						<name>filter_dups_lc_seqs.donor</name>
+						<name>filter_dups_lc_seqs.all_donor</name>
 					</commandSet>
 					<commandSet type="serial">
 						<state>incomplete</state>

@@ -269,12 +269,12 @@ if ($options{bam_input}) {
 		# In donor-only alignment cases, we do not keep the 'MM' matches
 
 		$config{"lgt_bwa_post_process default"}->{'$;RECIPIENT_FILE_LIST$;'} = '';
-		$config{"lgt_bwa_post_process default"}->{'$;LGT_TOKEN$;'} = 'single_map';
+		$config{"lgt_bwa_post_process default"}->{'$;LGT_DONOR_TOKEN$;'} = 'single_map';
 		$config{"lgt_bwa_post_process default"}->{'$;ALL_DONOR_TOKEN$;'} = 'all_map';
 		$config{"lgt_bwa_post_process default"}->{'$;ALL_RECIPIENT_TOKEN$;'} = 'no_map';
 
-		$config{"filter_dups_lc_seqs lgt"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
-		$config{"filter_dups_lc_seqs donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.all_map.bam.list';
+		$config{"filter_dups_lc_seqs lgt_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
+		$config{"filter_dups_lc_seqs all_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.all_map.bam.list';
 
 		push @gather_output_skip, 'move all recipient BAM';
 		push @gather_output_skip, 'move all donor BAM';
@@ -301,11 +301,11 @@ if ($options{bam_input}) {
 		}
 
 		$config{"lgt_bwa_post_process default"}->{'$;DONOR_FILE_LIST$;'} = '';
-		$config{"lgt_bwa_post_process default"}->{'$;LGT_TOKEN$;'} = 'single_map';
+		$config{"lgt_bwa_post_process default"}->{'$;LGT_RECIPIENT_TOKEN$;'} = 'single_map';
 		$config{"lgt_bwa_post_process default"}->{'$;ALL_DONOR_TOKEN$;'} = 'no_map';
 		$config{"lgt_bwa_post_process default"}->{'$;ALL_RECIPIENT_TOKEN$;'} = 'all_map';
 
-		$config{"filter_dups_lc_seqs lgt"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
+		$config{"filter_dups_lc_seqs lgt_recipient"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
 		
 		push @gather_output_skip, 'move LGT donor mpileup';
 		push @gather_output_skip, 'move all donor mpileup';
@@ -526,7 +526,7 @@ sub check_options {
 	# Specify LGT-infected option if provided
 	$lgt_infected = 1 if ($opts->{'lgt_infected'});
 	if ($lgt_infected && ($donor_only || $host_only)) {
-		&_log($WARN, "WARNING - Must have both donor and recipient references in order to use 'lgt-infected' option ... ignoring");
+		&_log($WARN, "WARNING - Must have both donor and recipient references in order to use 'lgt_infected' option ... ignoring");
 		$lgt_infected = 0;
 	}
 
@@ -538,6 +538,7 @@ sub check_options {
 
    print STDOUT "Perform alignments to the donor reference only.\n" if ($donor_only);
    print STDOUT "Perform alignments to the recipient reference only.\n" if ($host_only);
+   print STDOUT "Recipient reference is infected with LGT.\n" if ($lgt_infected);
    print STDOUT "Perform BWA reference indexing in pipeline.\n" if ($included_subpipelines{indexing});
    print STDOUT "Starting point is BAM input.\n" if $opts->{bam_input};
    print STDOUT "Starting point is FASTQ input.\n" if $opts->{fastq_input};
