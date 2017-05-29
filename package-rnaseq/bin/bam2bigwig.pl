@@ -26,7 +26,7 @@ use constant TRUE  => 1;
 use constant VERSION => '0.1.0';
 use constant PROGRAM => eval { ($0 =~ m/(\w+\.pl)$/) ? $1 : $0 };
 
-use constant UCSC_UTIL_DIR => '/usr/local/packages/ucsc_utils';
+use constant UCSC_UTIL_DIR => '/usr/local/packages/ucsc_utils/bin';
 use constant BEDTOOLS_BIN_DIR => '/usr/local/packages/bedtools';
 use constant SAMTOOLS_BIN_DIR => '/usr/local/bin';
 
