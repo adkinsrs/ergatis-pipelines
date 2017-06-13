@@ -364,6 +364,7 @@ sub write_to_excel {
 	    @arr = split (/\t/, $_);
 	    if ($_ =~ /^ID/) {
 		$len = chr((64 + scalar(@arr) - 3));
+		$len = "a" if (ord($len) < 97); # If $len is Unicode value < 97
 		$worksheet->set_column("A:$len",30);
 	    }
 	    $t = 0;
