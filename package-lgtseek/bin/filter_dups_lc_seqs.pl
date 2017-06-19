@@ -124,7 +124,7 @@ my $tmp_dir = (defined $options{'tmp_dir'}) ? $options{'tmp_dir'} : $options{'ou
 my $count = check_empty_file();
 if ($count == 0) {
 	print STDERR "Input file $options{'input_file'} has no alignments.  Exiting and not creating output.\n";
-	exit(0);
+	exit(1);
 }
 
 my $lc_method = defined $options{'lc_method'} ? $options{'lc_method'} : $DEFAULT_LC_METHOD;

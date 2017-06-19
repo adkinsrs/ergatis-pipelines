@@ -325,15 +325,6 @@ sub process_file_hlgt {
         print "Calling $fpath/$run.sam\n";
         &set_output("$fpath/$run.sam");
     }
-#    my $fs = -s "$options{tmp_dir}/$name.sam";
-#    if($fs == 0) {
-#        print "Had an empty file $options{tmp_dir}/$name.sam... skipping....\n\n";
-#        my $cmd = "rm $options{tmp_dir}/$name.sam";
-#        &run_cmd($cmd);
-#        return;
-#    }
-
-#    open IN2, "<$options{tmp_dir}/$name.sam" or die;
 
     while(<$infh>) {
         my @fields = split;
@@ -399,8 +390,6 @@ sub process_file_hlgt {
         }
     }
     close $infh;
-#    my $cmd = "rm $options{tmp_dir}/$name$suffix";
-#    &run_cmd($cmd);
 
 }
 

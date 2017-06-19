@@ -206,8 +206,6 @@ foreach my $ref (@ref_files) {
 
                 $in = $options{'output_dir'} . "/" . $out . " " . $type{'fastq'};
             } elsif ( $file_count == 1 && exists( $type{'bam'} ) ) {
-				# Check to ensure BAM file has reads, and exit if it does not.
-				check_for_empty_bam( \%options, $type{'bam'});
 		 		# Ensure file_base variable does not have .gz extension
 				(my $f_no_gz = $type{'bam'}) =~ s/\.gz//g;
                 ( $file_base, $file_dir, $file_ext ) =
@@ -549,22 +547,6 @@ sub check_for_single_sample {
             );
         }
     }
-}
-
-# Checks for empty BAM file.  Will immediately exit program if found empty.
-# NOTE: This is to help the LGT_Seek pipeline silently continue during later stages in cases where the upstream input BAM had no alignments found
-sub check_for_empty_bam {
-    my $sub_name = ( caller(0) )[3];
-	my $cmd_line_args = shift;
-	my $bam_file = shift;
-    $cmd = $cmd_line_args->{'samtools_path'} . " view $bam_file | wc -l";;
-	print_log_msg($DEBUG, "INFO : $sub_name - Running command '$cmd'");
-	my $lines = `cmd`;
-	chomp $lines;
-	return if ($lines > 0);
-	print_log_msg($DEBUG, "INFO - $sub_name - Input BAM $bam_file appears to be empty. Silently exiting script.");
-	exit(0)
-
 }
 
 # Description   : Used to check the correctness of the command line arguments passed to the script. The script exits if required arguments are missing.
