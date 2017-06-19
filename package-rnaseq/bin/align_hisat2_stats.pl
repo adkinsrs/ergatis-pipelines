@@ -125,7 +125,7 @@ while (<$mapstat_file>) {
     @arr = split(/\./,$prefix);
     $prefix =~ s/.accepted_hits.*//;
 
-    if (exists $bam{$prefix}) {
+    if (!exists $bam{$prefix}) {
 	    $bam{$prefix}{"mapstats"} = $_;
 	    $_ =~ s/mapstats.txt/mapped_reads.count/;
 	    $bam{$prefix}{"count"} = $_;
