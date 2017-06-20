@@ -1,11 +1,11 @@
 #!/usr/bin/env perl
 =head1 NAME
 
-lgt_bwa_post_process.pl - Description
+lgtseek_classify_reads.pl - Classify reads after BWA alignment into various categories of SAM files
 
 =head1 SYNOPSIS
 
- USAGE: lgt_bwa_post_process.pl
+ USAGE: lgtseek_classify_reads.pl
        --input_file=/path/to/some/input.file
        --output=/path/to/transterm.file
      [ --log=/path/to/file.log

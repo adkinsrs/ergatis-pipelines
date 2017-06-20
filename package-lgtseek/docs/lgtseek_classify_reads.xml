@@ -22,16 +22,16 @@
     <!-- Processing -->
         <command>
             <type>RunUnixCommand</type>
-            <name>Post Process bwa filtered reads</name>
+            <name>Classification of BWA filtered reads</name>
             <state>incomplete</state>
-            <executable>$;BIN_DIR$;/lgt_bwa_post_process</executable>
+            <executable>$;BIN_DIR$;/lgtseek_classify_reads</executable>
             <param>
                 <key>stdout</key>
-                <value>$;OUTPUT_DIRECTORY$;/post_process.stdout</value>
+                <value>$;OUTPUT_DIRECTORY$;/classify_reads.stdout</value>
             </param>
             <param>
                 <key>stderr</key>
-                <value>$;OUTPUT_DIRECTORY$;/post_process.stderr</value>
+                <value>$;OUTPUT_DIRECTORY$;/classify_reads.stderr</value>
             </param>
             <param>
                 <key>--samtools_path</key>

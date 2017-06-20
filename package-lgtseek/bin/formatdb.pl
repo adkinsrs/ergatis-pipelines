@@ -21,7 +21,9 @@ if( $$options{'input_file_list'} ) {
 	$files .= get_files( $$options{'input_file_list'} );
 }
 
-my $command = "$$options{'formatdb_path'} -p $$options{'protein'} -oT -i '$files' -n $$options{'database_name'}";
+my $dbtype = $$options{'protein'} == 'T' ? "prot" : "nucl";
+
+my $command = "$$options{'makeblastdb_path'} -dbtype $dbtype -parse_seqids -hash_index -in '$files' -out $$options{'database_name'}";
 
 print $command,"\n";
 system( $command ) == 0 or die "Error in executing the command, $command, $!\n";

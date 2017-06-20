@@ -14,7 +14,7 @@
 			</commandSet>
 			<commandSet type="serial">
 				<state>incomplete</state>
-				<name>lgt_bwa_post_process.default</name>
+				<name>lgtseek_classify_reads.default</name>
 			</commandSet>
 		</commandSet>
 		<commandSet type="parallel">
@@ -65,6 +65,46 @@
 					<state>incomplete</state>
 					<name>lgt_mpileup.all_recipient</name>
 				</commandSet>
+			</commandSet>
+		</commandSet>
+		<!-- BLAST & LCA -->
+		<commandSet type="serial">
+			<state>incomplete</state>
+			<commandSet type="serial">
+				<state>incomplete</state>
+				<name>sam2fasta.fasta</name>
+			</commandSet>
+			<commandSet type="serial">
+				<state>incomplete</state>
+				<name>split_multifasta.fasta</name>
+			</commandSet>
+			<commandSet type="serial">
+				<state>incomplete</state>
+				<name>formatdb.references</name>
+			</commandSet>
+			<commandSet type="serial">
+				<state>incomplete</state>
+				<name>blastn_plus.references</name>
+			</commandSet>
+			<commandSet type="serial">
+				<state>incomplete</state>
+				<name>concatenate_files.blast</name>
+			</commandSet>
+			<commandSet type="serial">
+				<state>incomplete</state>
+				<name>blast_lgt_finder.lgt</name>
+			</commandSet>
+			<commandSet type="serial">
+				<state>incomplete</state>
+				<name>blast2lca.lgt</name>
+			</commandSet>
+			<commandSet type="serial">
+				<state>incomplete</state>
+				<name>lgt_create_validated_bam.lgt</name>
+			</commandSet>
+			<commandSet type="serial">
+				<state>incomplete</state>
+				<name>lgt_bwa.validation</name>
 			</commandSet>
 		</commandSet>
 	</commandSet>

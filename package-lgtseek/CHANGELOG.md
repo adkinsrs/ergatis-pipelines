@@ -1,4 +1,11 @@
 # CHANGELOG
+6/20/17
+* Renamed 'lgt_bwa_post_process' to 'lgtseek_classify_reads'
+* Made 'filter_dups_lc_seqs' fail if no reads were in the input SAM file.
+  * NOTE: This will prevent the 'gather_lgtseek_files' component from executing if the pipeline fails
+* Added 'formatdb' component to run Blast+ makeblastdb command
+* Added BlastN+ components to Use Cases 1 and 2 but they will use the donor/recipient references as the database instead of NT
+
 5/29/17
 * lgt_mpileup.lgt_donor now reads from a 'lgt_donor' BAM instead of an 'lgt_recipient' file
 * Changed mpileup output to note the name of the reference in the output file in addition to the input file

@@ -123,7 +123,7 @@ my $results = GetOptions (\%options,
 my $tmp_dir = (defined $options{'tmp_dir'}) ? $options{'tmp_dir'} : $options{'output_dir'} . "/tmp";
 my $count = check_empty_file();
 if ($count == 0) {
-	print STDERR "Input file $options{'input_file'} has no alignments.  Exiting and not creating output.\n";
+	print STDERR "Input file $options{'input_file'} has no classified reads from alignment classification step.  Exiting and not creating output.\n";
 	exit(1);
 }
 

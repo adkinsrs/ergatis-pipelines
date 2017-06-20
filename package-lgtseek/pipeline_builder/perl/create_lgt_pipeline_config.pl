@@ -325,9 +325,11 @@ if ($options{bam_input}) {
 
 	# If we have a use case where there is a good donor and good reference, skip BLAST output
 	if (! ($donor_only || $host_only) ) {
-		push @gather_output_skip, 'move m8 output';
-		push @gather_output_skip, 'move clone output';
-		push @gather_output_skip, 'move blast-validated BAM';
+		#push @gather_output_skip, 'move m8 output';
+		#push @gather_output_skip, 'move clone output';
+		#push @gather_output_skip, 'move blast-validated BAM';
+
+		$config{'concatenate_files blast'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/blastn_plus/$;PIPELINEID$;_reference/blastn_plus.m8.list';
 
 		$config{'lgt_mpileup all_recipient'}->{'$;FASTA_REFERENCE$;'} = $options{host_reference};
 
@@ -335,6 +337,7 @@ if ($options{bam_input}) {
 		if ($lgt_infected) {
 			$config{'lgt_mpileup lgt_donor'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected/samtools_merge.bam.list';
 			$config{'lgt_mpileup lgt_recipient'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected/samtools_merge.bam.list';
+			$config{'sam2fasta fasta'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected/samtools_merge.bam.list';
 			$config{'gather_lgtseek_files'}->{'LGT_BAM_OUTPUT'} = '$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_infected/filter_dups_lc_seqs.bam.list' if $included_subpipelines{'post'};
 		}
 	}

@@ -26,8 +26,8 @@
 		<value>$;INPUT_FILES$;</value>
 	    </param>
 	    <param>
-		<key>--formatdb_path</key>
-		<value>$;FORMATDB_EXEC$;</value>
+		<key>--makeblastdb_path</key>
+		<value>$;MAKEBLASTDB_EXEC$;</value>
 	    </param>
 	    <param>
 		<key>--protein</key>
