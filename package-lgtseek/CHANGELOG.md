@@ -1,4 +1,7 @@
 # CHANGELOG
+6/22/17
+* Each use case will run a BLAST search using both donor LGT condidates and recipient LGT candidates
+
 6/20/17
 * Renamed 'lgt_bwa_post_process' to 'lgtseek_classify_reads'
 * Made 'filter_dups_lc_seqs' fail if no reads were in the input SAM file.
