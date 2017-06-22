@@ -69,24 +69,45 @@
         </command>
         <command>
             <type>RunUnixCommand</type>
-            <name>move blast-validated BAM</name>
+            <name>move donor blast-validated BAM</name>
             <state>incomplete</state>
             <executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
-            <arg>/mnt/output_data/$;PIPELINEID$;/blast_validated_lgt $;BLAST_LGT_BAM_OUT$;</arg>
+			<arg>/mnt/output_data/$;PIPELINEID$;/blast_validated_lgt $;DONOR_LGT_BLAST_BAM_OUT$;</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>
-            <name>move m8 output</name>
+            <name>move donor m8 output</name>
             <state>incomplete</state>
             <executable>/bin/cp</executable>
-            <arg>$;BLAST_M8_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt</arg>
+            <arg>$;DONOR_BLAST_M8_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>
-            <name>move clone output</name>
+            <name>move donor clone output</name>
             <state>incomplete</state>
             <executable>/bin/cp</executable>
-            <arg>$;LGT_CLONE_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt</arg>
+            <arg>$;DONOR_LGT_CLONE_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt</arg>
+        </command>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>move recipient blast-validated BAM</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
+            <arg>/mnt/output_data/$;PIPELINEID$;/blast_validated_lgt $;RECIPIENT_LGT_BLAST_BAM_OUT$;</arg>
+        </command>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>move recipient m8 output</name>
+            <state>incomplete</state>
+            <executable>/bin/cp</executable>
+            <arg>$;RECIPIENT_BLAST_M8_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt</arg>
+        </command>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>move recipient clone output</name>
+            <state>incomplete</state>
+            <executable>/bin/cp</executable>
+            <arg>$;RECIPIENT_LGT_CLONE_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>
