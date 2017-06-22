@@ -109,7 +109,7 @@ my $results = GetOptions (\%options,
 
 &check_options(\%options);
 
-$prefix = (defined $options{'prefix'}) ? $options{'prefix'} : "post_process";
+$prefix = (defined $options{'prefix'}) ? $options{'prefix'} : "classification";
 
 # Need to take a different approach depending on if we have a host file or not.
 if ($donor_only || $host_only) {

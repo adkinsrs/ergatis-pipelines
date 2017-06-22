@@ -13,6 +13,13 @@
         </command>
         <command>
             <type>RunUnixCommand</type>
+            <name>move classification counts file</name>
+            <state>incomplete</state>
+            <executable>/bin/cp</executable>
+            <arg>$;CLASSIFICATION_COUNTS_FILE$; /mnt/output_data/$;PIPELINEID$;/</arg>
+        </command>
+        <command>
+            <type>RunUnixCommand</type>
             <name>move LGT BAM</name>
             <state>incomplete</state>
             <executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
