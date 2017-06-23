@@ -327,8 +327,8 @@ sub main {
 # If we have a use case where there is a good donor and good reference...
 	if (! ($donor_only || $host_only) ) {
 
-		$config{'concatenate_files blast_d'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/blastn_plus/$;PIPELINEID$;_reference_d/blastn_plus.m8.list';
-		$config{'concatenate_files blast_r'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/blastn_plus/$;PIPELINEID$;_reference_r/blastn_plus.m8.list';
+		$config{'concatenate_files blast_d'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/blastn_plus/$;PIPELINEID$;_references_d/blastn_plus.m8.list';
+		$config{'concatenate_files blast_r'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/blastn_plus/$;PIPELINEID$;_references_r/blastn_plus.m8.list';
 
 		$config{'lgt_mpileup all_recipient'}->{'$;FASTA_REFERENCE$;'} = $options{host_reference};
 
