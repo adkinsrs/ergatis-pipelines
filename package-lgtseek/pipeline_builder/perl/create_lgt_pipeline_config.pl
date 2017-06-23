@@ -96,7 +96,7 @@ my ($ERROR, $WARN, $DEBUG) = (1,2,3);
 my $logfh;
 
 my $outdir = ".";
-my $template_directory = "/local/projects/ergatis/package-lgtseek/pipeline_templates";
+my $template_directory = "/local/projects/ergatis/package-lgtseek-devel/pipeline_templates";
 my %included_subpipelines = ();
 my @gather_output_skip;	# array to keep track of which steps to skip if Post-Analysis components are enabled
 my $donor_only = 0;
@@ -220,168 +220,166 @@ sub main {
 	# If the starting point is BAM input, then use that.
 	# Default is to point lgt_bwa.recipient to use the sra2fastq output list
 
-if ($options{bam_input}) {
-	# If starting from BAM instead of SRA, then change QUERY_FILE to use BAM input
-	if ($skip_alignment) {
-		if ( $donor_only ) {
-			$config{"lgt_bwa_post_process default"}->{'$;DONOR_FILE_LIST$;'} = '';
-			$config{"lgt_bwa_post_process default"}->{'$;DONOR_FILE$;'} = $options{bam_input};
-			delete $config{"lgt_bwa donor"};
-		} elsif ( $host_only ) {
-			$config{"lgt_bwa_post_process default"}->{'$;RECIPIENT_FILE_LIST$;'} = '';
-			$config{"lgt_bwa_post_process default"}->{'$;RECIPIENT_FILE$;'} = $options{bam_input};
-			delete $config{"lgt_bwa recipient"};
+	if ($options{bam_input}) {
+		# If starting from BAM instead of SRA, then change QUERY_FILE to use BAM input
+		if ($skip_alignment) {
+			if ( $donor_only ) {
+				$config{"lgt_bwa_post_process default"}->{'$;DONOR_FILE_LIST$;'} = '';
+				$config{"lgt_bwa_post_process default"}->{'$;DONOR_FILE$;'} = $options{bam_input};
+				delete $config{"lgt_bwa donor"};
+			} elsif ( $host_only ) {
+				$config{"lgt_bwa_post_process default"}->{'$;RECIPIENT_FILE_LIST$;'} = '';
+				$config{"lgt_bwa_post_process default"}->{'$;RECIPIENT_FILE$;'} = $options{bam_input};
+				delete $config{"lgt_bwa recipient"};
+			} else {
+				&_log($ERROR, "ERROR: --skip_alignment only works with the good donor/unknown recipient use-case or the good recipient/unknown donor use-case. Exiting: $!");
+			}
 		} else {
-			&_log($ERROR, "ERROR: --skip_alignment only works with the good donor/unknown recipient use-case or the good recipient/unknown donor use-case. Exiting: $!");
+			if ($donor_only) {
+				$config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = $options{bam_input};
+				$config{"lgt_bwa donor"}->{'$;PAIRED$;'} = 1;
+			} else {
+				$config{"lgt_bwa recipient"}->{'$;QUERY_FILE$;'} = $options{bam_input};
+				$config{"lgt_bwa recipient"}->{'$;PAIRED$;'} = 1;
+			}
+		}
+	} elsif ($options{fastq_input}) { 
+		&_log($WARN, "WARNING: Ignoring --skip_alignment option since input file was not BAM") if ($skip_alignment);
+		# If starting from FASTQ then change QUERY_FILE to use FASTQ input
+		if ($donor_only) {
+			$config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = $options{fastq_input};
+		} else {
+			$config{"lgt_bwa recipient"}->{'$;QUERY_FILE$;'} = $options{fastq_input};
 		}
 	} else {
-		if (! $donor_only) {
-			$config{"lgt_bwa recipient"}->{'$;QUERY_FILE$;'} = $options{bam_input};
-			$config{"lgt_bwa recipient"}->{'$;PAIRED$;'} = 1;
-		} else {
-			$config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = $options{bam_input};
-			$config{"lgt_bwa donor"}->{'$;PAIRED$;'} = 1;
-		}
+		&_log($WARN, "WARNING: Ignoring --skip_alignment option since input file was not BAM") if ($skip_alignment);
+		$config{"global"}->{'$;SRA_RUN_ID$;'} = $options{sra_id};
+		$config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = '$;REPOSITORY_ROOT$;/output_repository/sra2fastq/$;PIPELINEID$;_default/sra2fastq.list' if $donor_only;
 	}
-} elsif ($options{fastq_input}) { 
-	&_log($WARN, "WARNING: Ignoring --skip_alignment option since input file was not BAM") if ($skip_alignment);
-	# If starting from FASTQ then change QUERY_FILE to use FASTQ input
-	if (! $donor_only) {
-		$config{"lgt_bwa recipient"}->{'$;QUERY_FILE$;'} = $options{fastq_input};
-	} else {
-		$config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = $options{fastq_input};
-	}
-} else {
-	&_log($WARN, "WARNING: Ignoring --skip_alignment option since input file was not BAM") if ($skip_alignment);
-	$config{"global"}->{'$;SRA_RUN_ID$;'} = $options{sra_id};
-	$config{"lgt_bwa donor"}->{'$;QUERY_FILE$;'} = '$;REPOSITORY_ROOT$;/output_repository/sra2fastq/$;PIPELINEID$;_default/sra2fastq.list' if $donor_only;
-}
 
 # If SRA ID was not input type, then remove that step from array
-push @gather_output_skip, 'move SRA metadata output' unless $options{sra_id};
+	push @gather_output_skip, 'move SRA metadata output' unless $options{sra_id};
 
-if ($donor_only) {
-	# In donor-only alignment cases, we do not keep the 'MM' matches
+	if ($donor_only) {
+		# In donor-only alignment cases, we do not keep the 'MM' matches
 
-	$config{"lgt_bwa_post_process default"}->{'$;RECIPIENT_FILE_LIST$;'} = '';
-	$config{"lgt_bwa_post_process default"}->{'$;LGT_DONOR_TOKEN$;'} = 'single_map';
-	$config{"lgt_bwa_post_process default"}->{'$;ALL_DONOR_TOKEN$;'} = 'all_map';
-	$config{"lgt_bwa_post_process default"}->{'$;ALL_RECIPIENT_TOKEN$;'} = 'no_map';
+		$config{"lgt_bwa_post_process default"}->{'$;RECIPIENT_FILE_LIST$;'} = '';
+		$config{"lgt_bwa_post_process default"}->{'$;LGT_DONOR_TOKEN$;'} = 'single_map';
+		$config{"lgt_bwa_post_process default"}->{'$;ALL_DONOR_TOKEN$;'} = 'all_map';
+		$config{"lgt_bwa_post_process default"}->{'$;ALL_RECIPIENT_TOKEN$;'} = 'no_map';
 
-	$config{"filter_dups_lc_seqs lgt_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
-	$config{"filter_dups_lc_seqs lgt_recipient"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.no_map.bam.list';
-	$config{"filter_dups_lc_seqs all_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.all_map.bam.list';
-	$config{'sam2fasta fasta_d'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_donor/filter_dups_lc_seqs.bam.list';
-	$config{'sam2fasta fasta_r'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_recipient/filter_dups_lc_seqs.bam.list';
+		$config{"filter_dups_lc_seqs lgt_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
+		$config{"filter_dups_lc_seqs lgt_recipient"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.no_map.bam.list';
+		$config{"filter_dups_lc_seqs all_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.all_map.bam.list';
+		$config{'sam2fasta fasta_d'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_donor/filter_dups_lc_seqs.bam.list';
+		$config{'sam2fasta fasta_r'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_recipient/filter_dups_lc_seqs.bam.list';
 
-	push @gather_output_skip, 'move all recipient BAM';
-	push @gather_output_skip, 'move all donor BAM';
-	push @gather_output_skip, 'move all recipient mpileup';
-	push @gather_output_skip, 'move LGT recipient mpileup';
+		push @gather_output_skip, 'move all recipient BAM';
+		push @gather_output_skip, 'move all donor BAM';
+		push @gather_output_skip, 'move all recipient mpileup';
+		push @gather_output_skip, 'move LGT recipient mpileup';
 
-} else {
-	# Only add host-relevant info to config if we are aligning to a host
-	if ($options{host_reference} =~ /list$/) {
-		$config{"global"}->{'$;HOST_LIST$;'} = $options{host_reference};
 	} else {
-		$config{"global"}->{'$;HOST_REFERENCE$;'} = $options{host_reference};
+		# Only add host-relevant info to config if we are aligning to a host
+		if ($options{host_reference} =~ /list$/) {
+			$config{"global"}->{'$;HOST_LIST$;'} = $options{host_reference};
+		} else {
+			$config{"global"}->{'$;HOST_REFERENCE$;'} = $options{host_reference};
+		}
+
+		# The mpileup component needs the recipient reference to serve as a reference here too
+		$config{'lgt_mpileup lgt_recipient'}->{'$;FASTA_REFERENCE$;'} = $options{host_reference};
 	}
 
-	# The mpileup component needs the recipient reference to serve as a reference here too
-	$config{'lgt_mpileup lgt_recipient'}->{'$;FASTA_REFERENCE$;'} = $options{host_reference};
-}
+	if ($host_only) {
+		if ($options{refseq_reference} =~ /list$/) {
+			$config{"global"}->{'$;REFSEQ_LIST$;'} = $options{refseq_reference};
+		} else {
+			$config{"global"}->{'$;REFSEQ_REFERENCE$;'} = $options{refseq_reference};
+		}
 
-if ($host_only) {
-	if ($options{refseq_reference} =~ /list$/) {
-		$config{"global"}->{'$;REFSEQ_LIST$;'} = $options{refseq_reference};
+		$config{"lgt_bwa_post_process default"}->{'$;DONOR_FILE_LIST$;'} = '';
+		$config{"lgt_bwa_post_process default"}->{'$;LGT_RECIPIENT_TOKEN$;'} = 'single_map';
+		$config{"lgt_bwa_post_process default"}->{'$;ALL_DONOR_TOKEN$;'} = 'no_map';
+		$config{"lgt_bwa_post_process default"}->{'$;ALL_RECIPIENT_TOKEN$;'} = 'all_map';
+
+		$config{"filter_dups_lc_seqs lgt_recipient"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
+		$config{"filter_dups_lc_seqs lgt_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.no_map.bam.list';
+		$config{'sam2fasta fasta_r'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_recipient/filter_dups_lc_seqs.bam.list';
+		$config{'sam2fasta fasta_d'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_donor/filter_dups_lc_seqs.bam.list';
+
+		push @gather_output_skip, 'move LGT donor mpileup';
+		push @gather_output_skip, 'move all donor mpileup';
+		push @gather_output_skip, 'move all recipient mpileup';
 	} else {
-		$config{"global"}->{'$;REFSEQ_REFERENCE$;'} = $options{refseq_reference};
+		# Only add donor-relevant info to config if we are aligning to a donor
+		if ($options{donor_reference} =~/list$/) {
+			$config{"global"}->{'$;DONOR_LIST$;'} = $options{donor_reference};
+		} else {
+			$config{"global"}->{'$;DONOR_REFERENCE$;'} = $options{donor_reference};
+		}
+
+		# The mpileup component needs the donor reference to serve as a reference here too
+		$config{'lgt_mpileup lgt_donor'}->{'$;FASTA_REFERENCE$;'} = $options{donor_reference};
+		$config{'lgt_mpileup all_donor'}->{'$;FASTA_REFERENCE$;'} = $options{donor_reference};
 	}
 
-	$config{"lgt_bwa_post_process default"}->{'$;DONOR_FILE_LIST$;'} = '';
-	$config{"lgt_bwa_post_process default"}->{'$;LGT_RECIPIENT_TOKEN$;'} = 'single_map';
-	$config{"lgt_bwa_post_process default"}->{'$;ALL_DONOR_TOKEN$;'} = 'no_map';
-	$config{"lgt_bwa_post_process default"}->{'$;ALL_RECIPIENT_TOKEN$;'} = 'all_map';
+# If we have a use case where there is a good donor and good reference...
+	if (! ($donor_only || $host_only) ) {
 
-	$config{"filter_dups_lc_seqs lgt_recipient"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
-	$config{"filter_dups_lc_seqs lgt_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.no_map.bam.list';
-	$config{'sam2fasta fasta_r'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_recipient/filter_dups_lc_seqs.bam.list';
-	$config{'sam2fasta fasta_d'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_donor/filter_dups_lc_seqs.bam.list';
+		$config{'concatenate_files blast_d'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/blastn_plus/$;PIPELINEID$;_reference_d/blastn_plus.m8.list';
+		$config{'concatenate_files blast_r'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/blastn_plus/$;PIPELINEID$;_reference_r/blastn_plus.m8.list';
 
-	push @gather_output_skip, 'move LGT donor mpileup';
-	push @gather_output_skip, 'move all donor mpileup';
-	push @gather_output_skip, 'move all recipient mpileup';
-} else {
-	# Only add donor-relevant info to config if we are aligning to a donor
-	if ($options{donor_reference} =~/list$/) {
-		$config{"global"}->{'$;DONOR_LIST$;'} = $options{donor_reference};
-	} else {
-		$config{"global"}->{'$;DONOR_REFERENCE$;'} = $options{donor_reference};
+		$config{'lgt_mpileup all_recipient'}->{'$;FASTA_REFERENCE$;'} = $options{host_reference};
+
+		# If recipient is infected with LGT, change mpileup to use LGT-infected BAM list
+		if ($lgt_infected) {
+			$config{'lgt_mpileup lgt_donor'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected/samtools_merge.bam.list';
+			$config{'lgt_mpileup lgt_recipient'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected/samtools_merge.bam.list';
+			$config{'sam2fasta fasta_r'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected/samtools_merge.bam.list';
+			$config{'gather_lgtseek_files'}->{'RECIPIENT_LGT_BAM_OUTPUT'} = '$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_infected/filter_dups_lc_seqs.bam.list' if $included_subpipelines{'post'};
+		}
 	}
-
-	# The mpileup component needs the donor reference to serve as a reference here too
-	$config{'lgt_mpileup lgt_donor'}->{'$;FASTA_REFERENCE$;'} = $options{donor_reference};
-	$config{'lgt_mpileup all_donor'}->{'$;FASTA_REFERENCE$;'} = $options{donor_reference};
-}
-
-# If we have a use case where there is a good donor and good reference, skip BLAST output
-if (! ($donor_only || $host_only) ) {
-	#push @gather_output_skip, 'move m8 output';
-	#push @gather_output_skip, 'move clone output';
-	#push @gather_output_skip, 'move blast-validated BAM';
-
-	$config{'concatenate_files blast'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/blastn_plus/$;PIPELINEID$;_reference/blastn_plus.m8.list';
-
-	$config{'lgt_mpileup all_recipient'}->{'$;FASTA_REFERENCE$;'} = $options{host_reference};
-
-	# If recipient is infected with LGT, change mpileup to use LGT-infected BAM list
-	if ($lgt_infected) {
-		$config{'lgt_mpileup lgt_donor'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected/samtools_merge.bam.list';
-		$config{'lgt_mpileup lgt_recipient'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected/samtools_merge.bam.list';
-		$config{'sam2fasta fasta'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected/samtools_merge.bam.list';
-		$config{'gather_lgtseek_files'}->{'LGT_BAM_OUTPUT'} = '$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_infected/filter_dups_lc_seqs.bam.list' if $included_subpipelines{'post'};
-	}
-}
 
 # If we are indexing references in the pipeline, we need to change some config inputs
-if ($included_subpipelines{'indexing'}) {
+	if ($included_subpipelines{'indexing'}) {
 
-	if ($donor_only){
-		$config{'lgt_bwa validation_d'}->{'$;INPUT_FILE$;'} = '';
-		$config{'lgt_bwa validation_d'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_donor/lgt_build_bwa_index.fsa.list';
-	} else {
-		unless ($skip_alignment) {
-			# Change the host reference for lgt_bwa
-			$config{'lgt_bwa recipient'}->{'$;INPUT_FILE$;'} = '';
-			$config{'lgt_bwa recipient'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_recipient/lgt_build_bwa_index.fsa.list';
+		if ($donor_only){
+			$config{'lgt_bwa validation_d'}->{'$;INPUT_FILE$;'} = '';
+			$config{'lgt_bwa validation_d'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_donor/lgt_build_bwa_index.fsa.list';
+		} else {
+			unless ($skip_alignment) {
+				# Change the host reference for lgt_bwa
+				$config{'lgt_bwa recipient'}->{'$;INPUT_FILE$;'} = '';
+				$config{'lgt_bwa recipient'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_recipient/lgt_build_bwa_index.fsa.list';
+			}
+		}
+
+		# If host only, add no-mapped alignment and post-NT blast alignment
+		if ($host_only) {
+			# Each individual genome is small enough to use 'is' instead of 'btwsw'
+			$config{"lgt_build_bwa_index refseq"}->{'$;ALGORITHM$;'} = "is";
+
+			$config{'lgt_bwa validation_r'}->{'$;INPUT_FILE$;'} = '';
+			$config{'lgt_bwa validation_r'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_recipient/lgt_build_bwa_index.fsa.list';
+
+			# Change the Refseq reference for lgt_bwa
+			$config{'lgt_bwa lgt'}->{'$;INPUT_FILE$;'} = '';
+			$config{'lgt_bwa lgt'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_refseq/lgt_build_bwa_index.fsa.list';
+		} else {
+			unless ($skip_alignment) {
+				# Change the donor reference for lgt_bwa if not host-only run
+				$config{'lgt_bwa donor'}->{'$;INPUT_FILE$;'} = '';
+				$config{'lgt_bwa donor'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_donor/lgt_build_bwa_index.fsa.list';
+			}
 		}
 	}
-
-	# If host only, add no-mapped alignment and post-NT blast alignment
-	if ($host_only) {
-		# Each individual genome is small enough to use 'is' instead of 'btwsw'
-		$config{"lgt_build_bwa_index refseq"}->{'$;ALGORITHM$;'} = "is";
-
-		$config{'lgt_bwa validation_r'}->{'$;INPUT_FILE$;'} = '';
-		$config{'lgt_bwa validation_r'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_recipient/lgt_build_bwa_index.fsa.list';
-
-		# Change the Refseq reference for lgt_bwa
-		$config{'lgt_bwa lgt'}->{'$;INPUT_FILE$;'} = '';
-		$config{'lgt_bwa lgt'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_refseq/lgt_build_bwa_index.fsa.list';
-	} else {
-		unless ($skip_alignment) {
-			# Change the donor reference for lgt_bwa if not host-only run
-			$config{'lgt_bwa donor'}->{'$;INPUT_FILE$;'} = '';
-			$config{'lgt_bwa donor'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_donor/lgt_build_bwa_index.fsa.list';
-		}
-	}
-}
 
 # If we are passing a directory to store important output files, then change a few parameters
-if ($included_subpipelines{'post'}){
-	$config{'global'}->{'$;DATA_DIR$;'} = $options{data_directory};
-	$config{"gather_lgtseek_files default"}->{'$;SKIP_WF_COMMAND$;'} = join ',', @gather_output_skip;
-}
+	if ($included_subpipelines{'post'}){
+		$config{'global'}->{'$;DATA_DIR$;'} = $options{data_directory};
+		$config{"gather_lgtseek_files default"}->{'$;SKIP_WF_COMMAND$;'} = join ',', @gather_output_skip;
+	}
 
 	# open config file for writing
 	open( my $pcfh, "> $pipeline_config") or &_log($ERROR, "Could not open $pipeline_config for writing: $!");

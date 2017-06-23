@@ -1,0 +1,163 @@
+#!/bin/bash
+
+print_usage()
+{
+    progname=`basename $0`
+    cat << END
+usage: $progname -p <pipeline_id> -r <repository_root> -o <output_dir> -s <sra_run_id>
+END
+    exit 1
+}
+
+while getopts "p:r:o:s:" opt
+do
+    case $opt in
+        o) output_dir=$OPTARG;;
+        p) pipeline_id=$OPTARG;;
+        r) repo_root=$OPTARG;;
+        s) sra_run_id=$OPTARG;;
+    esac
+done
+
+output_repo=$repo_root/output_repository
+
+if [ ! -d $output_dir ]; then
+    echo "Now creating output_directory..."
+    mkdir -p -m 777 $output_dir
+fi
+
+metadata_file=${output_repo}/download_sra/${pipeline_id}_default/${sra_run_id}_info.csv
+if [ -f $metadata_file ]; then
+    echo "Now copying SRA metadata file..."
+    cp $metadata_file $output_dir
+else
+    echo "Metadata file is not present, skipping..."
+fi
+
+counts_file=${output_repo}/lgtseek_classify_reads/${pipeline_id}_default/classification.counts
+if [ -f $counts_file ]; then
+    echo "Now copying classification counts file..."
+    cp $counts_file $output_dir
+else
+    echo "Classification counts file is not present. Things downstream probably didn't run.  Exiting with failure..."
+    exit 1
+fi
+
+lgt_donor_bam=${output_repo}/filter_dups_lc_seqs/${pipeline_id}_lgt_donor/filter_dups_lc_seqs.bam.list
+lgt_recipient_bam=${output_repo}/filter_dups_lc_seqs/${pipeline_id}_lgt_recipient/filter_dups_lc_seqs.bam.list
+all_donor_bam=${output_repo}/filter_dups_lc_seqs/${pipeline_id}_all_donor/filter_dups_lc_seqs.bam.list
+all_recipient_bam=${output_repo}/filter_dups_lc_seqs/${pipeline_id}_all_recipient/filter_dups_lc_seqs.bam.list
+
+if [ -f $lgt_donor_bam ]; then
+    echo "Now copying donor LGT-mapped BAM file..."
+    ./cp_lgt_list_files $output_dir/lgt_bam $lgt_donor_bam
+else
+    echo "LGT donor BAM file is not present, skipping..."
+fi
+
+if [ -f $lgt_recipient_bam ]; then
+    echo "Now copying recipient LGT-mapped BAM file..."
+    ./cp_lgt_list_files $output_dir/lgt_bam $lgt_recipient_bam
+else
+    echo "LGT recipient BAM file is not present, skipping..."
+fi
+
+if [ -f $all_donor_bam ]; then
+    echo "Now copying all-donor mapped BAM file..."
+    ./cp_lgt_list_files $output_dir/all_donor_bam $all_donor_bam
+else
+    echo "All-donor BAM file is not present, skipping..."
+fi
+
+if [ -f $all_recipient_bam ]; then
+    echo "Now copying all-recipient mapped BAM file..."
+    ./cp_lgt_list_files $output_dir/all_recipient_bam $all_recipient_bam
+else
+    echo "All-recipient BAM file is not present, skipping..."
+fi
+
+donor_lgt_blast_bam=${output_repo}/lgt_bwa/${pipeline_id}_validation_d/lgt_bwa.bam.list
+recipient_lgt_blast_bam=${output_repo}/lgt_bwa/${pipeline_id}_validation_r/lgt_bwa.bam.list
+
+if [ -f $donor_lgt_blast_bam ]; then
+    echo "Now copying donor Blast BAM file..."
+    ./cp_lgt_list_files $output_dir/blast_validated_lgt $donor_lgt_blast_bam
+else
+    echo "Donor Blast BAM file is not present, skipping..."
+fi
+
+if [ -f $recipient_lgt_blast_bam ]; then
+    echo "Now copying recipient Blast BAM file..."
+    ./cp_lgt_list_files $output_dir/blast_validated_lgt $recipient_lgt_blast_bam
+else
+    echo "Recipient Blast BAM file is not present, skipping..."
+fi
+
+lgt_recipient_mpileup=${output_repo}/lgt_mpileup/${pipeline_id}_lgt_recipient/lgt_mpileup.list
+lgt_donor_mpileup=${output_repo}/lgt_mpileup/${pipeline_id}_lgt_donor/lgt_mpileup.list
+all_recipient_mpileup=${output_repo}/lgt_mpileup/${pipeline_id}_all_recipient/lgt_mpileup.list
+all_donor_mpileup=${output_repo}/lgt_mpileup/${pipeline_id}_all_donor/lgt_mpileup.list
+
+if [ -f $lgt_donor_mpileup ]; then
+    echo "Now copying LGT donor mpileup file..."
+    ./cp_lgt_list_files $output_dir/lgt_donor_mpileup $lgt_donor_mpileup
+else
+    echo "LGT donor mpileup file is not present, skipping..."
+fi
+
+if [ -f $lgt_recipient_bam ]; then
+    echo "Now copying LGT recipient mpileup file..."
+    ./cp_lgt_list_files $output_dir/lgt_recipient_mpileup $lgt_recipient_mpileup
+else
+    echo "LGT recipient mpileup file is not present, skipping..."
+fi
+
+if [ -f $all_donor_mpileup ]; then
+    echo "Now copying all-donor mpileup file..."
+    ./cp_lgt_list_files $output_dir/all_donor_mpileup $all_donor_mpileup
+else
+    echo "All-donor mpileup file is not present, skipping..."
+fi
+
+if [ -f $all_recipient_mpileup ]; then
+    echo "Now copying all-recipient mpileup file..."
+    ./cp_lgt_list_files $output_dir/all_recipient_mpileup $all_recipient_mpileup
+else
+    echo "All-recipient mpileup file is not present, skipping..."
+fi
+
+donor_lgt_clone=${output_repo}/blast_lgt_finder/${pipeline_id}_lgt_d/i1/g1/blastn_by_clone.txt
+recipient_lgt_clone=${output_repo}/blast_lgt_finder/${pipeline_id}_lgt_r/i1/g1/blastn_by_clone.txt
+
+if [ -f $donor_lgt_clone ]; then
+    echo "Now copying donor Blast 'clones' file..."
+    ./cp_lgt_list_files $output_dir/blast_validated_lgt $donor_lgt_clone
+else
+    echo "Donor Blast 'clones' file is not present, skipping..."
+fi
+
+if [ -f $recipient_lgt_clone ]; then
+    echo "Now copying recipient Blast 'clones' file..."
+    ./cp_lgt_list_files $output_dir/blast_validated_lgt $recipient_lgt_clone
+else
+    echo "Recipient Blast 'clones' file is not present, skipping..."
+fi
+
+donor_m8=${output_repo}/concatenate_files/${pipeline_id}_blast_d/blastn.out
+recipient_m8=${output_repo}/concatenate_files/${pipeline_id}_blast_r/blastn.out
+
+if [ -f $donor_m8 ]; then
+    echo "Now copying donor Blast m8 file..."
+    ./cp_lgt_list_files $output_dir/blast_validated_lgt $donor_m8
+else
+    echo "Donor Blast m8 file is not present, skipping..."
+fi
+
+if [ -f $recipient_m8 ]; then
+    echo "Now copying recipient Blast m8 file..."
+    ./cp_lgt_list_files $output_dir/blast_validated_lgt $recipient_m8
+else
+    echo "Recipient Blast m8 file is not present, skipping..."
+fi
+
+exit 0
