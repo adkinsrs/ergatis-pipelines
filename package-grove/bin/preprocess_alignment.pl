@@ -2,11 +2,11 @@
 
 =head1 NAME
 
-picard_processing.pl - Wrapper script for several Picard utilities in the RNASeq SNP pipeline
+preprocess_alignment.pl - Wrapper script for several Picard utilities in the RNASeq SNP pipeline
 
 =head1 SYNOPSIS
 
- USAGE: picard_processing.pl
+ USAGE: preprocess_alignment.pl
        --config_file=/path/to/some/config
      [ 
 	   --output_dir=/path/to/output/dir
@@ -42,10 +42,9 @@ B<--help,-h>
 
 =head1  DESCRIPTION
 
- This script is a wrapper script for 3 utilities from the Picard-tools suite
- 1) AddOrReplaceReadGroups - Add Read Group to BAM file
- 2) MarkDuplicates - Mark duplicate reads in BAM file
- 3) BuildBamIndex - Index resulting BAM file
+ This script is a wrapper script for 2 utilities from the Picard-tools suite
+ 1) ReorderSam - Reorder reads to match contig ordering in reference file
+ 2) SortSam - Sort reads in BAM file by coordinate
  
 =head1  INPUT
 
@@ -105,36 +104,32 @@ sub main {
     &check_options(\%options);
 
     read_config(\%options, \%config);
-	my $prefix = $config{'picard_processing'}{'Prefix'}[0];
-
-	my $stringency = uc($config{'picard_processing'}{'VALIDATION_STRINGENCY'}[0]);
-	my $max_records = $config{'picard_processing'}{'MAX_READS_STORED'}[0];
+	my $prefix = $config{'global'}{'PREFIX'}[0];
+	my $stringency = uc($config{'global'}{'VALIDATION_STRINGENCY'}[0]);
+	my $max_records = $config{'global'}{'MAX_READS_STORED'}[0];
 
     if ( defined $stringency && none{$_ eq $stringency} @stringency_arr ) {
         &_log($ERROR, $stringency." is not a valid option.  Choose from 'SILENT', 'LENIENT', or 'STRICT'");
     }
 
-    if (defined $config{'picard_processing'}{'Java_Memory'}) {
-	    $java_mem = $config{'picard_processing'}{'Java_Memory'}[0] ;
+    if (defined $config{'preprocess_alignment'}{'Java_Memory'}) {
+	    $java_mem = $config{'preprocess_alignment'}{'Java_Memory'}[0] ;
     }
 
-	### AddOrReplaceReadGroups ###
+	### ReorderSam ###
     my %args = ( 
-			'INPUT' => $config{'picard_processing'}{'INPUT_FILE'}[0],
-			'OUTPUT' => $outdir."/$prefix.add_read_group.bam" ,
-			'RGID' => $config{'picard_processing'}{'ID'}[0],
-			'RGLB' => $config{'picard_processing'}{'LIBRARY'}[0],
-			'RGPL' => $config{'picard_processing'}{'PLATFORM'}[0],
-			'RGPU' => $config{'picard_processing'}{'PLATFORM_UNIT'}[0],
-			'RGSM' => $config{'picard_processing'}{'SAMPLE_NAME'}[0],
+			'INPUT' => $config{'preprocess_alignment'}{'INPUT_FILE'}[0],
+			'OUTPUT' => $outdir."/$prefix.reorder.bam" ,
+			'REFERENCE' => $config{'global'}{'REFERENCE_FILE'}[0],
 			'VALIDATION_STRINGENCY' => $stringency,
-			'MAX_RECORDS_IN_RAM' => $max_records
+			'MAX_RECORDS_IN_RAM' => $max_records,
+			'CREATE_INDEX' => "TRUE"
     );
 
+    # Start building the Picard tools command
 	my $cmd = $options{'java_path'} . " $java_mem -Djava.io.tmpdir=" .$options{tmpdir};
 
-    # Start building the Picard tools command
-    $cmd .=" -jar ".$options{'picard_jar'}." AddOrReplaceReadGroups ";
+	$cmd .= " -jar ".$options{'picard_jar'}." ReorderSam ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
@@ -143,19 +138,19 @@ sub main {
 
     exec_command($cmd);
 
-	### MarkDuplicates ###
+	### SortSam ###
     %args = ( 
-			'INPUT' => $outdir."/$prefix.add_read_group.bam",
-			'OUTPUT' => $outdir."/$prefix.mark_dups.bam" ,
-			'METRICS_FILE' => $outdir."/$prefix.mark_dups_metrics.txt",
+			'INPUT' => $outdir."/$prefix.reorder.bam",
+			'OUTPUT' => $outdir."/$prefix.sorted.bam" ,
 			'VALIDATION_STRINGENCY' => $stringency,
-			'MAX_RECORDS_IN_RAM' => $max_records
+			'MAX_RECORDS_IN_RAM' => $max_records,
+			'SORT_ORDER' => "coordinate"
     );
 
 	$cmd = $options{'java_path'} . " $java_mem -Djava.io.tmpdir=" .$options{tmpdir};
 
     # Start building the Picard tools command
-    $cmd .= " -jar ".$options{'picard_jar'}." MarkDuplicates ";
+    $cmd .= " -jar ".$options{'picard_jar'}." SortSam ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
@@ -164,27 +159,8 @@ sub main {
 
     exec_command($cmd);
 
-	### BuildBamIndex ###
-    %args = ( 
-			'INPUT' => $outdir."/$prefix.mark_dups.bam",
-			'OUTPUT' => $outdir . "/$prefix.mark_dups.bai",
-			'VALIDATION_STRINGENCY' => $stringency,
-			'MAX_RECORDS_IN_RAM' => $max_records
-    );
-
-	$cmd = $options{'java_path'} . " $java_mem -Djava.io.tmpdir=" .$options{tmpdir};
-
-    # Start building the Picard tools command
-    $cmd .= " -jar ".$options{'picard_jar'}." BuildBamIndex ";
-
-    # Add only passed in options to command
-    foreach my $arg (keys %args) {
-        $cmd .= "${arg}=".$args{$arg}." " if defined $args{$arg};
-    }
-
-    exec_command($cmd);
-    my $config_out = "$outdir/picard_processing." .$prefix.".config" ;
-    $config{'split_spliced_reads'}{'INPUT_FILE'}[0] = $outdir."/$prefix.mark_dups.bam";
+    my $config_out = "$outdir/preprocess_alignment." .$prefix.".config" ;
+    $config{'picard_processing'}{'INPUT_FILE'}[0] = $outdir."/$prefix.sorted.bam";
     write_config(\%options, \%config, $config_out);
 
 }

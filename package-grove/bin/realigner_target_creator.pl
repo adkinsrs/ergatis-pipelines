@@ -9,13 +9,13 @@ eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
 
 =head1 NAME
 
-print_reads.pl - Script to execute GATK's Print Reads on input BAM.
+realigner_target_creator.pl - Script to execute GATK's Realigner Target Creator on input BAM.
 
 =head1 SYNOPSIS
 
-print_reads.pl    --c config file
-		              [--o outdir] [-t tmpdir]
-                      [--v]
+realigner_target_creator.pl  --c config file
+		                    [--o outdir] [-t tmpdir]
+                            [--v]
 
     parameters in [] are optional
     do NOT type the carets when specifying options
@@ -32,7 +32,7 @@ print_reads.pl    --c config file
 
 =head1 DESCRIPTION
 
-Script to execute Print Reads from GATK software package on input BAM file.
+Script to execute Realigner Target Creator from GATK software package on input BAM file.
 
 =head1 AUTHOR
 
@@ -120,28 +120,30 @@ if (defined $hCmdLineOption{'outdir'}) {
 $sOutDir = File::Spec->canonpath($sOutDir);
 
 ($bDebug || $bVerbose) ? 
-	print STDERR "\nExecuting GATK Indel Realigner on input BAM...\n" : ();
+	print STDERR "\nExecuting GATK RealignerTargetCreator on input BAM ...\n" : ();
 
 ##Read config file 
 
 read_config(\%hCmdLineOption, \%hConfig);
 
-if (!defined $hConfig{'print_reads'}{'GATK_BIN'}[0]) {
-    $hConfig{'print_reads'}{'GATK_BIN'}[0] = GATK_BIN;
+my $prefix = $hConfig{'global'}{'PREFIX'}[0];
+
+if (!defined $hConfig{'realigner_target_creator'}{'GATK_BIN'}[0]) {
+    $hConfig{'realigner_target_creator'}{'GATK_BIN'}[0] = GATK_BIN;
 }
 
 $sCmd = "java ";
 
-if (defined $hConfig{'print_reads'}{'Java_Memory'}) {
-	$sCmd .= "$hConfig{'print_reads'}{'Java_Memory'}[0]" ;
+if (defined $hConfig{'realigner_target_creator'}{'Java_Memory'}) {
+	$sCmd .= "$hConfig{'realigner_target_creator'}{'Java_Memory'}[0]" ;
 }
 
-$sCmd  .= " -Djava.io.tmpdir=$hCmdLineOption{tmpdir} -jar " .  $hConfig{'print_reads'}{'GATK_BIN'}[0] . "/GenomeAnalysisTK.jar -T PrintReads " . 
-		  " -I $hConfig{'print_reads'}{'Infile'}[0] -o $sOutDir/$hConfig{'print_reads'}{'Prefix'}[0].base_recal.bam ".
-		  " -BQSR $hConfig{'print_reads'}{'BQSR'}[0] -R $hConfig{'print_reads'}{'Reference'}[0] " ;
+$sCmd  .= " -Djava.io.tmpdir=$hCmdLineOption{tmpdir} -jar " . $hConfig{'realigner_target_creator'}{'GATK_BIN'}[0] . "/GenomeAnalysisTK.jar -T RealignerTargetCreator " . 
+		  " -I $hConfig{'realigner_target_creator'}{'Infile'}[0] -o $sOutDir/$prefix.bam.indels.list ".
+		  " -R $hConfig{'global'}{'REFERENCE_FILE'}[0] " ;
 
-if (defined $hConfig{'print_reads'}{'OTHER_PARAMETERS'}) {
-	$sCmd .= $hConfig{'print_reads'}{'OTHER_PARAMETERS'}[0] ;
+if (defined $hConfig{'realigner_target_creator'}{'OTHER_PARAMETERS'}) {
+	$sCmd .= $hConfig{'realigner_target_creator'}{'OTHER_PARAMETERS'}[0] ;
 }
 
 
@@ -149,11 +151,10 @@ if (defined $hConfig{'print_reads'}{'OTHER_PARAMETERS'}) {
 #print "$sCmd\n";
 exec_command($sCmd);
 
-$config_out = "$sOutDir/print_reads.$hConfig{'print_reads'}{'Prefix'}[0].config" ;
-$hConfig{'haplotype_caller'}{'INPUT_FILE'}[0] = "$sOutDir/$hConfig{'print_reads'}{'Prefix'}[0].base_recal.bam" ;
-
+$config_out = "$sOutDir/realigner_target_creator.$prefix.config" ;
+$hConfig{'indel_realigner'}{'Infile'}[0] = "$hConfig{'realigner_target_creator'}{'Infile'}[0]" ;
+$hConfig{'indel_realigner'}{'TargetInterval'}[0] = "$sOutDir/$prefix.bam.indels.list" ;
 write_config(\%hCmdLineOption,\%hConfig,$config_out);
-
 
 
 

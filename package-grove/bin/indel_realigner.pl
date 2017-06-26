@@ -9,11 +9,11 @@ eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
 
 =head1 NAME
 
-base_recalibration.pl - Script to execute GATK's Base Recalibration on input BAM.
+indel_realigner.pl - Script to execute GATK's Indel Realigner on input BAM.
 
 =head1 SYNOPSIS
 
-base_recalibration.pl --c config file
+indel_realigner.pl    --c config file
 		              [--o outdir] [-t tmpdir]
                       [--v]
 
@@ -32,7 +32,7 @@ base_recalibration.pl --c config file
 
 =head1 DESCRIPTION
 
-Script to execute Base Recalibration from GATK software package on input BAM file.
+Script to execute Indel Realigner from GATK software package on input BAM file.
 
 =head1 AUTHOR
 
@@ -90,7 +90,7 @@ pod2usage( -msg => $sHelpHeader, -exitval => 1) if $hCmdLineOption{'help'};
 check_parameters(\%hCmdLineOption);
 
 my ($sOutDir);
-my ($sCmd, $config_out, $fh);
+my ($sCmd, $config_out);
 my $bDebug   = (defined $hCmdLineOption{'debug'}) ? TRUE : FALSE;
 my $bVerbose = (defined $hCmdLineOption{'verbose'}) ? TRUE : FALSE;
 my (%hConfig);
@@ -120,44 +120,44 @@ if (defined $hCmdLineOption{'outdir'}) {
 $sOutDir = File::Spec->canonpath($sOutDir);
 
 ($bDebug || $bVerbose) ? 
-	print STDERR "\nExecuting GATK Base Recalibration on input BAM...\n" : ();
-
-
-$sCmd = "java ";
-
-if (defined $hConfig{'base_recalibration'}{'Java_Memory'}) {
-        $sCmd .= " $hConfig{'base_recalibration'}{'Java_Memory'}[0] " ;
-}
+	print STDERR "\nExecuting GATK Indel Realigner on input BAM...\n" : ();
 
 ##Read config file 
+
 read_config(\%hCmdLineOption, \%hConfig);
 
-if (!defined $hConfig{'base_recalibration'}{'GATK_BIN'}[0]) {
-    $hConfig{'base_recalibration'}{'GATK_BIN'}[0] = GATK_BIN;
+my $prefix = $hConfig{'global'}{'PREFIX'}[0];
+
+if (!defined $hConfig{'indel_realigner'}{'GATK_BIN'}[0]) {
+    $hConfig{'indel_realigner'}{'GATK_BIN'}[0] = GATK_BIN;
 }
 
 $sCmd = "java ";
 
-if (defined $hConfig{'base_recalibration'}{'Java_Memory'}) {
-	$sCmd .= "$hConfig{'base_recalibration'}{'Java_Memory'}[0]" ;
+if (defined $hConfig{'indel_realigner'}{'Java_Memory'}) {
+	$sCmd .= "$hConfig{'indel_realigner'}{'Java_Memory'}[0]" ;
 }
 
-$sCmd  .= " -Djava.io.tmpdir=$hCmdLineOption{tmpdir} -jar " .  $hConfig{'base_recalibration'}{'GATK_BIN'}[0] . "/GenomeAnalysisTK.jar -T BaseRecalibrator " . 
-		  " -I $hConfig{'base_recalibration'}{'Infile'}[0] -o $sOutDir/Merged.base.recal.grp ".
-		  " -knownSites $hConfig{'base_recalibration'}{'KnownSites'}[0] -R $hConfig{'base_recalibration'}{'Reference'}[0] " ;
+$sCmd  .= " -Djava.io.tmpdir=$hCmdLineOption{tmpdir} -jar " .  $hConfig{'indel_realigner'}{'GATK_BIN'}[0] . "/GenomeAnalysisTK.jar -T IndelRealigner " . 
+		  " -I $hConfig{'indel_realigner'}{'Infile'}[0] -o $sOutDir/$prefix.realigned.bam ".
+		  " -targetIntervals $hConfig{'indel_realigner'}{'TargetInterval'}[0] -R $hConfig{'global'}{'REFERENCE_FILE'}[0] " ;
 
-if (defined $hConfig{'base_recalibration'}{'OTHER_PARAMETERS'}) {
-	$sCmd .= $hConfig{'base_recalibration'}{'OTHER_PARAMETERS'}[0] ;
+if (defined $hConfig{'indel_realigner'}{'OTHER_PARAMETERS'}) {
+	$sCmd .= $hConfig{'indel_realigner'}{'OTHER_PARAMETERS'}[0] ;
 }
+
+
 
 #print "$sCmd\n";
 exec_command($sCmd);
 
-#Write config file out..
-$config_out = "$sOutDir/base_recalibration.$hConfig{'base_recalibration'}{'Prefix'}[0].config" ;
-$hConfig{'print_reads'}{'Infile'}[0] = $hConfig{'base_recalibration'}{'Infile'}[0];
-$hConfig{'print_reads'}{'BQSR'}[0] = "$sOutDir/Merged.base.recal.grp" ;
+$config_out = "$sOutDir/indel_realigner.$prefix.config" ;
+$hConfig{'base_recalibration'}{'Infile'}[0] = "$sOutDir/$prefix.realigned.bam" ;
+
 write_config(\%hCmdLineOption,\%hConfig,$config_out);
+
+
+
 
 ################################################################################
 ### Subroutines

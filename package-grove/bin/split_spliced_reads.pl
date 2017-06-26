@@ -2,12 +2,12 @@
 
 =head1 NAME
 
-variant_filtration.pl - Wrapper script for GATK's VariantFiltration utility
+split_spliced_reads.pl - Wrapper script for GATK's SplitNCigarReads utility
 
 =head1 SYNOPSIS
 
- USAGE: variant_filtration.pl
-       --config_file=/path/to/some/config.txt
+ USAGE: split_spliced_reads.pl
+       --config_file=/path/to/some/config/file
        --output_dir=/path/to/output/dir
      [ 
 	   --gatk_jar=/path/to/gatk.jar
@@ -97,37 +97,42 @@ sub main {
                           );
 
     &check_options(\%options);
+
     read_config(\%options, \%config);
-	my $prefix = $config{'variant_filtration'}{'Prefix'}[0];
+	my $prefix = $config{'global'}{'PREFIX'}[0];
 
     my %args = ( 
-			'--variant' => $config{'variant_filtration'}{'INPUT_FILE'}[0],
-			'--out' => "$outdir/$prefix.variant_filtration.vcf",
-			'--reference_sequence' => $config{'variant_filtration'}{'REFERENCE'}[0],
-			'--clusterWindowSize' => $config{'variant_filtration'}{'WINDOW_SIZE'}[0],
-			'--clusterSize'	=> $config{'variant_filtration'}{'CLUSTER_SIZE'}[0],
+			'--input_file' => $config{'split_spliced_reads'}{'INPUT_FILE'}[0],
+			'--out' => $outdir."/$prefix.split.bam",
+			'--reference_sequence' => $config{'global'}{'REFERENCE_FILE'}[0],
+			'--maxReadsInMemory' => $config{'global'}{'MAX_READS_STORED'}[0],
+			'--unsafe' => uc($config{'split_spliced_reads'}{'UNSAFE'}[0]),
+			'--reassign_mapping_quality_from' => $config{'split_spliced_reads'}{'ORIG_MAPPING_QUALITY'}[0],
+            '--reassign_mapping_quality_to' => $config{'split_spliced_reads'}{'DESIRED_MAPPING_QUALITY'}[0]
     );
 
+	$config{'split_spliced_reads'}{'OTHER_OPTS'}[0] = '' if ! $config{'split_spliced_reads'}{'OTHER_OPTS'}[0];
+
 	my $cmd = $options{'java_path'} . " -Djava.io.tmpdir=" .$options{tmpdir};
-    if (defined $config{'variant_filtration'}{'Java_Memory'}) {
-	    $cmd .= " $config{'variant_filtration'}{'Java_Memory'}[0]" ;
+    if (defined $config{'split_spliced_reads'}{'Java_Memory'}) {
+	    $cmd .= " $config{'split_spliced_reads'}{'Java_Memory'}[0]" ;
     }
     # Start building the Picard tools command
-    $cmd .= " -jar ".$options{'gatk_jar'}." --analysis_type VariantFiltration ";
-
+    $cmd .= " -jar ".$options{'gatk_jar'}." --analysis_type SplitNCigarReads -rf ReassignOneMappingQuality ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
         $cmd .= "${arg} ".$args{$arg}." " if defined $args{$arg};
-    }
+	}
 
 	# Add other misc parameters via a string
-	$cmd .= $config{'variant_filtration'}{'OTHER_OPTS'}[0];
+	$cmd .= $config{'split_spliced_reads'}{'OTHER_OPTS'}[0];
 
     exec_command($cmd);
 
-    my $config_out = "$outdir/variant_filtration." .$prefix.".config" ;
-    $config{'annovar'}{'INPUT_FILE'}[0] = $outdir."/$prefix.variant_filtration.vcf";
+	print STDOUT "GATK finished.  Now writing config file\n";
+    my $config_out = "$outdir/split_spliced_reads." .$prefix.".config" ;
+    $config{'realigner_target_creator'}{'Infile'}[0] = $outdir."/$prefix.split.bam";
     write_config(\%options, \%config, $config_out);
 }
 
@@ -153,6 +158,7 @@ sub check_options {
    $outdir = File::Spec->curdir();
     if (defined $opts->{'output_dir'}) {
         $outdir = $opts->{'output_dir'};
+
         if (! -e $outdir) {
            mkdir($opts->{'output_dir'}) ||
             die "ERROR! Cannot create output directory\n";

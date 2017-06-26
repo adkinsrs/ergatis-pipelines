@@ -2,37 +2,15 @@
 
 <commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
     <commandSet type="serial">
-        <name>preprocess_alignment</name>
-  		<command>
-    		<type>RunUnixCommand</type>
-    		<name>replace_config_keys</name>
-    		<state>incomplete</state>
-    		<executable>$;BIN_DIR$;/replace_config_keys</executable>
-    		<param>  
-      			<key>--template_conf</key>
-      			<value>$;I_FILE_PATH$;</value>
-    		</param>
-    		<param>  
-      			<key>--output_conf</key>
-      			<value>$;I_FILE_PATH$;.final</value>
-    		</param>   
-    		<param>
-      			<key>stdout</key>
-	  			<value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/replace_input_config_keys.stdout</value>
-    		</param> 
-    		<param>
-      			<key>stderr</key>
-	  			<value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/replace_input_config_keys.stderr</value>
-    		</param>
-  		</command>
+        <name>variant_filtration</name>
 		<command>
             <type>RunUnixCommand</type>
-            <name>preprocess_alignment</name>
+            <name>variant filtraation</name>
             <state>incomplete</state>
-            <executable>$;BIN_DIR$;/preprocess_alignment</executable>
+            <executable>$;BIN_DIR$;/variant_filtration</executable>
             <param>
                 <key>--config_file</key>
-                <value>$;I_FILE_PATH$;.final</value>
+                <value>$;I_FILE_PATH$;</value>
             </param>
             <param>
                 <key>--output_dir</key>
@@ -43,8 +21,8 @@
                 <value>$;JAVA_EXEC$;</value>
             </param>
             <param>
-                <key>--picard_jar</key>
-                <value>$;PICARD_TOOLS$;</value>
+                <key>--gatk_jar</key>
+				<value>$;GATK_BIN$;/GenomeAnalysisTK.jar</value>
             </param>
             <param>
                 <key>--tmpdir</key>

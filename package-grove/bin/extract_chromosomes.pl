@@ -2,16 +2,16 @@
 
 =head1 NAME
 
-run_annovar.pl - Wrapper script for table_annovar.pl, which annotates filtered variants from input
+extract_chromosomes.pl - Use samtools view to filter reads to those only from chromosomes
 
 =head1 SYNOPSIS
 
- USAGE: run_annovar.pl
+ USAGE: extract_chromosomes.pl
        --config_file=/path/to/some/config.txt
        --output_dir=/path/to/output/dir
      [ 
-	   --tmpdir=/path/to/tmp
-	   --annovar_bin=/usr/bin/annovar
+	   --tmp_dir=/path/to/tmp
+	   --samtools_bin=/path/to/samtools
 	   --log=/path/to/file.log
        --debug=3
        --help
@@ -25,8 +25,11 @@ B<--config_file,-c>
 B<--output_dir,-o>
 	Optional. Path to directory to write output to.  If not provided, use current directory
 
-B<--annovar_bin>
-	Optional. Path to the samtools bin directory.  If not provided, will use /usr/local/packages/annovar/
+B<--tmpdir,-t>
+	Optional. Path to directory to write temporary files to.  If not provided, use /tmp
+
+B<--samtools_bin>
+	Optional. Path to the samtools bin directory.  If not provided, will use /usr/local/bin/
 
 B<--log,-l>
     Logfile.
@@ -69,7 +72,8 @@ my $debug = 1;
 my ($ERROR, $WARN, $DEBUG) = (1,2,3);
 my $logfh;
 
-use constant ANNOVAR_BIN => "/usr/local/packages/annovar/";
+use constant SAMTOOLS_BIN => "/usr/local/bin/";
+use constant TMP_DIR => "/tmp";
 ####################################################
 
 my %options;
@@ -85,7 +89,7 @@ sub main {
 						 "config_file|c=s",
 						 "output_dir|o=s",
 						 "tmpdir|t=s",
-						 "annovar_bin=s",
+						 "samtools_bin=s",
                          "log|l=s",
                          "debug|d=s",
                          "help|h"
@@ -94,41 +98,30 @@ sub main {
     &check_options(\%options);
     read_config(\%options, \%config);
 
-    my $prefix = $config{'annovar'}{'Prefix'}[0];
+    my $prefix = $config{'global'}{'PREFIX'}[0];
 
     my %args = ( 
-			'-outfile' => $outdir."/$prefix.annovar.tbl",
-			'-protocol' => $config{'annovar'}{'PROTOCOL'}[0],
-			'-buildver' => $config{'annovar'}{'BUILDVER'}[0],
-			'-operation' => $config{'annovar'}{'OPERATION'}[0],
-			'-nastring' => $config{'annovar'}{'NASTRING'}[0]
+			'-o' => $outdir."/$prefix.extract_chromosomes.bam",
     );
 
-	# First run convert2annovar to convert VCF into readable annovar input
-	&_log($DEBUG, "Now running convert2annovar.pl");
-	my $avinput = "$outdir/$prefix.avinput";
-	my $cmd  = $options{'annovar_bin'}."/convert2annovar.pl --includeinfo --format vcf4 ";
-	$cmd .= "--outfile $avinput ";
-	$cmd .= $config{'annovar'}{'INPUT_FILE'}[0];
-	exec_command($cmd);
+    # Start building the Samtools command
+	my $tmp_dir_env = "TMP_DIR=".$options{'tmpdir'} . " ";
+	my $groups_str = " 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y MT";
 
-    # Start building the annovar command
-	&_log($DEBUG, "Now running table_annovar.pl");
-    $cmd =  $options{'annovar_bin'}."/table_annovar.pl ";
-
-	$cmd .= $avinput . ' ';
-	$cmd .= $config{'annovar'}{'DB_PATH'}[0] . ' ';
+    my $cmd = $tmp_dir_env . $options{'samtools_bin'}."/samtools view -b ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
         $cmd .= "${arg} ".$args{$arg}." " if defined $args{$arg};
     }
 
-	$cmd .= "-remove" if $config{'annovar'}{'REMOVE'} == 1;
-	$cmd .= "-vcfinput" if $config{'annovar'}{'VCFINPUT'} == 1;
-	$cmd .= $config{'annovar'}{'OTHER_ARGS'} if $config{'annovar'}{'OTHER_ARGS'};
+	$cmd .= $config{'extract_chromosomes'}{'INPUT_FILE'}[0] . " $groups_str";
 
     exec_command($cmd);
+
+    my $config_out = "$outdir/extract_chromosomes." .$prefix.".config" ;
+    $config{'preprocess_alignment'}{'INPUT_FILE'}[0] = $outdir."/$prefix.extract_chromosomes.bam";
+    write_config(\%options, \%config, $config_out);
 }
 
 sub check_options {
@@ -147,7 +140,8 @@ sub check_options {
        &_log($ERROR, "Option $req is required") unless( $opts->{$req} );
    }
 
-   $opts->{'annovar_bin'} = ANNOVAR_BIN if !$opts->{'annovar_bin'};
+   $opts->{'samtools_bin'} = SAMTOOLS_BIN if !$opts->{'samtools_bin'};
+   $opts->{'tmp_dir'} = TMP_DIR if !$opts->{'tmp_dir'};
 
    $outdir = File::Spec->curdir();
     if (defined $opts->{'output_dir'}) {

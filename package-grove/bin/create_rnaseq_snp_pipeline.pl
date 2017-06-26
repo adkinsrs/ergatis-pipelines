@@ -59,7 +59,7 @@ B<--help,-h>
 
 use strict;
 use warnings;
-use lib ("/usr/local/projects/ergatis/package-arbor/lib/perl5");
+use lib ("/usr/local/projects/ergatis/package-grove/lib/perl5");
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
 use Pod::Usage;
 use File::Basename;
@@ -73,7 +73,7 @@ my ($ERROR, $WARN, $DEBUG) = (1,2,3);
 my $logfh;
 
 my $outdir = ".";
-my $template_directory = "/local/projects/ergatis/package-arbor/pipeline_templates";
+my $template_directory = "/local/projects/ergatis/package-grove/pipeline_templates";
 ####################################################
 
 my %options;

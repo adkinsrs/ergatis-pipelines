@@ -2,16 +2,16 @@
 
 =head1 NAME
 
-haplotype_caller.pl - Wrapper script for GATK's HaplotypeCaller utility
+run_annovar.pl - Wrapper script for table_annovar.pl, which annotates filtered variants from input
 
 =head1 SYNOPSIS
 
- USAGE: haplotype_caller.pl
+ USAGE: run_annovar.pl
        --config_file=/path/to/some/config.txt
        --output_dir=/path/to/output/dir
      [ 
-	   --gatk_jar=/path/to/gatk.jar
-	   --java_path=/path/to/java
+	   --tmpdir=/path/to/tmp
+	   --annovar_bin=/usr/bin/annovar
 	   --log=/path/to/file.log
        --debug=3
        --help
@@ -25,11 +25,8 @@ B<--config_file,-c>
 B<--output_dir,-o>
 	Optional. Path to directory to write output to.  If not provided, use current directory
 
-B<--gatk_jar>
-	Optional. Path to the GATK JAR file.  If not provided, will use /usr/local/packages/GATK-3.7/GenomeAnalysisTK.jar
-
-B<--java_path>
-	Optiona. Path to JAVA executable from Java 8 JDK.  If not provided, will use /usr/bin/java
+B<--annovar_bin>
+	Optional. Path to the samtools bin directory.  If not provided, will use /usr/local/packages/annovar/
 
 B<--log,-l>
     Logfile.
@@ -72,8 +69,7 @@ my $debug = 1;
 my ($ERROR, $WARN, $DEBUG) = (1,2,3);
 my $logfh;
 
-use constant JAVA_PATH => "/usr/bin/java";
-use constant GATK_JAR => "/usr/local/packages/GATK-3.7/GenomeAnalysisTK.jar";
+use constant ANNOVAR_BIN => "/usr/local/packages/annovar/";
 ####################################################
 
 my %options;
@@ -88,9 +84,8 @@ sub main {
     my $results = GetOptions (\%options,
 						 "config_file|c=s",
 						 "output_dir|o=s",
-						 "gatk_jar=s",
-						 "java_path=s",
 						 "tmpdir|t=s",
+						 "annovar_bin=s",
                          "log|l=s",
                          "debug|d=s",
                          "help|h"
@@ -99,36 +94,41 @@ sub main {
     &check_options(\%options);
     read_config(\%options, \%config);
 
-	my $prefix = $config{'haplotype_caller'}{'Prefix'}[0];
+    my $prefix = $config{'global'}{'PREFIX'}[0];
 
     my %args = ( 
-			'--input_file' => $config{'haplotype_caller'}{'INPUT_FILE'}[0],
-			'--out' => $outdir."/$prefix.haplotype_caller.vcf",
-			'--reference_sequence' => $config{'haplotype_caller'}{'REFERENCE_FILE'}[0],
-			'--maxTotalReadsInMemory' => $config{'haplotype_caller'}{'MAX_READS_STORED'}[0],
-			'--standard_min_confidence_threshold_for_calling' => $config{'haplotype_caller'}{'STAND_CALL_CONF'}[0]
+			'-outfile' => $outdir."/$prefix.annovar.tbl",
+			'-protocol' => $config{'annovar'}{'PROTOCOL'}[0],
+			'-buildver' => $config{'annovar'}{'BUILDVER'}[0],
+			'-operation' => $config{'annovar'}{'OPERATION'}[0],
+			'-nastring' => $config{'annovar'}{'NASTRING'}[0]
     );
 
-	my $cmd = $options{'java_path'} . " -Djava.io.tmpdir=" .$options{tmpdir};
-    if (defined $config{'haplotype_caller'}{'Java_Memory'}) {
-	    $cmd .= " $config{'haplotype_caller'}{'Java_Memory'}[0]" ;
-    }
-    # Start building the Picard tools command
-    $cmd .= " -jar ".$options{'gatk_jar'}." --analysis_type HaplotypeCaller ";
+	# First run convert2annovar to convert VCF into readable annovar input
+	&_log($DEBUG, "Now running convert2annovar.pl");
+	my $avinput = "$outdir/$prefix.avinput";
+	my $cmd  = $options{'annovar_bin'}."/convert2annovar.pl --includeinfo --format vcf4 ";
+	$cmd .= "--outfile $avinput ";
+	$cmd .= $config{'annovar'}{'INPUT_FILE'}[0];
+	exec_command($cmd);
 
+    # Start building the annovar command
+	&_log($DEBUG, "Now running table_annovar.pl");
+    $cmd =  $options{'annovar_bin'}."/table_annovar.pl ";
+
+	$cmd .= $avinput . ' ';
+	$cmd .= $config{'annovar'}{'DB_PATH'}[0] . ' ';
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
         $cmd .= "${arg} ".$args{$arg}." " if defined $args{$arg};
     }
 
-	$cmd .= "--dontUseSoftClippedBases " if ($config{'haplotype_caller'}{"NO_SOFT_CLIPPED_BASES"}[0] == 1);
+	$cmd .= "-remove" if $config{'annovar'}{'REMOVE'} == 1;
+	$cmd .= "-vcfinput" if $config{'annovar'}{'VCFINPUT'} == 1;
+	$cmd .= $config{'annovar'}{'OTHER_ARGS'} if $config{'annovar'}{'OTHER_ARGS'};
 
     exec_command($cmd);
-
-    my $config_out = "$outdir/haplotype_caller." .$prefix.".config" ;
-    $config{'variant_filtration'}{'INPUT_FILE'}[0] = $outdir."/$prefix.haplotype_caller.vcf";
-    write_config(\%options, \%config, $config_out);
 }
 
 sub check_options {
@@ -147,12 +147,12 @@ sub check_options {
        &_log($ERROR, "Option $req is required") unless( $opts->{$req} );
    }
 
-   $opts->{'java_path'} = JAVA_PATH if !$opts->{'java_path'};
-   $opts->{'gatk_jar'} = GATK_JAR if !$opts->{'gatk_jar'};
+   $opts->{'annovar_bin'} = ANNOVAR_BIN if !$opts->{'annovar_bin'};
 
    $outdir = File::Spec->curdir();
     if (defined $opts->{'output_dir'}) {
         $outdir = $opts->{'output_dir'};
+
         if (! -e $outdir) {
            mkdir($opts->{'output_dir'}) ||
             die "ERROR! Cannot create output directory\n";

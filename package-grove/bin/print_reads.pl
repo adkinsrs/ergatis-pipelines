@@ -9,11 +9,11 @@ eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
 
 =head1 NAME
 
-indel_realigner.pl - Script to execute GATK's Indel Realigner on input BAM.
+print_reads.pl - Script to execute GATK's Print Reads on input BAM.
 
 =head1 SYNOPSIS
 
-indel_realigner.pl    --c config file
+print_reads.pl    --c config file
 		              [--o outdir] [-t tmpdir]
                       [--v]
 
@@ -32,7 +32,7 @@ indel_realigner.pl    --c config file
 
 =head1 DESCRIPTION
 
-Script to execute Indel Realigner from GATK software package on input BAM file.
+Script to execute Print Reads from GATK software package on input BAM file.
 
 =head1 AUTHOR
 
@@ -126,22 +126,24 @@ $sOutDir = File::Spec->canonpath($sOutDir);
 
 read_config(\%hCmdLineOption, \%hConfig);
 
-if (!defined $hConfig{'indel_realigner'}{'GATK_BIN'}[0]) {
-    $hConfig{'indel_realigner'}{'GATK_BIN'}[0] = GATK_BIN;
+my $prefix = $hConfig{'global'}{'PREFIX'}[0];
+
+if (!defined $hConfig{'print_reads'}{'GATK_BIN'}[0]) {
+    $hConfig{'print_reads'}{'GATK_BIN'}[0] = GATK_BIN;
 }
 
 $sCmd = "java ";
 
-if (defined $hConfig{'indel_realigner'}{'Java_Memory'}) {
-	$sCmd .= "$hConfig{'indel_realigner'}{'Java_Memory'}[0]" ;
+if (defined $hConfig{'print_reads'}{'Java_Memory'}) {
+	$sCmd .= "$hConfig{'print_reads'}{'Java_Memory'}[0]" ;
 }
 
-$sCmd  .= " -Djava.io.tmpdir=$hCmdLineOption{tmpdir} -jar " .  $hConfig{'indel_realigner'}{'GATK_BIN'}[0] . "/GenomeAnalysisTK.jar -T IndelRealigner " . 
-		  " -I $hConfig{'indel_realigner'}{'Infile'}[0] -o $sOutDir/$hConfig{'indel_realigner'}{'Prefix'}[0].realigned.bam ".
-		  " -targetIntervals $hConfig{'indel_realigner'}{'TargetInterval'}[0] -R $hConfig{'indel_realigner'}{'Reference'}[0] " ;
+$sCmd  .= " -Djava.io.tmpdir=$hCmdLineOption{tmpdir} -jar " .  $hConfig{'print_reads'}{'GATK_BIN'}[0] . "/GenomeAnalysisTK.jar -T PrintReads " . 
+		  " -I $hConfig{'print_reads'}{'Infile'}[0] -o $sOutDir/$prefix.base_recal.bam ".
+		  " -BQSR $hConfig{'print_reads'}{'BQSR'}[0] -R $hConfig{'global'}{'REFERENCE_FILE'}[0] " ;
 
-if (defined $hConfig{'indel_realigner'}{'OTHER_PARAMETERS'}) {
-	$sCmd .= $hConfig{'indel_realigner'}{'OTHER_PARAMETERS'}[0] ;
+if (defined $hConfig{'print_reads'}{'OTHER_PARAMETERS'}) {
+	$sCmd .= $hConfig{'print_reads'}{'OTHER_PARAMETERS'}[0] ;
 }
 
 
@@ -149,8 +151,8 @@ if (defined $hConfig{'indel_realigner'}{'OTHER_PARAMETERS'}) {
 #print "$sCmd\n";
 exec_command($sCmd);
 
-$config_out = "$sOutDir/indel_realigner.$hConfig{'indel_realigner'}{'Prefix'}[0].config" ;
-$hConfig{'base_recalibration'}{'Infile'}[0] = "$sOutDir/$hConfig{'indel_realigner'}{'Prefix'}[0].realigned.bam" ;
+$config_out = "$sOutDir/print_reads.$prefix.config" ;
+$hConfig{'haplotype_caller'}{'INPUT_FILE'}[0] = "$sOutDir/$prefix.base_recal.bam" ;
 
 write_config(\%hCmdLineOption,\%hConfig,$config_out);
 

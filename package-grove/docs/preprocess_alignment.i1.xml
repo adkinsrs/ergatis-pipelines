@@ -2,37 +2,15 @@
 
 <commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
     <commandSet type="serial">
-        <name>picard_processing</name>
-  		<command>
-    		<type>RunUnixCommand</type>
-    		<name>replace_config_keys</name>
-    		<state>incomplete</state>
-    		<executable>$;BIN_DIR$;/replace_config_keys</executable>
-    		<param>  
-      			<key>--template_conf</key>
-      			<value>$;I_FILE_PATH$;</value>
-    		</param>
-    		<param>  
-      			<key>--output_conf</key>
-      			<value>$;I_FILE_PATH$;.final</value>
-    		</param>   
-    		<param>
-      			<key>stdout</key>
-	  			<value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/replace_input_config_keys.stdout</value>
-    		</param> 
-    		<param>
-      			<key>stderr</key>
-	  			<value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/replace_input_config_keys.stderr</value>
-    		</param>
-  		</command>
+        <name>preprocess_alignment</name>
 		<command>
             <type>RunUnixCommand</type>
-            <name>picard_processing</name>
+            <name>preprocess_alignment</name>
             <state>incomplete</state>
-            <executable>$;BIN_DIR$;/picard_processing</executable>
+            <executable>$;BIN_DIR$;/preprocess_alignment</executable>
             <param>
                 <key>--config_file</key>
-                <value>$;I_FILE_PATH$;.final</value>
+                <value>$;I_FILE_PATH$;</value>
             </param>
             <param>
                 <key>--output_dir</key>

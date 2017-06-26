@@ -2,16 +2,16 @@
 
 =head1 NAME
 
-extract_chromosomes.pl - Use samtools view to filter reads to those only from chromosomes
+haplotype_caller.pl - Wrapper script for GATK's HaplotypeCaller utility
 
 =head1 SYNOPSIS
 
- USAGE: extract_chromosomes.pl
+ USAGE: haplotype_caller.pl
        --config_file=/path/to/some/config.txt
        --output_dir=/path/to/output/dir
      [ 
-	   --tmp_dir=/path/to/tmp
-	   --samtools_bin=/path/to/samtools
+	   --gatk_jar=/path/to/gatk.jar
+	   --java_path=/path/to/java
 	   --log=/path/to/file.log
        --debug=3
        --help
@@ -25,11 +25,11 @@ B<--config_file,-c>
 B<--output_dir,-o>
 	Optional. Path to directory to write output to.  If not provided, use current directory
 
-B<--tmpdir,-t>
-	Optional. Path to directory to write temporary files to.  If not provided, use /tmp
+B<--gatk_jar>
+	Optional. Path to the GATK JAR file.  If not provided, will use /usr/local/packages/GATK-3.7/GenomeAnalysisTK.jar
 
-B<--samtools_bin>
-	Optional. Path to the samtools bin directory.  If not provided, will use /usr/local/bin/
+B<--java_path>
+	Optiona. Path to JAVA executable from Java 8 JDK.  If not provided, will use /usr/bin/java
 
 B<--log,-l>
     Logfile.
@@ -72,8 +72,8 @@ my $debug = 1;
 my ($ERROR, $WARN, $DEBUG) = (1,2,3);
 my $logfh;
 
-use constant SAMTOOLS_BIN => "/usr/local/bin/";
-use constant TMP_DIR => "/tmp";
+use constant JAVA_PATH => "/usr/bin/java";
+use constant GATK_JAR => "/usr/local/packages/GATK-3.7/GenomeAnalysisTK.jar";
 ####################################################
 
 my %options;
@@ -88,8 +88,9 @@ sub main {
     my $results = GetOptions (\%options,
 						 "config_file|c=s",
 						 "output_dir|o=s",
+						 "gatk_jar=s",
+						 "java_path=s",
 						 "tmpdir|t=s",
-						 "samtools_bin=s",
                          "log|l=s",
                          "debug|d=s",
                          "help|h"
@@ -98,29 +99,35 @@ sub main {
     &check_options(\%options);
     read_config(\%options, \%config);
 
-    my $prefix = $config{'extract_chromosomes'}{'Prefix'}[0];
+	my $prefix = $config{'global'}{'PREFIX'}[0];
 
     my %args = ( 
-			'-o' => $outdir."/$prefix.extract_chromosomes.bam",
+			'--input_file' => $config{'haplotype_caller'}{'INPUT_FILE'}[0],
+			'--out' => $outdir."/$prefix.haplotype_caller.vcf",
+			'--reference_sequence' => $config{'global'}{'REFERENCE_FILE'}[0],
+			'--maxTotalReadsInMemory' => $config{'global'}{'MAX_READS_STORED'}[0],
+			'--standard_min_confidence_threshold_for_calling' => $config{'haplotype_caller'}{'STAND_CALL_CONF'}[0]
     );
 
-    # Start building the Samtools command
-	my $tmp_dir_env = "TMP_DIR=".$options{'tmpdir'} . " ";
-	my $groups_str = " 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y MT";
+	my $cmd = $options{'java_path'} . " -Djava.io.tmpdir=" .$options{tmpdir};
+    if (defined $config{'haplotype_caller'}{'Java_Memory'}) {
+	    $cmd .= " $config{'haplotype_caller'}{'Java_Memory'}[0]" ;
+    }
+    # Start building the Picard tools command
+    $cmd .= " -jar ".$options{'gatk_jar'}." --analysis_type HaplotypeCaller ";
 
-    my $cmd = $tmp_dir_env . $options{'samtools_bin'}."/samtools view -b ";
 
     # Add only passed in options to command
     foreach my $arg (keys %args) {
         $cmd .= "${arg} ".$args{$arg}." " if defined $args{$arg};
     }
 
-	$cmd .= $config{'extract_chromosomes'}{'INPUT_FILE'}[0] . " $groups_str";
+	$cmd .= "--dontUseSoftClippedBases " if ($config{'haplotype_caller'}{"NO_SOFT_CLIPPED_BASES"}[0] == 1);
 
     exec_command($cmd);
 
-    my $config_out = "$outdir/extract_chromosomes." .$prefix.".config" ;
-    $config{'preprocess_alignment'}{'INPUT_FILE'}[0] = $outdir."/$prefix.extract_chromosomes.bam";
+    my $config_out = "$outdir/haplotype_caller." .$prefix.".config" ;
+    $config{'variant_filtration'}{'INPUT_FILE'}[0] = $outdir."/$prefix.haplotype_caller.vcf";
     write_config(\%options, \%config, $config_out);
 }
 
@@ -140,13 +147,12 @@ sub check_options {
        &_log($ERROR, "Option $req is required") unless( $opts->{$req} );
    }
 
-   $opts->{'samtools_bin'} = SAMTOOLS_BIN if !$opts->{'samtools_bin'};
-   $opts->{'tmp_dir'} = TMP_DIR if !$opts->{'tmp_dir'};
+   $opts->{'java_path'} = JAVA_PATH if !$opts->{'java_path'};
+   $opts->{'gatk_jar'} = GATK_JAR if !$opts->{'gatk_jar'};
 
    $outdir = File::Spec->curdir();
     if (defined $opts->{'output_dir'}) {
         $outdir = $opts->{'output_dir'};
-
         if (! -e $outdir) {
            mkdir($opts->{'output_dir'}) ||
             die "ERROR! Cannot create output directory\n";
