@@ -10,13 +10,13 @@ for file in `ls -1 $1/bin`; do
 	fileext=${file##*.}
 	case $fileext in
 		pl)
-			/usr/local/bin/perl ${script_dir}/perl2wrapper_ergatis.pl INSTALL_BASE=$1 $file
+			/usr/bin/perl ${script_dir}/perl2wrapper_ergatis.pl INSTALL_BASE=$1 $file
 			;;
 		py)
-			/usr/local/bin/perl ${script_dir}/python2wrapper_ergatis.pl INSTALL_BASE=$1 $file
+			/usr/bin/perl ${script_dir}/python2wrapper_ergatis.pl INSTALL_BASE=$1 $file
 			;;
 		jl)
-			/usr/local/bin/perl ${script_dir}/julia2wrapper_ergatis.pl INSTALL_BASE=$1 $file
+			/usr/bin/perl ${script_dir}/julia2wrapper_ergatis.pl INSTALL_BASE=$1 $file
 			;;
 		*)
 			echo "$file is not a Perl, Python, or Julia file... skipping\n"

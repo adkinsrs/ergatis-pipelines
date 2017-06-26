@@ -14,7 +14,9 @@ sub get_perl_bins{
 	my $schemadocsdir='';
 	my $fname = '';
 
-    my $perl_path = $^X;  ## can be overwritten below
+	#my $perl_path = $^X;  ## can be overwritten below
+    my $perl_path = `which perl`;  ## can be overwritten below
+	chomp $perl_path;
     
     foreach my $arg (@ARGV){
         if($arg =~ /INSTALL_BASE/){
