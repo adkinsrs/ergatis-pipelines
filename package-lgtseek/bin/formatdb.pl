@@ -9,7 +9,7 @@ use Getopt::Long;
 
 my $options = {};
 
-GetOptions( $options, 'input_file_list|l:s', 'input_files|f:s', 'formatdb_path|p=s', 'protein=s', 'database_name|n=s' );
+GetOptions( $options, 'input_file_list|l:s', 'input_files|f:s', 'makeblastdb_path|p=s', 'protein=s', 'database_name|n=s' );
 
 my $files = "";
 
@@ -21,7 +21,7 @@ if( $$options{'input_file_list'} ) {
 	$files .= get_files( $$options{'input_file_list'} );
 }
 
-my $dbtype = $$options{'protein'} == 'T' ? "prot" : "nucl";
+my $dbtype = $$options{'protein'} eq 'T' ? "prot" : "nucl";
 
 my $command = "$$options{'makeblastdb_path'} -dbtype $dbtype -parse_seqids -hash_index -in '$files' -out $$options{'database_name'}";
 
