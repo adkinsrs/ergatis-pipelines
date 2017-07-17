@@ -17,12 +17,12 @@
 				<name>lgtseek_classify_reads.default</name>
 			</commandSet>
 		</commandSet>
+		<commandSet type="serial">
+			<state>incomplete</state>
+			<name>formatdb.references</name>
+		</commandSet>
 		<commandSet type="parallel">
 			<state>incomplete</state>
-			<commandSet type="serial">
-				<state>incomplete</state>
-				<name>formatdb.references</name>
-			</commandSet>
 			<!-- LGT side -->
 			<commandSet type="serial">
 				<state>incomplete</state>
