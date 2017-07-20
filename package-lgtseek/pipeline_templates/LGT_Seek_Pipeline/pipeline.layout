@@ -17,10 +17,6 @@
 				<name>lgtseek_classify_reads.default</name>
 			</commandSet>
 		</commandSet>
-		<commandSet type="serial">
-			<state>incomplete</state>
-			<name>formatdb.references</name>
-		</commandSet>
 		<commandSet type="parallel">
 			<state>incomplete</state>
 			<!-- LGT side -->
@@ -49,7 +45,7 @@
 						</commandSet>
 						<commandSet type="serial">
 							<state>incomplete</state>
-							<name>blastn_plus.references_r</name>
+							<name>blastn_plus.nt_r</name>
 						</commandSet>
 						<commandSet type="serial">
 							<state>incomplete</state>
@@ -99,7 +95,7 @@
 						</commandSet>
 						<commandSet type="serial">
 							<state>incomplete</state>
-							<name>blastn_plus.references_d</name>
+							<name>blastn_plus.nt_d</name>
 						</commandSet>
 						<commandSet type="serial">
 							<state>incomplete</state>
