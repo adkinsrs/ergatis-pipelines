@@ -16,16 +16,18 @@ eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
 
 =head1 SYNOPSIS
 
-    align_hisat2_split_stats.pl  --i <path to mapstats list file>   
-                           [--o outdir] [--v]
+    align_hisat2_stats.pl  --i <path to mapstats list file>   
+                           [--o outdir --h <hisat2.bam.list] [--v]
 
     parameters in [] are optional
     do NOT type the carets when specifying options
 
 =head1 OPTIONS
     
-    --i  <bam list file>   = /list of mapstats files.
-   
+    --i  <mapstats list file>   = /list of mapstats files.
+
+	--h <hisat2_bam_list> = Path to HISAT2 BAM output list.  Optional
+
     --o <output dir>       = /path/to/output directory. Optional.[PWD]
 
     --v                    = generate runtime messages. Optional
@@ -72,7 +74,7 @@ my %hCmdLineOption = ();
 my $sHelpHeader = "\nThis is ".PROGRAM."\n";
 
 GetOptions( \%hCmdLineOption,
-            'outdir|o=s', 'infile|i=s', 
+            'outdir|o=s', 'infile|i=s', 'hisat2_list|h=s',
             'verbose|v',
             'debug',
             'help',
@@ -176,6 +178,23 @@ foreach $key (keys (%bam)) {
 		$tot_reads = $bam{$key}{'tot_reads'};
 	}
     
+	# Find HISAT2 stderr file that corresponds to this prefix, if list provided
+	# Use 'total_reads' value instead of the default value from samtools_alignment_stats
+    if (defined $hCmdLineOption{'hisat2_list'}) {
+        open HISAT, $hCmdLineOption{'hisat2_list'} or die "Cannot open HISAT2 BAM list for reading";
+        while (<HISAT>) {
+            chomp;
+			if (/$prefix\.accepted_hits\.bam$/) {
+				my $file = $_;
+				# NOTE - could fail if there is 2+ BAM outputs in a group
+                $file =~ s/$prefix\.accepted_hits\.bam/hisat2.stderr/;
+				$tot_reads = get_total_reads_from_hisat_stderr($file);
+				last;
+			}
+		}
+		close HISAT
+	}
+
     ###Percent mapped..
     $p_mapped = sprintf("%.2f",eval(($readcount/$tot_reads ) * 100)); 
 
@@ -194,6 +213,20 @@ foreach $key (keys (%bam)) {
 
 }   
 close $out_all;
+
+sub get_total_reads_from_hisat_stderr {
+    my $hisat_stderr = shift;
+	my $total_reads;
+    open HS_IN, $hisat_stderr or die "Cannot open HISAT2 stderr file for reading:#!\n";
+    while (<HS_IN>) {
+      chomp;
+	  if (/(\d+) reads; of these:$/) {
+        $total_reads = $1 * 2;
+	  }
+	}
+	close HS_IN;
+	return $total_reads;
+}
 
 ################################################################################
 ### Subroutines

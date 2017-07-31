@@ -149,7 +149,9 @@ $sSizeFile = File::Spec->rel2abs("$sOutDir/$sPrefix.chromosome.sizes");
 ($bDebug || $bVerbose) ? 
 	print STDERR "\nGenerating $sSizeFile .....\n" : ();
 
-$sCmd = "cut -f1,2 $sOutDir/$sRefFile.fai > $sSizeFile";
+my $sIndexFile = "$sOutDir/$sRefFile.fai";
+
+$sCmd = "cut -f1,2 $sIndexFile > $sSizeFile";
 
 exec_command($sCmd);
 
@@ -167,10 +169,10 @@ $sSampleId =~ s/\.bam$//;
 if ($hCmdLineOption{'org-type'} eq 'euk') {
 
     ####Exonic Bed File
-    $sSortedFile = Process_Annotation(\%hCmdLineOption, $hCmdLineOption{'annotation'}, $hCmdLineOption{'annotationfiletype'}, "exonic", $sOutDir);
+    $sSortedFile = Process_Annotation(\%hCmdLineOption, $hCmdLineOption{'annotation'}, $hCmdLineOption{'annotationfiletype'}, $sIndexFile, "exonic", $sOutDir);
    
     ####Genic Bed File
-    $sGenicFile = Generate_Gene_BedFile(\%hCmdLineOption, $hCmdLineOption{'annotation'}, $hCmdLineOption{'annotationfiletype'}, "genic", $sOutDir);
+    $sGenicFile = Generate_Gene_BedFile(\%hCmdLineOption, $hCmdLineOption{'annotation'}, $hCmdLineOption{'annotationfiletype'}, $sIndexFile, "genic", $sOutDir);
 
     ####Intronic Bed file
     $sIntronicBedFile = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sSortedFile, ".exonic.sorted.bed");
@@ -190,26 +192,38 @@ if ($hCmdLineOption{'org-type'} eq 'euk') {
     }
 }
 else {    
-    $sGenicFile = Process_Annotation(\%hCmdLineOption, $hCmdLineOption{'annotation'}, $hCmdLineOption{'annotationfiletype'}, "genic", $sOutDir);
+    $sGenicFile = Process_Annotation(\%hCmdLineOption, $hCmdLineOption{'annotation'}, $hCmdLineOption{'annotationfiletype'}, $sIndexFile, "genic", $sOutDir);
 }
 
-$sGenicBedFile = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sGenicFile, ".bed");
+$sGenicBedFile = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sGenicFile, ".sorted.bed");
 $sGenicBedFile .= '.sanitized.bed';
 $sCmd = $hCmdLineOption{'bedtools_bin_dir'}."/bedtools merge".
 			" -s -i ".$sGenicFile." > ".$sGenicBedFile;
 exec_command($sCmd);
 
-####Intergenic Bed file
-$sIntergenicBedFile = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sGenicBedFile, ".genic.sorted.sanitized.bed");
-$sIntergenicBedFile .= '.intergenic.sorted.sanitized.bed';
-$sCmd = $hCmdLineOption{'bedtools_bin_dir'}."/bedtools complement".
-			" -i ".$sGenicBedFile.
-			" -g ".$sSizeFile.
-			" > ".$sIntergenicBedFile;
-		
+# Sadkins - 7/25/17 - During a test run, the merge unsorted the sorted bed file
+my $sGenicSortedBedFile = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sGenicBedFile, ".sanitized.bed");
+$sGenicSortedBedFile .= '.sorted.sanitized.bed';
+$sCmd = $hCmdLineOption{'bedtools_bin_dir'}."/bedtools sort".
+		#" -faidx $sIndexFile".
+		" -i $sGenicBedFile > $sGenicSortedBedFile";
 exec_command($sCmd);
 
+####Intergenic Bed file
+$sIntergenicBedFile = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sGenicSortedBedFile, ".genic.sorted.sanitized.bed");
+$sIntergenicBedFile .= '.intergenic.sanitized.bed';
+$sCmd = $hCmdLineOption{'bedtools_bin_dir'}."/bedtools complement".
+			" -i ".$sGenicSortedBedFile.
+			" -g ".$sSizeFile.
+			" > ".$sIntergenicBedFile;
+exec_command($sCmd);
 
+my $sIntergenicSortedBedFile = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sIntergenicBedFile, ".intergenic.sanitized.bed");
+$sIntergenicSortedBedFile .= '.intergenic.sorted.sanitized.bed';
+$sCmd = $hCmdLineOption{'bedtools_bin_dir'}."/bedtools sort".
+		#" -faidx $sIndexFile".
+		" -i $sIntergenicBedFile > $sIntergenicSortedBedFile ";
+exec_command($sCmd);
 
 ###Bed tools intersect
 
@@ -220,17 +234,17 @@ if ($hCmdLineOption{'org-type'} eq 'euk') {
     $intron_inter = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sIntronicBedFile, ".bed");
     $intron_inter .= '.intersect.bed';
     bed_intersect(\%hCmdLineOption,$hCmdLineOption{'infile'},$sIntronicBedFile,$intron_inter);  
-    $intergenic_inter = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sIntergenicBedFile, ".bed");
+    $intergenic_inter = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sIntergenicSortedBedFile, ".bed");
     $intergenic_inter .= '.intersect.bed';
-    bed_intersect(\%hCmdLineOption,$hCmdLineOption{'infile'},$sIntergenicBedFile,$intergenic_inter);
+    bed_intersect(\%hCmdLineOption,$hCmdLineOption{'infile'},$sIntergenicSortedBedFile,$intergenic_inter);
 }
 else {
     $genic_inter = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sGenicFile, ".bed");
     $genic_inter .= '.intersect.bed';
     bed_intersect(\%hCmdLineOption,$hCmdLineOption{'infile'},$sGenicFile,$genic_inter);  
-    $intergenic_inter = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sIntergenicBedFile, ".bed");
+    $intergenic_inter = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sIntergenicSortedBedFile, ".bed");
     $intergenic_inter .= '.intersect.bed';
-    bed_intersect(\%hCmdLineOption,$hCmdLineOption{'infile'},$sIntergenicBedFile,$intergenic_inter);
+    bed_intersect(\%hCmdLineOption,$hCmdLineOption{'infile'},$sIntergenicSortedBedFile,$intergenic_inter);
 
 }
 
@@ -262,8 +276,8 @@ else {
 }
 
 print "Removing BED files........\n";
-$sCmd = "rm ".$sOutDir."/*.bed";
-exec_command($sCmd);
+#$sCmd = "rm ".$sOutDir."/*.bed";
+#exec_command($sCmd);
 
 exit;
 
@@ -325,7 +339,7 @@ while (<$genic_file>) {
 	$hcount{$read1}{$tag}[2]++;             # Increment Intergenic Count
     }
     else {
-        print "Unmapped read encountered. Error, if input BAM file was from TopHat. May be encountered in Bowtie output\n";
+        print "Unmapped read '$read1' encountered. Error, if input BAM file was from TopHat. May be encountered in Bowtie output\n";
     }
     
     # Total number of maps for each read
@@ -397,6 +411,7 @@ while (<$exon_file>) {
         die "Error: The input files are not correct. Use sorted by name bam file";
     }
 
+	# If a new read is encountered, tally distribution of previous read
     if (!(exists $hcount{$read1})) {
         foreach $k (keys %hcount) {
             foreach $k1 (keys %{$hcount{$k}}) {
@@ -412,10 +427,15 @@ while (<$exon_file>) {
     
     $hcount{$read1}{$tag} = [0,0,0,0] if (!(exists $hcount{$read1}{$tag}));
 
-    $e_count = (split (/\t/,$_))[6];             # Read exonic map count for read
-    $in_count = (split (/\t/,$in_line))[6];      # Read intronic map count for read
-    $it_count = (split (/\t/,$it_line))[6];      # Read intergenic map count for read
+	# NOT COMPATABLE WITH HISAT2 - Sadkins 7/25/17
+	#$e_count = (split (/\t/,$_))[6];             # Read exonic map count for read
+	#$in_count = (split (/\t/,$in_line))[6];      # Read intronic map count for read
+	#$it_count = (split (/\t/,$it_line))[6];      # Read intergenic map count for read
     
+    $e_count = (split (/\t/,$_))[-1];             # Read exonic map count for read
+    $in_count = (split (/\t/,$in_line))[-1];      # Read intronic map count for read
+    $it_count = (split (/\t/,$it_line))[-1];      # Read intergenic map count for read
+
     if ($e_count >= 1) {
 	$hcount{$read1}{$tag}[1]++;             # Increment Exonic Count
     }
@@ -426,7 +446,7 @@ while (<$exon_file>) {
 	$hcount{$read1}{$tag}[3]++;             # Increment Intergenic Count
     }
     else {
-        print "Unmapped read encountered. Error, if input BAM file was from TopHat. May be encountered in Bowtie output\n";
+        print "Unmapped read '$read1' encountered. Error, if input BAM file was from TopHat. May be encountered in Bowtie output\n";
     }
     
     # Total number of maps for each read
@@ -530,6 +550,7 @@ sub exec_command {
 #   phCmdLineOption		= pointer to hash containing command line options
 #   sAnnotationFile		= path to annotation file
 #   sExtension			= file extension for annotation file
+#   sIndexFile			= path to reference .fai file
 #   sRegion				= region tag to be added to the output file
 #   sOutDir				= output directory
 #
@@ -550,6 +571,7 @@ sub Process_Annotation {
     my $phCmdLineOption		= shift;
     my $sAnnotationFile		= shift;
     my $sExtension			= shift;
+	my $sIndexFile			= shift;
     my $sRegion				= shift;
     my $sOutDir				= shift;
 
@@ -557,6 +579,7 @@ sub Process_Annotation {
 
     if (! ((defined $sAnnotationFile) &&
            (defined $sExtension) &&
+		   (defined $sIndexFile) &&
            (defined $sRegion) &&
            (defined $sOutDir) &&
            (defined $phCmdLineOption))) {
@@ -591,8 +614,10 @@ sub Process_Annotation {
     $sSortedFile = Init_OutFileName($phCmdLineOption, $sOutDir, $sBedFile, ".bed");
     $sSortedFile .= '.sorted.bed';
 	
+	# Use reference index sort order as a basis to sort this file
 	$sCmd = $phCmdLineOption->{'bedtools_bin_dir'}."/bedtools sort".
-			" -i ".$sBedFile." > ".$sSortedFile;
+			#" -faidx $sIndexFile".
+			" -i $sBedFile > $sSortedFile ";
 	
 	exec_command($sCmd);
 	
@@ -612,6 +637,7 @@ sub Process_Annotation {
 #   phCmdLineOption		= pointer to hash containing command line options
 #   sAnnotationFile		= path to annotation file
 #   sExtension			= file extension for annotation file
+#   sIndexFile			= path to reference .fai file
 #   sRegion				= region tag to be added to the output file
 #   sOutDir				= output directory
 #
@@ -632,6 +658,7 @@ sub Generate_Gene_BedFile {
     my $phCmdLineOption		= shift;
     my $sAnnotationFile		= shift;
     my $sExtension			= shift;
+	my $sIndexFile			= shift;
     my $sRegion				= shift;
     my $sOutDir				= shift;
 
@@ -639,6 +666,7 @@ sub Generate_Gene_BedFile {
 
     if (! ((defined $sAnnotationFile) &&
            (defined $sExtension) &&
+		   (defined $sIndexFile) &&
            (defined $sRegion) &&
            (defined $sOutDir) &&
            (defined $phCmdLineOption))) {
@@ -686,7 +714,7 @@ sub Generate_Gene_BedFile {
 	
 	$sCmd = $phCmdLineOption->{'bedtools_bin_dir'}."/bedtools groupby".
 			" -i ".$sBedFile.
-			" -g 1,4,6".
+			" -g 1,4,6" .
 			" -opCols 2,3".
 			" -ops min,max".
 			" > ".$sGroupedFile;
@@ -716,8 +744,10 @@ sub Generate_Gene_BedFile {
     $sSortedFile = Init_OutFileName($phCmdLineOption, $sOutDir, $sGroupedFile, ".bed");
     $sSortedFile .= '.sorted.bed';
 	
+	# Use reference index sort order as a basis to sort this file
 	$sCmd = $phCmdLineOption->{'bedtools_bin_dir'}."/bedtools sort".
-			" -i ".$sGroupedFile." > ".$sSortedFile;
+			#" -faidx $sIndexFile".
+			" -i $sGroupedFile > $sSortedFile";
 	
 	exec_command($sCmd);
 	

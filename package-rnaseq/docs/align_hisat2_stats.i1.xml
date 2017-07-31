@@ -13,6 +13,10 @@
                 <value>$;I_FILE_PATH$;</value>
             </param>
             <param>
+                <key>--hisat2_list</key>
+                <value>$;HISAT2_BAM_LIST$;</value>
+            </param>
+            <param>
                 <key>--outdir</key>
                 <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;</value>
             </param>
