@@ -184,10 +184,10 @@ foreach $key (keys (%bam)) {
         open HISAT, $hCmdLineOption{'hisat2_list'} or die "Cannot open HISAT2 BAM list for reading";
         while (<HISAT>) {
             chomp;
-			if (/$prefix\.accepted_hits\.bam$/) {
+			if (/$key\.accepted_hits\.bam$/) {
 				my $file = $_;
 				# NOTE - could fail if there is 2+ BAM outputs in a group
-                $file =~ s/$prefix\.accepted_hits\.bam/hisat2.stderr/;
+                $file =~ s/$key\.accepted_hits\.bam/hisat2.stderr/;
 				$tot_reads = get_total_reads_from_hisat_stderr($file);
 				last;
 			}

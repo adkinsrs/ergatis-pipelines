@@ -171,6 +171,17 @@ if( -e $path ) {
 	 $sample{$hCmdLineOption{'pipeline'}}{'tophat'} = $_;
     }
     close $filehandle;
+} 
+
+$path = $hCmdLineOption{'outrep'}."/align_hisat2_split_stats/".$hCmdLineOption{'pipeline'}."_hisat2_stats/align_hisat2_split_stats.txt.list";
+if (-e $path) {
+    open($filehandle,"<$path") or die "Cannot open Hisat2_stats.list file";
+    $flag = 'h';
+    while (<$filehandle>) {
+	chomp($_);
+	 $sample{$hCmdLineOption{'pipeline'}}{'hisat2'} = $_;
+    }
+    close $filehandle;
 }
 
 
@@ -181,6 +192,17 @@ if( -e $path ) {
     while (<$filehandle>) {
 	chomp($_);
 	 $sample{$hCmdLineOption{'pipeline'}}{'tophat'} = $_;
+    }
+    close $filehandle;
+} 
+
+$path = $hCmdLineOption{'outrep'}."/align_hisat2_stats/".$hCmdLineOption{'pipeline'}."_hisat2_stats/align_hisat2_stats.txt.list";
+if (-e $path) {
+    open($filehandle,"<$path") or die "Cannot open Hisat2_stats.list file";
+    $flag = 'h';
+    while (<$filehandle>) {
+	chomp($_);
+	 $sample{$hCmdLineOption{'pipeline'}}{'hisat2'} = $_;
     }
     close $filehandle;
 }
@@ -289,6 +311,22 @@ foreach $key (keys %sample) {
 	}
 	close $file;
     }    
+
+    if (exists $sample{$key}{'hisat2'}) {
+    open($file,"<$sample{$key}{'hisat2'}");
+	while (<$file>) {
+		if($_=~/^\#Sample/){
+			@arr = split(/\t/,$_);
+			$prefix = $arr[1];
+			<$file>;
+			$val = <$file>;
+			chomp ($prefix);
+			chomp ($val);
+			$final{$key}{$prefix}{'hisat2'} = $val;
+		}
+	}
+	close $file;
+    }
 }
 
 open ($fout,">$sOutDir/Summary.txt") or die "Error Cannot open output file.";
@@ -296,57 +334,61 @@ open ($ffile,">$sOutDir/Quality.pngs.list") or die "Error Cannot open output fil
 
 foreach (sort keys %final) {
     
-    if ($flag eq 'b') {
-	print $fout "\#Sample_ID\tTotal.Reads\tTotal.Mapped.Reads\tPercent.Mapped.Reads\tPercent.Properly.Paired";
-	if ($flag_per == 1) {print $fout "\tUniquely.Mapped.Reads\tPercent.Genic\tPercent.Intergenic";}
-	if ($rpkm_flag == 1) {print $fout "\tTotal.Features\tFeatures.With.Coverage\tAvg.RPKM\n";} 
-	else {print $fout "\n";}
-    }
-    if ($flag eq 't') {
-	print $fout "\#Sample_ID\tTotal.Reads\tTotal.Mapped.Reads\tPercent.Mapped.Reads\tPercent.Properly.Paired";
-	if ($flag_per == 1) {print $fout "\tUniquely.Mapped.Reads\tPercent.Exonic\tPercent.Intronic\tPercent.Intergenic";}
-	if ($rpkm_flag == 1) {print $fout "\tTotal.Features\tFeatures.With.Coverage\tAvg.RPKM\n";} 
-	else {print $fout "\n";}
-    }
+	if ($flag eq 'b') {
+		print $fout "\#Sample_ID\tTotal.Reads\tTotal.Mapped.Reads\tPercent.Mapped.Reads\tPercent.Properly.Paired";
+		if ($flag_per == 1) {print $fout "\tUniquely.Mapped.Reads\tPercent.Genic\tPercent.Intergenic";}
+		if ($rpkm_flag == 1) {print $fout "\tTotal.Features\tFeatures.With.Coverage\tAvg.RPKM\n";} 
+		else {print $fout "\n";}
+	}
+	if ($flag eq 't' || $flag eq 'h') {
+		print $fout "\#Sample_ID\tTotal.Reads\tTotal.Mapped.Reads\tPercent.Mapped.Reads\tPercent.Properly.Paired";
+		if ($flag_per == 1) {print $fout "\tUniquely.Mapped.Reads\tPercent.Exonic\tPercent.Intronic\tPercent.Intergenic";}
+		if ($rpkm_flag == 1) {print $fout "\tTotal.Features\tFeatures.With.Coverage\tAvg.RPKM\n";} 
+		else {print $fout "\n";}
+	}
     
-    if ($flag eq 'a') {
-    	print $fout "\#Sample_ID\tTotal.Features\tFeatures.With.Coverage\tAvg.RPKM\n";
-    }
+	if ($flag eq 'a') {
+		print $fout "\#Sample_ID\tTotal.Features\tFeatures.With.Coverage\tAvg.RPKM\n";
+	}
 
 
-    foreach $f1 (sort keys %{$final{$_}}) {
+	foreach $f1 (sort keys %{$final{$_}}) {
 
-	print $fout "$f1\t";
-	if (exists $final{$_}{$f1}{'bowtie'}){	    
-	    print $fout "$final{$_}{$f1}{'bowtie'}";
+		print $fout "$f1\t";
+		if (exists $final{$_}{$f1}{'bowtie'}){	    
+			print $fout "$final{$_}{$f1}{'bowtie'}";
+		}
+		if (exists $final{$_}{$f1}{'tophat'}){
+			print $fout "$final{$_}{$f1}{'tophat'}";
+		}
+		if (exists $final{$_}{$f1}{'hisat2'}){	    
+			print $fout "$final{$_}{$f1}{'hisat2'}";
+		}
+
+		if (exists $final{$_}{$f1}{'percent'}){
+			$val = (split(/:/,$final{$_}{$f1}{'percent'}[1]))[1];
+			$val =~ s/\s//g;
+			print $fout "\t$val";
+			@arr = split(/\t/,$final{$_}{$f1}{'percent'}[3]);
+			foreach $a (@arr) {
+				print $fout "\t$a";
+			}
+		}
+
+		if (exists $final{$_}{$f1}{'rpkm'}){
+			$val = (split(/[\:\(]/,$final{$_}{$f1}{'rpkm'}[0]))[1];
+			$val =~ s/\s//g;
+			print $fout "\t$val";
+			$val = (split(/[\:\(]/,$final{$_}{$f1}{'rpkm'}[0]))[2];
+			$val =~ s/[a-zA-Z\)]//g;
+			$val =~ s/\s//g;
+			print $fout "\t$val";
+			$val = (split(/[\:\(]/,$final{$_}{$f1}{'rpkm'}[4]))[1];
+			$val =~ s/\s//g;
+			print $fout "\t$val";
+		}
+		print $fout "\n";
 	}
-	if (exists $final{$_}{$f1}{'tophat'}){
-	    print $fout "$final{$_}{$f1}{'tophat'}";
-	}
-	if (exists $final{$_}{$f1}{'percent'}){
-	    $val = (split(/:/,$final{$_}{$f1}{'percent'}[1]))[1];
-	    $val =~ s/\s//g;
-	    print $fout "\t$val";
-	    @arr = split(/\t/,$final{$_}{$f1}{'percent'}[3]);
-	    foreach $a (@arr) {
-		print $fout "\t$a";
-	    }
-	}
-	if (exists $final{$_}{$f1}{'rpkm'}){
-	    $val = (split(/[\:\(]/,$final{$_}{$f1}{'rpkm'}[0]))[1];
-	    $val =~ s/\s//g;
-	    print $fout "\t$val";
-	    $val = (split(/[\:\(]/,$final{$_}{$f1}{'rpkm'}[0]))[2];
-	    $val =~ s/[a-zA-Z\)]//g;
-	    $val =~ s/\s//g;
-	    print $fout "\t$val";
-	    $val = (split(/[\:\(]/,$final{$_}{$f1}{'rpkm'}[4]))[1];
-	    $val =~ s/\s//g;
-	    print $fout "\t$val";
-	    
-	}
-	print $fout "\n";
-    }
 }
 
 foreach (keys %fastqc_png) {
