@@ -44,7 +44,7 @@ B<--build_indexes,-B>
 	If the flag is enabled, will build indexes using BWA in the pipeline.  If you are using pre-build indexes it is important they are compatible with the version of BWA running in the pipeline (0.7.12 for internal Ergatis, 0.7.15 for Docker Ergatis).
 
 B<--skip_alignment,-S>
-    If the flag is enabled, then assumes the BAM input file has already been aligned to a reference, and will skipthe "lgt_bwa" alignment step.  The input will instead be passed straight to the "lgt_bwa_post_process" component.  Note that this can only apply in the good donor/unknown recipient use case or the good recipient/unknown donor use case.  Furthermore, the genome reference will still be required for mpileup coverage downstream in the pipeline.
+    If the flag is enabled, then assumes the BAM input file has already been aligned to a reference, and will skipthe "lgt_bwa" alignment step.  The input will instead be passed straight to the "lgt_bwa_classify_reads" component.  Note that this can only apply in the good donor/unknown recipient use case or the good recipient/unknown donor use case.  Furthermore, the genome reference will still be required for mpileup coverage downstream in the pipeline.
 
 B<--template_directory,-t>
 	Path of the template configuration and layout files used to create the pipeline config and layout files.
@@ -224,12 +224,12 @@ sub main {
 		# If starting from BAM instead of SRA, then change QUERY_FILE to use BAM input
 		if ($skip_alignment) {
 			if ( $donor_only ) {
-				$config{"lgt_bwa_post_process default"}->{'$;DONOR_FILE_LIST$;'} = '';
-				$config{"lgt_bwa_post_process default"}->{'$;DONOR_FILE$;'} = $options{bam_input};
+				$config{"lgt_bwa_classify_reads default"}->{'$;DONOR_FILE_LIST$;'} = '';
+				$config{"lgt_bwa_classify_reads default"}->{'$;DONOR_FILE$;'} = $options{bam_input};
 				delete $config{"lgt_bwa donor"};
 			} elsif ( $host_only ) {
-				$config{"lgt_bwa_post_process default"}->{'$;RECIPIENT_FILE_LIST$;'} = '';
-				$config{"lgt_bwa_post_process default"}->{'$;RECIPIENT_FILE$;'} = $options{bam_input};
+				$config{"lgt_bwa_classify_reads default"}->{'$;RECIPIENT_FILE_LIST$;'} = '';
+				$config{"lgt_bwa_classify_reads default"}->{'$;RECIPIENT_FILE$;'} = $options{bam_input};
 				delete $config{"lgt_bwa recipient"};
 			} else {
 				&_log($ERROR, "ERROR: --skip_alignment only works with the good donor/unknown recipient use-case or the good recipient/unknown donor use-case. Exiting: $!");
@@ -263,16 +263,16 @@ sub main {
 	if ($donor_only) {
 		# In donor-only alignment cases, we do not keep the 'MM' matches
 
-		$config{"lgt_bwa_post_process default"}->{'$;RECIPIENT_FILE_LIST$;'} = '';
-		$config{"lgt_bwa_post_process default"}->{'$;LGT_DONOR_TOKEN$;'} = 'single_map';
-		$config{"lgt_bwa_post_process default"}->{'$;ALL_DONOR_TOKEN$;'} = 'all_map';
-		$config{"lgt_bwa_post_process default"}->{'$;ALL_RECIPIENT_TOKEN$;'} = 'no_map';
+		$config{"lgt_bwa_classify_reads default"}->{'$;RECIPIENT_FILE_LIST$;'} = '';
+		$config{"lgt_bwa_classify_reads default"}->{'$;LGT_DONOR_TOKEN$;'} = 'single_map';
+		$config{"lgt_bwa_classify_reads default"}->{'$;ALL_DONOR_TOKEN$;'} = 'all_map';
+		$config{"lgt_bwa_classify_reads default"}->{'$;ALL_RECIPIENT_TOKEN$;'} = 'no_map';
 
-		$config{"filter_dups_lc_seqs lgt_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
-		$config{"filter_dups_lc_seqs lgt_recipient"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.no_map.bam.list';
-		$config{"filter_dups_lc_seqs all_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.all_map.bam.list';
-		$config{'sam2fasta fasta_d'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_donor/filter_dups_lc_seqs.bam.list';
-		$config{'sam2fasta fasta_r'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_recipient/filter_dups_lc_seqs.bam.list';
+		$config{"filter_dups_lc_seqs lgt_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_classify_reads/$;PIPELINEID$;_default/lgt_bwa_classify_reads.single_map.bam.list';
+		$config{"filter_dups_lc_seqs lgt_recipient"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_classify_reads/$;PIPELINEID$;_default/lgt_bwa_classify_reads.no_map.bam.list';
+		$config{"filter_dups_lc_seqs all_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_classify_reads/$;PIPELINEID$;_default/lgt_bwa_classify_reads.all_map.bam.list';
+		$config{'sam2fasta fasta_d'}->{'$;INPUT_FILE$;'} ='$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_donor/filter_dups_lc_seqs.bam.list';
+		$config{'sam2fasta fasta_r'}->{'$;INPUT_FILE$;'} ='$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_recipient/filter_dups_lc_seqs.bam.list';
 
 		push @gather_output_skip, 'move all recipient BAM';
 		push @gather_output_skip, 'move all donor BAM';
@@ -298,15 +298,15 @@ sub main {
 			$config{"global"}->{'$;REFSEQ_REFERENCE$;'} = $options{refseq_reference};
 		}
 
-		$config{"lgt_bwa_post_process default"}->{'$;DONOR_FILE_LIST$;'} = '';
-		$config{"lgt_bwa_post_process default"}->{'$;LGT_RECIPIENT_TOKEN$;'} = 'single_map';
-		$config{"lgt_bwa_post_process default"}->{'$;ALL_DONOR_TOKEN$;'} = 'no_map';
-		$config{"lgt_bwa_post_process default"}->{'$;ALL_RECIPIENT_TOKEN$;'} = 'all_map';
+		$config{"lgt_bwa_classify_reads default"}->{'$;DONOR_FILE_LIST$;'} = '';
+		$config{"lgt_bwa_classify_reads default"}->{'$;LGT_RECIPIENT_TOKEN$;'} = 'single_map';
+		$config{"lgt_bwa_classify_reads default"}->{'$;ALL_DONOR_TOKEN$;'} = 'no_map';
+		$config{"lgt_bwa_classify_reads default"}->{'$;ALL_RECIPIENT_TOKEN$;'} = 'all_map';
 
-		$config{"filter_dups_lc_seqs lgt_recipient"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.single_map.bam.list';
-		$config{"filter_dups_lc_seqs lgt_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_post_process/$;PIPELINEID$;_default/lgt_bwa_post_process.no_map.bam.list';
-		$config{'sam2fasta fasta_r'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_recipient/filter_dups_lc_seqs.bam.list';
-		$config{'sam2fasta fasta_d'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_donor/filter_dups_lc_seqs.bam.list';
+		$config{"filter_dups_lc_seqs lgt_recipient"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_classify_reads/$;PIPELINEID$;_default/lgt_bwa_classify_reads.single_map.bam.list';
+		$config{"filter_dups_lc_seqs lgt_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_bwa_classify_reads/$;PIPELINEID$;_default/lgt_bwa_classify_reads.no_map.bam.list';
+		$config{'sam2fasta fasta_r'}->{'$;INPUT_FILE$;'} ='$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_recipient/filter_dups_lc_seqs.bam.list';
+		$config{'sam2fasta fasta_d'}->{'$;INPUT_FILE$;'} ='$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_donor/filter_dups_lc_seqs.bam.list';
 
 		push @gather_output_skip, 'move LGT donor mpileup';
 		push @gather_output_skip, 'move all donor mpileup';
@@ -333,7 +333,7 @@ sub main {
 		if ($lgt_infected) {
 			$config{'lgt_mpileup lgt_donor'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected/samtools_merge.bam.list';
 			$config{'lgt_mpileup lgt_recipient'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected/samtools_merge.bam.list';
-			$config{'sam2fasta fasta_r'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected/samtools_merge.bam.list';
+			$config{'sam2fasta fasta_r'}->{'$;INPUT_FILE$;'} ='$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected/samtools_merge.bam.list';
 			$config{'gather_lgtseek_files'}->{'RECIPIENT_LGT_BAM_OUTPUT'} = '$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_infected/filter_dups_lc_seqs.bam.list' if $included_subpipelines{'post'};
 		}
 	}
