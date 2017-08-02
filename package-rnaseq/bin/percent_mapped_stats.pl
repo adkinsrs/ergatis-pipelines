@@ -205,7 +205,7 @@ exec_command($sCmd);
 my $sGenicSortedBedFile = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sGenicBedFile, ".sanitized.bed");
 $sGenicSortedBedFile .= '.sorted.sanitized.bed';
 $sCmd = $hCmdLineOption{'bedtools_bin_dir'}."/bedtools sort".
-		#" -faidx $sIndexFile".
+		" -faidx $sIndexFile".
 		" -i $sGenicBedFile > $sGenicSortedBedFile";
 exec_command($sCmd);
 
@@ -221,7 +221,7 @@ exec_command($sCmd);
 my $sIntergenicSortedBedFile = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sIntergenicBedFile, ".intergenic.sanitized.bed");
 $sIntergenicSortedBedFile .= '.intergenic.sorted.sanitized.bed';
 $sCmd = $hCmdLineOption{'bedtools_bin_dir'}."/bedtools sort".
-		#" -faidx $sIndexFile".
+		" -faidx $sIndexFile".
 		" -i $sIntergenicBedFile > $sIntergenicSortedBedFile ";
 exec_command($sCmd);
 
@@ -276,8 +276,8 @@ else {
 }
 
 print "Removing BED files........\n";
-#$sCmd = "rm ".$sOutDir."/*.bed";
-#exec_command($sCmd);
+$sCmd = "rm ".$sOutDir."/*.bed";
+exec_command($sCmd);
 
 exit;
 
@@ -422,9 +422,11 @@ while (<$exon_file>) {
                elsif ($hcount{$k}{$k1}[3] >= 1) {$t_inter++;}    # Increment Intergenic Mapped Read Count
            }
         }
+		# Reset the hash table
         %hcount = ();
     }
     
+	# Initialize new read in hash
     $hcount{$read1}{$tag} = [0,0,0,0] if (!(exists $hcount{$read1}{$tag}));
 
 	# NOT COMPATABLE WITH HISAT2 - Sadkins 7/25/17
@@ -486,8 +488,10 @@ sub bed_intersect {
     my $bed_file = shift;
     my $outfile = shift;
     my $sCmd;
+	# Sadkins - 7/25/17 - As of BEDtools v2.18.0, -abam is deprecated and -a will work
     $sCmd = $phCmdLineOption->{'bedtools_bin_dir'}."/bedtools intersect".
-			" -abam ".$bam_file.
+			" -a ".$bam_file.
+			#" -abam ".$bam_file.
 			" -b ".$bed_file.
 			" -bed -c ".
 			" > ".$outfile;
@@ -616,7 +620,7 @@ sub Process_Annotation {
 	
 	# Use reference index sort order as a basis to sort this file
 	$sCmd = $phCmdLineOption->{'bedtools_bin_dir'}."/bedtools sort".
-			#" -faidx $sIndexFile".
+			" -faidx $sIndexFile".
 			" -i $sBedFile > $sSortedFile ";
 	
 	exec_command($sCmd);
@@ -746,7 +750,7 @@ sub Generate_Gene_BedFile {
 	
 	# Use reference index sort order as a basis to sort this file
 	$sCmd = $phCmdLineOption->{'bedtools_bin_dir'}."/bedtools sort".
-			#" -faidx $sIndexFile".
+			" -faidx $sIndexFile".
 			" -i $sGroupedFile > $sSortedFile";
 	
 	exec_command($sCmd);
