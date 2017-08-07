@@ -1093,11 +1093,12 @@ if (defined $hCmdLineOption{'alignment'} || defined $hCmdLineOption{'split'}) {
 	else{
 		%hParams = ();
 		if (defined $hCmdLineOption{'tophat_legacy'}){
-			$hParams{'SPLITBAM_LIST'} = ["$sListBamFile", "path to list of BAM files from alignment of split fastq file"];
+	    	$hParams{'INPUT_FILE'} = ["$sListFile", "path to list of alignment BAM files"];
+		    $hParams{'SPLITBAM_LIST'} = ["$sListBamFile", "path to list of BAM files from alignment of split fastq file"];
 		    include_component_layout($oPL, $sTemplateDir, "align_tophat_split_stats", "tophat_stats");
 		    add_config_section($fpPC, "align_tophat_split_stats", "tophat_stats");
 		} else { 
-			$hParams{'INPUT_FILE'} = ["$sMapStatsList", "path to list of mapstats files"];
+		    $hParams{'INPUT_FILE'} = ["$sMapStatsList", "path to list of mapstats files"];
 		    include_component_layout($oPL, $sTemplateDir, "align_hisat2_split_stats", "hisat2_stats");
 		    add_config_section($fpPC, "align_hisat2_split_stats", "hisat2_stats");
 		}
