@@ -372,8 +372,8 @@ sub samtools_sort {
 	
 	my $sCmd;
 	
-	$sCmd = $phCmdLineOption->{'samtools_bin_dir'}."/samtools sort".
-			" $sInFile $sOutPrefix";
+	$sCmd = $phCmdLineOption->{'samtools_bin_dir'}."/samtools sort ".
+			"-o $sOutPrefix $sInFile";
 	
 	exec_command($sCmd);
 	
