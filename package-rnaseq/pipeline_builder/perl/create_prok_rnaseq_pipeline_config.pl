@@ -1095,7 +1095,7 @@ sub is_gzipped {
 	}
 	else {
 		$sCmd = "file $sFile";
-		$sMsg = `$sCmd`;
+		$sMsg = `$sCmd` or die "Cannot determine file type of $sFile";
 		if ($sMsg =~ m/gzip/i) {
 			$bFlag = 1;
 		}
