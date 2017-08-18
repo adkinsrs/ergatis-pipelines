@@ -1,3 +1,18 @@
+// On load, let user know if their browser does not support multiple file uploading
+function CcheckMultiple() {
+    if(SupportMultiple()) {
+        document.querySelector("#multipleFileYes").setAttribute("style","");
+        document.querySelector("#multipleFileNo").setAttribute("style","display:none;");
+    }
+}
+
+function SupportMultiple() {
+    //do I support input type=file/multiple
+    var el = document.createElement("input");
+
+    return ("multiple" in el);
+}
+
 // Reset the form to its original appearance
 function ResetForm() {
 	var FormName = document.forms.namedItem("lgt_pipeline_step1_form");
@@ -8,9 +23,9 @@ function ResetForm() {
 // Clear the text input fields
 function ResetText() {
 	var FormName = document.forms.namedItem("lgt_pipeline_step1_form");
-	var textFields = ["tsra", "tfastq", "tbam", "tdonor", "trecipient", "trefseq"];
-    for (var i in textFields) {
-		field = FormName.elements[ textFields[i] ];
+	var formFields = ["tsra", "ifastq", "ibam", "idonor", "irecipient", "irefseq"];
+    for (var i in formFields) {
+		field = FormName.elements[ formFields[i] ];
        	field.value = '';
 	}
 }
@@ -39,6 +54,7 @@ function SetUpRefFields() {
 function SetUpInputFields() {
 	var FormName = document.forms.namedItem("lgt_pipeline_step1_form");
 	FormName.Step3.style.display = "block";
+    CheckMultiple();
 	if (document.getElementById("rbam").checked) {
 		document.getElementById('dbam').style.display = "block";
 		document.getElementById('dfastq').style.display = "none";

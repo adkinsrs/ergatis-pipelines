@@ -12,7 +12,7 @@ include_once('header.php');
 */  ?>
 
 <!-- HTML5 coding style suggests to keep indenting to a minimum and seperate code blocks with blank lines -->
-<form id='lgt_pipeline_step1_form' method="post" action="lgt_pipeline_complete.php">
+<form id='lgt_pipeline_step1_form' method="post" action="lgt_pipeline_complete.php" enctype="multipart/form-data">
 <br>
 
 <fieldset name="Step1">
@@ -32,7 +32,8 @@ include_once('header.php');
 
 <fieldset name="Step3" style="display:none">
 <legend class="legend">STEP 3: Provide the necessary file information <sup><a href='./help.php#form' target='_blank'>?</a></sup></legend>
-<p>Note: Hold CTRL to select multiple files for input. Hold SHIFT to select all files between two clicked files.
+<p id="multipleFileYes" style="display:none;">Note: Hold CTRL to select multiple files for input. Hold SHIFT to select all files between two clicked files.</p>
+<p id="multipleFileNo">It appears your browser does not allow for multiple file input.  You will only be able to have one input per field.</p>
 <div id="ddonor">
 <label for="idonor">Donor reference file(s)</label><br>
 <input type="input" name="tdonor[]" id="tdonor" class="textbox" multiple value=''><br><br>

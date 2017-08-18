@@ -24,13 +24,13 @@ include_once('header.php');
 						The reference files include:
 						<ul>
 							<li>
-								Donor genome reference - Either a single fasta sequence or a list file (ending in .list) consisting of paths to fasta references is accepted.  If passing a list file, the references must all be in the same directory as the list file.  If the "Build BWA Indexes" checkbox is checked, then a path to the reference index files, including the index prefix must be passed.  This reference is required for Use Cases 1 or 2.
+								Donor genome reference - One or more fasta sequences.  If the "Build BWA Indexes" checkbox is not checked, then all the files associated with the reference index must be uploaded instead.  This reference is required for Use Cases 1 or 2.
 							</li>
 							<li>
-								Recipient genome reference - Either a single fasta sequence or a list file (ending in .list) consisting of paths to fasta references is accepted.  If passing a list file, the references must all be in the same directory as the list file.  If the "Build BWA Indexes" checkbox is checked, then a path to the reference index files, including the index prefix must be passed. This reference is required for Use Cases 1 or 3.
+								Recipient genome reference - One or more fasta sequences.  If the "Build BWA Indexes" checkbox is not checked, then all the files associated with the reference index must be uploaded instead.  This reference is required for Use Cases 1 or 3.
 							</li>
 							<li>
-								RefSeq reference - A list of annotated nucleotide sequences located within the NCBI Reference Sequence database. If the "Build BWA Indexes" checkbox is checked, then a path to the reference index files, including the index prefix must be passed.  This reference is required for Use Case 3.
+								RefSeq reference - One or more annotated nucleotide sequences located within the NCBI Reference Sequence database. If the "Build BWA Indexes" checkbox is not checked, then all the files associated with the reference index must be uploaded instead.  This reference is required for Use Case 3.
 							</li>
 						</ul>
 					</li>
@@ -46,19 +46,10 @@ include_once('header.php');
 							</ul>
 							</li>
 							<li>
-							A FASTQ input file for a single sample.  Passed in one of the following ways:
-							<ul>
-								<li>FASTQ file path for a single-end read.  Can be compressed with GZIP</li>
-								<li>A file with the extension ".pair", which will find the two paired-end files with the same basename located in the same directory as the ".pair" file.</li>
-								<li>A list file containing a single file path to either of the previously mentioned files, or two file paths for each mate of a paired-end FASTQ set.  These files should end in "_1.fastq"/"_2.fastq" or "R1.fastq"/"R2.fastq".  In the case of the single-end or paired-end FASTQ paths, they can be compressed with GZIP.</li>
-							</ul>
+							A FASTQ input file or files associated with a single sample.  If passing paired-end files, these files should end in "_1.fastq"/"_2.fastq" or "R1.fastq"/"R2.fastq".  Can be compressed with GZIP before uploading
 							</li>
 							<li>
-							A BAM input file. Passed in one of the following ways:
-							<ul>
-								<li>One BAM input file. Can be compressed with GZIP.</li>
-								<li>A list file containing the file paths of one or more BAM files. If multiple BAM files are in the list file, then all BAM files will be merged prior to performing the first BWA alignment.  BAM files can be compressed with GZIP.
-							</ul>
+							A BAM input file or files.  Can be compressed with GZIP before uploading
 							</li>
 						</ul>
 					</li>

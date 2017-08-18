@@ -35,15 +35,17 @@
 		if ( !empty($_POST['tsra']) ) {
 			$args .= "--sra_id " . trim($_POST['tsra']) . " ";
 			$formValuesArr['r_input']['error'] = 0;
-		} elseif ( !empty($_POST['tbam']) ) {
-			$bam = trim($_POST['tbam']);
-			$bam = adjust_paths($bam, $dir, "/mnt/input_data/input_source");
-			$args .= "--bam_input $bam ";
+		} elseif ( !empty($_POST['ibam']) ) {
+			$bam = trim($_POST['ibam']);
+			$bam_list = '/mnt/input_data/bam.list';
+			create_list_file($_FILES['ibam'], $bam_list);
+			$args .= "--bam_input $bam_list ";
 			$formValuesArr['r_input']['error'] = 0;
-		} elseif ( !empty($_POST['tfastq']) ) {
-			$fastq = trim($_POST['tfastq']);
-			$fastq = adjust_paths($fastq, $dir, "/mnt/input_data/input_source");
-			$args .= "--fastq_input $fastq ";
+		} elseif ( !empty($_POST['ifastq']) ) {
+			$fastq = trim($_POST['ifastq']);
+			$fastq_list = '/mnt/input_data/fastq.list';
+			create_list_file($_FILES['ifastq'], $fastq_list);
+			$args .= "--fastq_input $fastq_list ";
 			$formValuesArr['r_input']['error'] = 0;
 		} else {
 			$errFlag++;
@@ -51,10 +53,11 @@
 			$formValuesArr['r_input']['msg'] = "An SRA ID, FASTQ input path, or BAM input path is required.";
 		}
 
-		if ( !empty($_POST['tdonor']) ) {
-			$donor = trim($_POST['tdonor']);
-			$donor = adjust_paths($donor, $dir, "/mnt/input_data/donor_ref");
-			$args .= "--donor_reference $donor ";
+		if ( !empty($_POST['idonor']) ) {
+			$donor = trim($_POST['idonor']);
+			$donor_list = '/mnt/input_data/donor.list';
+			create_list_file($_FILES['idonor'], $donor_list);
+			$args .= "--donor_reference $donor_list ";
 		} else {
 			if ( trim($_POST['r_usecase']) == 'case1' || trim($_POST['r_usecase']) == 'case2' || trim($_POST['r_usecase']) == 'case3' ){
 				$errFlag++;
@@ -62,10 +65,11 @@
 				$formValuesArr['r_input']['msg'] = "No donor input file found.";
 			}
 		}
-		if ( !empty($_POST['trecipient']) ) {
-			$recipient = trim($_POST['trecipient']);
-			$recipient = adjust_paths($recipient, $dir, "/mnt/input_data/recipient_ref");
-			$args .= "--host_reference $recipient ";
+		if ( !empty($_POST['irecipient']) ) {
+			$recipient = trim($_POST['irecipient']);
+			$recipient_list = '/mnt/input_data/recipient.list';
+			create_list_file($_FILES['irecipient'], $recipient_list);
+			$args .= "--host_reference $recipient_list ";
 		} else {
 			if ( trim($_POST['r_usecase']) == 'case1' || trim($_POST['r_usecase']) == 'case2' || trim($_POST['r_usecase']) == 'case4' ){
 				$errFlag++;
@@ -73,10 +77,11 @@
 				$formValuesArr['r_input']['msg'] = "No recipient input file found.";
 			}
 		}
-		if ( !empty($_POST['trefseq']) ) {
-			$refseq = trim($_POST['trefseq']);
-			$refseq = adjust_paths($refseq, $dir, "/mnt/input_data/refseq_ref");
-			$args .= "--refseq_reference $refseq ";
+		if ( !empty($_POST['irefseq']) ) {
+			$refseq = trim($_POST['irefseq']);
+			$refseq_list = '/mnt/input_data/refseq.list';
+			create_list_file($_FILES['irefseq'], $refseq_list);
+			$args .= "--refseq_reference $refseq_list ";
 		} else {
 			if ( trim($_POST['r_usecase']) == 'case4' ){
 				$errFlag++;
@@ -91,13 +96,13 @@
 
 
 		if ( trim($_POST['r_usecase']) == 'case2' ){
-			$args .= "--lgt_infected "
+			$args .= "--lgt_infected ";
 		}
 	}
 
 	if ($errFlag == 0) {
 		exec("/usr/bin/perl ./perl/create_lgt_pipeline_config.pl $args --template_directory /opt/ergatis/pipeline_templates", $exec_output, $exit_status);
-		#echo "/usr/bin/perl ./perl/create_lgt_pipeline_config.pl $args --template_directory /opt/ergatis/pipeline_templates";;
+		#echo "/usr/bin/perl ./perl/create_lgt_pipeline_config.pl $args --template_directory /opt/ergatis/pipeline_templates";
 
 		if ($exit_status > 0) {
 			$output_string = implode("\n", $exec_output);
@@ -141,32 +146,19 @@
 		exit(1);
 	}
 
-	# This function checks if the input file is a list.
-	# If it is a list, the paths of each file in list will be changed to reflect the location of the volume in the Docker container.  A new list file is created, and returned
-	# If not a list, path of the input file is changed to reflect the location of the volume in the Docker container and is returned
-	function adjust_paths ($filename, $new_dir, $mounted_dir) {
-		$file_parts = pathinfo($filename);
-		$file_base = basename($filename);
-		# File needs to reflect the mounted directory path, not the path on the host
-		$mounted_file = $mounted_dir . "/" . $file_base;
+	# Creates a list file out of the uploaded file array and returns it
+	function create_list_file($files, $list_file) {
+		# Ignore BWA index extensions
+        $ignored_extensions = ['.amb', '.ann', '.bwt', '.pac', '.sa'];
 
-		if ($file_parts['extension'] == 'list') {
-			# Construct filename for new list
-			$new_list = $new_dir . "/" . $file_base;
-
-			$fh = fopen($mounted_file, "r") or die("Cannot open $mounted_file - check the path to make sure it exists");
-			$new_fh = fopen($new_list, "w");
-			while (($line = fgets($fh)) !== false) {
-				$path_base = basename(trim($line));
-				fwrite($new_fh, $mounted_dir . "/" . $path_base . "\n");
-		    }
-			fclose($new_fh);
-		    fclose($fh);
-
-			return $new_list;
+		$fh = fopen($list_file, 'w');
+        foreach ($files['tmp_name'] as $file) {
+			$fileparts = pathinfo($file);
+			if (! in_array($fileparts['extension'], $ignored_extensions) ){
+				fwrite($fh, $file . "\n");
+		  	}
 		}
-		# This is the 'else' case
-		return $mounted_file;
+		fclose($fh);
 	}
 
 	function create_pipeline_dir ($local_dir) {
