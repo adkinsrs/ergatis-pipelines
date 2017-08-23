@@ -521,8 +521,12 @@ sub Generate_Gene_BedFile {
     $sSortedFile = Init_OutFileName($phCmdLineOption, $sOutDir, $sGroupedFile, ".bed");
     $sSortedFile .= '.sorted.bed';
 	
-	$sCmd = $phCmdLineOption->{'bedtools_bin_dir'}."/bedtools sort".
-			" -i ".$sGroupedFile." > ".$sSortedFile;
+	#$sCmd = $phCmdLineOption->{'bedtools_bin_dir'}."/bedtools sort".
+	#		" -i ".$sGroupedFile." > ".$sSortedFile;
+
+	# SAdkins - 8/21/17 - Switching to UNIX sort as it's faster and more memory-efficient
+	# Sort by chromosome, then by start position (http://bedtools.readthedocs.io/en/latest/content/tools/sort.html)
+	$sCmd = "sort -k 1,1 -k2,2n $sGroupedFile > $sSortedFile";
 	
 	exec_command($sCmd);
 	
@@ -894,10 +898,11 @@ sub Feature_Coverage {
 
 #    ($bDebug) ? print STDERR "In $sSubName\n" : ();
 	
+	# NOTE - Sadkins - As of v2.24.0 the coverage is computed for the A file, not the B file
 	$sCmd = $phCmdLineOption->{'bedtools_bin_dir'}."/bedtools coverage".
-			" -split".
-			" -abam ".$sInFile.
-			" -b ".$sBedFile.
+			" -split -sorted".
+			" -b ".$sInFile.
+			" -a ".$sBedFile.
 			" > ".$sOutFile;
 	
 	exec_command($sCmd);
