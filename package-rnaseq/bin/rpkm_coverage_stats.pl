@@ -900,7 +900,7 @@ sub Feature_Coverage {
 	
 	# NOTE - Sadkins - As of v2.24.0 the coverage is computed for the A file, not the B file
 	$sCmd = $phCmdLineOption->{'bedtools_bin_dir'}."/bedtools coverage".
-			" -split -sorted".
+			" -split ".
 			" -b ".$sInFile.
 			" -a ".$sBedFile.
 			" > ".$sOutFile;

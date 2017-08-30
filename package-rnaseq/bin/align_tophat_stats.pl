@@ -6,6 +6,9 @@ eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
 eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
     if 0; # not running under some shell
 
+eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
+    if 0; # not running under some shell
+
 ################################################################################
 ### POD Documentation
 ################################################################################
@@ -88,7 +91,7 @@ check_parameters(\%hCmdLineOption);
 my ($sOutDir,$prefix);
 my ($tophat_file, $mapstat_list, $mapstat_file, $f1, $path,$key,$pipeline1,$pipeline2);
 my %bam; 
-my ($cfile,$mfile,$lfile,$rfile,$pfile,$readcount,@arr,@arr1,$p_paired,$left_count,,$total_count,$tot_reads,$p_mapped,$fout,$out_all);
+my ($cfile,$mfile,$lfile,$rfile,$pfile,$readcount,@arr,@arr1,$p_paired,$left_count,$tot_reads,$p_mapped,$fout,$out_all);
 my $right_count=0;
 my $bDebug   = (defined $hCmdLineOption{'debug'}) ? TRUE : FALSE;
 my $bVerbose = (defined $hCmdLineOption{'verbose'}) ? TRUE : FALSE;
@@ -132,7 +135,7 @@ while (<$tophat_file>) {
     chomp($_);
     ($f1,$path,$prefix) = File::Spec->splitpath($_);
     @arr = split(/\./,$prefix);
-    $prefix =~ s/.accepted_hits.*//;
+    $prefix = $arr[0];
     if (!(exists $bam{$prefix})) {
 	if ( -e $path."prep_reads.info" ) {
 	    $bam{$prefix}{"prep"} = $path."prep_reads.info";
@@ -149,12 +152,11 @@ while (<$mapstat_file>) {
     chomp($_);
     ($f1,$path,$prefix) = File::Spec->splitpath($_);
     @arr = split(/\./,$prefix);
-    $prefix =~ s/.accepted_hits.*//;
+    $prefix = $arr[0];
     if (exists $bam{$prefix}) {
 	$bam{$prefix}{"mapstats"} = $_;
 	$_ =~ s/mapstats.txt/mapped_reads.count/;
 	$bam{$prefix}{"count"} = $_;
-    
     }
 }
 
@@ -163,8 +165,7 @@ close $mapstat_file;
 
 open ($out_all, ">$sOutDir/All_Samples.txt") or die "Error Cannot open output file";
 
-foreach $key (sort keys (%bam)) {
-    
+foreach $key (keys (%bam)) {
     open ($cfile, "<$bam{$key}{'count'}") or die "Error! Cannot open read count file";
     open ($mfile, "<$bam{$key}{'mapstats'}") or die "Error! Cannot open mapstats file";
 
@@ -201,9 +202,6 @@ foreach $key (sort keys (%bam)) {
     }
     
     if (exists ($bam{$key}{"prep"})) {	
-	$left_count = 0;
-	$right_count = 0;
-	$total_count = 0 ;
 	while(<$pfile>) {
 	    chomp ($_);
 	    if ($_ =~m/left_reads_in/) {
@@ -216,10 +214,6 @@ foreach $key (sort keys (%bam)) {
 		$right_count = $arr[1];
 		
 	    }
-      if ($_ =~m/reads_in/) {
-        @arr= split (/\=/,$_);
-        $total_count = $arr[1];
-      }
 	}
 	close $pfile;
  
@@ -251,7 +245,7 @@ foreach $key (sort keys (%bam)) {
     }
 	
     ###Total reads..
-    $tot_reads = $left_count + $right_count + $total_count;
+    $tot_reads = $left_count + $right_count;
     
     ###Percent mapped..
     $p_mapped = sprintf("%.2f",eval(($readcount/$tot_reads ) * 100)); 
