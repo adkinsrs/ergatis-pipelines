@@ -35,7 +35,7 @@ my %hCmdLineOption = ();
 my $sHelpHeader = "\nThis is ".PROGRAM." version ".VERSION."\n";
 
 my (@aRegions);
-my ($sRefFile, $sBamFile, $sAnnotationFile);
+my ($sRefFile, $sBamFile, $sAnnotationFile, $sIndexFile);
 my ($sGenicBedFile, $sExonicBedFile, $sIntronicBedFile, $sIntergenicBedFile);
 my ($sOutDir, $sSizeFile, $sOutFile, $sSortedFile, $sSummaryFile);
 my ($sPrefix, $sSampleId, $sRegion, $nTotalMappedReads, $nUniqueMappedReads);
@@ -155,51 +155,50 @@ die "\nERROR! No regions defined for rpkm calculations!\n" if (@aRegions < 1);
 	print STDERR "\nGenerating coverage statistics for the following regions :\n@aRegions\n" : ();
 
 foreach $sRegion (@aRegions) {
+	# process reference file
+	die "Error! Reference Fasta file not found!\n" if (! (defined $hCmdLineOption{'reffile'}) );
 	
-	if ($sRegion eq "genomic") {
-		# process reference file
+	$hCmdLineOption{'reffile'} = File::Spec->rel2abs($hCmdLineOption{'reffile'});
+	($_, $_, $sRefFile) = File::Spec->splitpath($hCmdLineOption{'reffile'});
+	
+	symlink $hCmdLineOption{'reffile'}, "$sOutDir/$sRefFile";
+	
+	if ( -e "$hCmdLineOption{'reffile'}.fai" ) {
+		symlink "$hCmdLineOption{'reffile'}.fai", "$sOutDir/$sRefFile.fai";
+	} else {
+		($bDebug || $bVerbose) ? 
+			print STDERR "\nIndexing $sRefFile .....\n" : ();
 		
-		die "Error! Reference Fasta file not found!\n" if (! (defined $hCmdLineOption{'reffile'}) );
+		$sCmd = $hCmdLineOption{'samtools_bin_dir'}."/samtools faidx".
+				" ".$sOutDir."/".$sRefFile;
 		
-		$hCmdLineOption{'reffile'} = File::Spec->rel2abs($hCmdLineOption{'reffile'});
-		($_, $_, $sRefFile) = File::Spec->splitpath($hCmdLineOption{'reffile'});
+		exec_command($sCmd);
 		
-		symlink $hCmdLineOption{'reffile'}, "$sOutDir/$sRefFile";
+		($bDebug || $bVerbose) ? 
+			print STDERR "Indexing $sRefFile ..... done\n" : ();
+	}
+
+	$sIndexFile = "$sOutDir/$sRefFile.fai";
+
+	# process chromosome size file
+	if ($hCmdLineOption{'regiontype'} =~ m/genomic|genic/) {
+		$sPrefix = $sRefFile;
+		$sPrefix =~ s/\.([A-za-z])+$//;
 		
-		if ( -e "$hCmdLineOption{'reffile'}.fai" ) {
-			symlink "$hCmdLineOption{'reffile'}.fai", "$sOutDir/$sRefFile.fai";
-		}
-		else {
-			($bDebug || $bVerbose) ? 
-				print STDERR "\nIndexing $sRefFile .....\n" : ();
-			
-			$sCmd = $hCmdLineOption{'samtools_bin_dir'}."/samtools faidx".
-					" ".$sOutDir."/".$sRefFile;
-			
-			exec_command($sCmd);
-			
-			($bDebug || $bVerbose) ? 
-				print STDERR "Indexing $sRefFile ..... done\n" : ();
-		}
+		$sSizeFile = File::Spec->rel2abs("$sOutDir/$sPrefix.chromosome.sizes");
 		
-		# process chromosome size file
-		if ($hCmdLineOption{'regiontype'} =~ m/genomic/) {
-			$sPrefix = $sRefFile;
-			$sPrefix =~ s/\.([A-za-z])+$//;
-			
-			$sSizeFile = File::Spec->rel2abs("$sOutDir/$sPrefix.chromosome.sizes");
-			
-			($bDebug || $bVerbose) ? 
-				print STDERR "\nGenerating $sSizeFile .....\n" : ();
-			
-			$sCmd = "cut -f1,2 $sOutDir/$sRefFile.fai > $sSizeFile";
-			
-			exec_command($sCmd);
-			
-			($bDebug || $bVerbose) ? 
-				print STDERR "Generating $sSizeFile ..... done\n" : ();
-		}
+		($bDebug || $bVerbose) ? 
+			print STDERR "\nGenerating $sSizeFile .....\n" : ();
 		
+		$sCmd = "cut -f1,2 $sOutDir/$sRefFile.fai > $sSizeFile";
+		
+		exec_command($sCmd);
+		
+		($bDebug || $bVerbose) ? 
+			print STDERR "Generating $sSizeFile ..... done\n" : ();
+	}
+
+	if ($sRegion eq "genomic") {	
 		# genomic coverage statistics
 		
 		if (! -e "$sOutDir/genomic_coverage") {
@@ -221,10 +220,10 @@ foreach $sRegion (@aRegions) {
 		# genic coverage statistics
 		
 		if (defined $hCmdLineOption{'groupby'}) {
-			$sGenicBedFile = Generate_Gene_BedFile(\%hCmdLineOption, $hCmdLineOption{'annotation'}, $hCmdLineOption{'annotationfiletype'}, "genic", $sOutDir);
+			$sGenicBedFile = Generate_Gene_BedFile(\%hCmdLineOption, $hCmdLineOption{'annotation'}, $hCmdLineOption{'annotationfiletype'}, "genic", $sIndexFile, $sOutDir);
 		}
 		else {
-			$sGenicBedFile = Process_Annotation(\%hCmdLineOption, $hCmdLineOption{'annotation'}, $hCmdLineOption{'annotationfiletype'}, "genic", $sOutDir);
+			$sGenicBedFile = Process_Annotation(\%hCmdLineOption, $hCmdLineOption{'annotation'}, $hCmdLineOption{'annotationfiletype'}, "genic", $sIndexFile, $sOutDir);
 		}
 		
 		if (! -e "$sOutDir/genic_coverage") {
@@ -235,7 +234,7 @@ foreach $sRegion (@aRegions) {
 			print STDERR "\nGenerating gene coverage statistics for $sBamFile .....\n" : ();
 		
 		$sOutFile = File::Spec->rel2abs("$sOutDir/genic_coverage/$sSampleId.genic.coverage.stats.txt");
-		Feature_Coverage(\%hCmdLineOption, $hCmdLineOption{'infile'}, $sGenicBedFile, $sOutFile, $nTotalMappedReads, $nUniqueMappedReads);
+		Feature_Coverage(\%hCmdLineOption, $hCmdLineOption{'infile'}, $sGenicBedFile, $sOutFile, $sSizeFile, $nTotalMappedReads, $nUniqueMappedReads);
 		
 		($bDebug || $bVerbose) ? 
 			print STDERR "Generating gene coverage statistics for $sBamFile ..... done\n" : ();
@@ -244,7 +243,7 @@ foreach $sRegion (@aRegions) {
 	if ($sRegion eq "exonic") {
 		# exonic coverage statistics
 		
-		$sSortedFile = Process_Annotation(\%hCmdLineOption, $hCmdLineOption{'annotation'}, $hCmdLineOption{'annotationfiletype'}, "exonic", $sOutDir);
+		$sSortedFile = Process_Annotation(\%hCmdLineOption, $hCmdLineOption{'annotation'}, $hCmdLineOption{'annotationfiletype'}, "exonic", $sIndexFile, $sOutDir);
 		
 		$sExonicBedFile = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sSortedFile, ".bed");
 	    $sExonicBedFile .= '.sanitized.bed';
@@ -262,7 +261,7 @@ foreach $sRegion (@aRegions) {
 			print STDERR "\nGenerating exon coverage statistics for $sBamFile .....\n" : ();
 		
 		$sOutFile = File::Spec->rel2abs("$sOutDir/exonic_coverage/$sSampleId.exonic.coverage.stats.txt");
-		Feature_Coverage(\%hCmdLineOption, $hCmdLineOption{'infile'}, $sExonicBedFile, $sOutFile, $nTotalMappedReads, $nUniqueMappedReads);
+		Feature_Coverage(\%hCmdLineOption, $hCmdLineOption{'infile'}, $sExonicBedFile, $sOutFile, $sSizeFile, $nTotalMappedReads, $nUniqueMappedReads);
 		
 		($bDebug || $bVerbose) ? 
 			print STDERR "Generating exon coverage statistics for $sBamFile ..... done\n" : ();
@@ -336,6 +335,7 @@ sub exec_command {
 #   sAnnotationFile		= path to annotation file
 #   sExtension			= file extension for annotation file
 #   sRegion				= region tag to be added to the output file
+#   sIndexFile			= Index file generated by samtools faidx
 #   sOutDir				= output directory
 #
 # Optional Parameters
@@ -356,6 +356,7 @@ sub Process_Annotation {
     my $sAnnotationFile		= shift;
     my $sExtension			= shift;
     my $sRegion				= shift;
+	my $sIndexFile			= shift;
     my $sOutDir				= shift;
 
     my $sSubName = (caller(0))[3];
@@ -364,6 +365,7 @@ sub Process_Annotation {
            (defined $sExtension) &&
            (defined $sRegion) &&
            (defined $sOutDir) &&
+		   (defined $sIndexFile) &&
            (defined $phCmdLineOption))) {
         croak "$sSubName - required parameters missing\n";
     }
@@ -397,7 +399,9 @@ sub Process_Annotation {
     $sSortedFile .= '.sorted.bed';
 	
 	$sCmd = $phCmdLineOption->{'bedtools_bin_dir'}."/bedtools sort".
-			" -i ".$sBedFile." > ".$sSortedFile;
+			" -i ".$sBedFile.
+			" -faidx ".$sIndexFile.
+			" > ".$sSortedFile;
 	
 	exec_command($sCmd);
 	
@@ -418,6 +422,7 @@ sub Process_Annotation {
 #   sAnnotationFile		= path to annotation file
 #   sExtension			= file extension for annotation file
 #   sRegion				= region tag to be added to the output file
+#   sIndexFile			= Ref index file generated by samtools faidx
 #   sOutDir				= output directory
 #
 # Optional Parameters
@@ -438,6 +443,7 @@ sub Generate_Gene_BedFile {
     my $sAnnotationFile		= shift;
     my $sExtension			= shift;
     my $sRegion				= shift;
+	my $sIndexFile			= shift;
     my $sOutDir				= shift;
 
     my $sSubName = (caller(0))[3];
@@ -445,6 +451,7 @@ sub Generate_Gene_BedFile {
     if (! ((defined $sAnnotationFile) &&
            (defined $sExtension) &&
            (defined $sRegion) &&
+		   (defined $sIndexFile) &&
            (defined $sOutDir) &&
            (defined $phCmdLineOption))) {
         croak "$sSubName - required parameters missing\n";
@@ -521,12 +528,10 @@ sub Generate_Gene_BedFile {
     $sSortedFile = Init_OutFileName($phCmdLineOption, $sOutDir, $sGroupedFile, ".bed");
     $sSortedFile .= '.sorted.bed';
 	
-	#$sCmd = $phCmdLineOption->{'bedtools_bin_dir'}."/bedtools sort".
-	#		" -i ".$sGroupedFile." > ".$sSortedFile;
-
-	# SAdkins - 8/21/17 - Switching to UNIX sort as it's faster and more memory-efficient
-	# Sort by chromosome, then by start position (http://bedtools.readthedocs.io/en/latest/content/tools/sort.html)
-	$sCmd = "sort -k 1,1 -k2,2n $sGroupedFile > $sSortedFile";
+	$sCmd = $phCmdLineOption->{'bedtools_bin_dir'}."/bedtools sort".
+			" -i ".$sBedFile.
+			" -faidx ".$sIndexFile.
+			" > ".$sSortedFile;
 	
 	exec_command($sCmd);
 	
@@ -821,7 +826,7 @@ sub Genome_Coverage {
 #    ($bDebug) ? print STDERR "In $sSubName\n" : ();
 	
 	$sCmd = $phCmdLineOption->{'bedtools_bin_dir'}."/bedtools genomecov".
-			" -split".
+			" -split -sorted".
 			" -ibam ".$sInFile.
 			" -g ".$sSizeFile.
 			" > ".$sOutFile;
@@ -852,6 +857,7 @@ sub Genome_Coverage {
 #   sInFile				= path to alignment SAM/BAM file
 #   sBedFile			= path to feature coords file in BED format
 #   sOutFile			= path to output stats file
+#   sSizeFile			= path to genome size file
 #   nTotalMappedReads	= total number of mapped reads
 #   nUniqueMappedReads	= total number of unique mapped reads
 #
@@ -873,6 +879,7 @@ sub Feature_Coverage {
     my $sInFile				= shift;
     my $sBedFile			= shift;
     my $sOutFile			= shift;
+	my $sSizeFile			= shift;
     my $nTotalMappedReads	= shift;
     my $nUniqueMappedReads	= shift;
 
@@ -881,6 +888,7 @@ sub Feature_Coverage {
     if (! ((defined $sInFile) &&
            (defined $sBedFile) &&
            (defined $sOutFile) &&
+		   (defined $sSizeFile) &&
            (defined $nTotalMappedReads) &&
            (defined $nUniqueMappedReads) &&
            (defined $phCmdLineOption))) {
@@ -900,9 +908,10 @@ sub Feature_Coverage {
 	
 	# NOTE - Sadkins - As of v2.24.0 the coverage is computed for the A file, not the B file
 	$sCmd = $phCmdLineOption->{'bedtools_bin_dir'}."/bedtools coverage".
-			" -split ".
+			" -split -sorted".
 			" -b ".$sInFile.
 			" -a ".$sBedFile.
+			" -g ".$sSizeFile.
 			" > ".$sOutFile;
 	
 	exec_command($sCmd);
