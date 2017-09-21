@@ -29,7 +29,7 @@ B<--gatk_jar>
 	Optional. Path to the GATK JAR file.  If not provided, will use /usr/local/packages/GATK-3.7/GenomeAnalysisTK.jar
 
 B<--java_path>
-	Optiona. Path to JAVA executable from Java 8 JDK.  If not provided, will use /usr/bin/java
+	Optional. Path to JAVA executable from Java 8 JDK.  If not provided, will use /usr/bin/java
 
 B<--log,-l>
     Logfile.
