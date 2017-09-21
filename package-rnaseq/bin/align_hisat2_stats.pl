@@ -17,7 +17,7 @@ eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
 =head1 SYNOPSIS
 
     align_hisat2_stats.pl  --i <path to mapstats list file>   
-                           [--o outdir --h <hisat2.bam.list] [--v]
+                           [--o outdir --h <hisat2.bam.list] [--s --v]
 
     parameters in [] are optional
     do NOT type the carets when specifying options
@@ -29,6 +29,8 @@ eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
 	--h <hisat2_bam_list> = Path to HISAT2 BAM output list.  Optional
 
     --o <output dir>       = /path/to/output directory. Optional.[PWD]
+
+	--s					   = Enable flag for single-stranded reads.  Default is double-stranded.
 
     --v                    = generate runtime messages. Optional
 
@@ -67,12 +69,13 @@ use constant PROGRAM => eval { ($0 =~ m/(\w+\.pl)$/) ? $1 : $0 };
 ##############################################################################
 ### Globals
 ##############################################################################
-
+#
 my %hCmdLineOption = ();
 my $sHelpHeader = "\nThis is ".PROGRAM."\n";
+my $singleStranded = 0;
 
 GetOptions( \%hCmdLineOption,
-            'outdir|o=s', 'infile|i=s', 'hisat2_list|h=s',
+            'outdir|o=s', 'infile|i=s', 'hisat2_list|h=s', 'single_stranded|s',
             'verbose|v',
             'debug',
             'help',
@@ -175,7 +178,7 @@ foreach $key (sort keys (%bam)) {
 				my $file = $_;
 				# NOTE - could fail if there is 2+ BAM outputs in a group
                 $file =~ s/$key\.accepted_hits\.bam/hisat2.stderr/;
-				$tot_reads = get_total_reads_from_hisat_stderr($file);
+				$tot_reads = get_total_reads_from_hisat_stderr($file, $singleStranded);
 				last;
 			}
 		}
@@ -205,12 +208,14 @@ close $out_all;
 
 sub get_total_reads_from_hisat_stderr {
     my $hisat_stderr = shift;
+	my $ss = shift;
 	my $total_reads;
     open HS_IN, $hisat_stderr or die "Cannot open HISAT2 stderr file for reading:#!\n";
     while (<HS_IN>) {
       chomp;
 	  if (/(\d+) reads; of these:$/) {
-        $total_reads = $1 * 2;
+        $total_reads = $1;
+		$total_reads *= 2 if $ss;
 	  }
 	}
 	close HS_IN;
@@ -228,6 +233,8 @@ sub check_parameters {
     if (! (defined $phOptions->{'infile'}) ) {
 	pod2usage( -msg => $sHelpHeader, -exitval => 1);
     }
+
+	$singleStranded = 1 if defined $phOptions->{'single_stranded'};
 }
 
 ################################################################################
