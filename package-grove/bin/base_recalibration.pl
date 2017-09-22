@@ -14,8 +14,9 @@ base_recalibration.pl - Script to execute GATK's Base Recalibration on input BAM
 =head1 SYNOPSIS
 
 base_recalibration.pl --c config file
-		              [--o outdir] [-t tmpdir]
-                      [--v]
+		                    [--o outdir] [-t tmpdir]
+							[--gatk_jar path] [--java_path path]
+                            [--v]
 
     parameters in [] are optional
     do NOT type the carets when specifying options
@@ -23,6 +24,10 @@ base_recalibration.pl --c config file
 =head1 OPTIONS
 
     --c <config> =    Path to config file with input parameters.
+
+    --gatk_jar   =    Optional. Path to the GATK JAR file.  If not provided, will use /usr/local/packages/GATK-3.7/GenomeAnalysisTK.jar
+
+    --java_path  =    Optional. Path to JAVA executable from Java 8 JDK.  If not provided, will use /usr/bin/java
     
     --o          =    Output directory
     
@@ -62,8 +67,8 @@ use constant FALSE => 0;
 use constant TRUE  => 1;
 
 
-use constant GATK_BIN => '/usr/local/packages/GenomeAnalysisTK-3.1.1' ;
-use constant JAVA_EXEC => '/usr/local/packages/jdk1.7.0_40' ;
+use constant JAVA_PATH => "/usr/bin/java";
+use constant GATK_JAR => "/usr/local/packages/GATK-3.7/GenomeAnalysisTK.jar";
 
 use constant VERSION => '1.0.0';
 use constant PROGRAM => eval { ($0 =~ m/(\w+\.pl)$/) ? $1 : $0 };
@@ -77,6 +82,8 @@ my $sHelpHeader = "\nThis is ".PROGRAM." version ".VERSION."\n";
 
 GetOptions( \%hCmdLineOption,
             'config_file|c=s', 
+			'gatk_jar=s',
+			'java_path=s',
             'outdir|o=s', 'verbose|v',
             'debug', 'tmpdir|t=s',
             'help',
@@ -94,7 +101,6 @@ my ($sCmd, $config_out, $fh);
 my $bDebug   = (defined $hCmdLineOption{'debug'}) ? TRUE : FALSE;
 my $bVerbose = (defined $hCmdLineOption{'verbose'}) ? TRUE : FALSE;
 my (%hConfig);
-my ($prefix);
 
 ################################################################################
 ### Main
@@ -123,28 +129,18 @@ $sOutDir = File::Spec->canonpath($sOutDir);
 	print STDERR "\nExecuting GATK Base Recalibration on input BAM...\n" : ();
 
 
-$sCmd = "java ";
-
-if (defined $hConfig{'base_recalibration'}{'Java_Memory'}) {
-        $sCmd .= " $hConfig{'base_recalibration'}{'Java_Memory'}[0] " ;
-}
-
 ##Read config file 
 read_config(\%hCmdLineOption, \%hConfig);
 
 my $prefix = $hConfig{'global'}{'PREFIX'}[0];
 
-if (!defined $hConfig{'base_recalibration'}{'GATK_BIN'}[0]) {
-    $hConfig{'base_recalibration'}{'GATK_BIN'}[0] = GATK_BIN;
+$sCmd = $hCmdLineOption{'java_path'} . " -Djava.io.tmpdir=" .$hCmdLineOption{tmpdir};
+
+if (defined $hConfig{'realigner_target_creator'}{'Java_Memory'}) {
+	$sCmd .= " $hConfig{'realigner_target_creator'}{'Java_Memory'}[0]" ;
 }
 
-$sCmd = "java ";
-
-if (defined $hConfig{'base_recalibration'}{'Java_Memory'}) {
-	$sCmd .= "$hConfig{'base_recalibration'}{'Java_Memory'}[0]" ;
-}
-
-$sCmd  .= " -Djava.io.tmpdir=$hCmdLineOption{tmpdir} -jar " .  $hConfig{'base_recalibration'}{'GATK_BIN'}[0] . "/GenomeAnalysisTK.jar -T BaseRecalibrator " . 
+$sCmd  .= " -jar " . $hCmdLineOption{'gatk_jar'} . " -T BaseRecalibrator " . 
 		  " -I $hConfig{'base_recalibration'}{'Infile'}[0] -o $sOutDir/Merged.base.recal.grp ".
 		  " -knownSites $hConfig{'base_recalibration'}{'KnownSites'}[0] -R $hConfig{'global'}{'REFERENCE_FILE'}[0] " ;
 
@@ -173,21 +169,9 @@ sub check_parameters {
 	 pod2usage( -msg => $sHelpHeader, -exitval => 1);
      }
   
+    $phOptions->{'gatk_jar'} = GATK_JAR if !defined $phOptions->{'gatk_jar'};
+    $phOptions->{'java_path'} = JAVA_PATH if !defined $phOptions->{'java_exec'};
     
-    # set environment variables
-    set_environment($phOptions);
-}
-
-sub set_environment {
-	my $phOptions = shift;
-	
-	umask 0000;
-	
-	# adding speedseq executible path to user environment
-	$ENV{PATH} = GATK_BIN .":".$ENV{PATH} ;
-	$ENV{PATH} = JAVA_EXEC ."/bin" .":".$ENV{PATH} ;
-	$ENV{JAVA_HOME} = JAVA_EXEC ;
-	$ENV{CLASSPATH} = JAVA_EXEC . "/jre/lib/ext" . ":" . JAVA_EXEC . "/lib/tools.jar" ;
 }
 
 sub exec_command {

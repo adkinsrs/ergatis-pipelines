@@ -13,8 +13,9 @@ realigner_target_creator.pl - Script to execute GATK's Realigner Target Creator 
 
 =head1 SYNOPSIS
 
-realigner_target_creator.pl  --c config file
+realigner_target_creator.pl  --c config file 
 		                    [--o outdir] [-t tmpdir]
+							[--gatk_jar path] [--java_path path]
                             [--v]
 
     parameters in [] are optional
@@ -146,8 +147,6 @@ $sCmd  .= " -jar " . $hCmdLineOption{'gatk_jar'} . " -T RealignerTargetCreator "
 if (defined $hConfig{'realigner_target_creator'}{'OTHER_PARAMETERS'}) {
 	$sCmd .= $hConfig{'realigner_target_creator'}{'OTHER_PARAMETERS'}[0] ;
 }
-
-
 
 #print "$sCmd\n";
 exec_command($sCmd);

@@ -13,6 +13,14 @@
                 <value>$;I_FILE_PATH$;</value>
             </param>
             <param>
+                <key>--java_path</key>
+                <value>$;JAVA_EXEC$;</value>
+            </param>
+            <param>
+                <key>--gatk_jar</key>
+				<value>$;GATK_BIN$;/GenomeAnalysisTK.jar</value>
+            </param>
+            <param>
                 <key>--outdir</key>
                 <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;</value>
             </param>
