@@ -3,9 +3,6 @@
 eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
     if 0; # not running under some shell
 
-eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
-    if 0; # not running under some shell
-
 ################################################################################
 ### POD Documentation
 ################################################################################
@@ -30,7 +27,7 @@ eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
 
     --o <output dir>       = /path/to/output directory. Optional.[PWD]
 
-	--s					   = Enable flag for single-stranded reads.  Default is double-stranded.
+	--s					   = Enable flag for single-end reads.  Default is paired-end.
 
     --v                    = generate runtime messages. Optional
 
@@ -75,7 +72,7 @@ my $sHelpHeader = "\nThis is ".PROGRAM."\n";
 my $singleStranded = 0;
 
 GetOptions( \%hCmdLineOption,
-            'outdir|o=s', 'infile|i=s', 'hisat2_list|h=s', 'single_stranded|s',
+            'outdir|o=s', 'infile|i=s', 'hisat2_list|h=s', 'single_end|s',
             'verbose|v',
             'debug',
             'help',
@@ -234,7 +231,7 @@ sub check_parameters {
 	pod2usage( -msg => $sHelpHeader, -exitval => 1);
     }
 
-	$singleStranded = 1 if defined $phOptions->{'single_stranded'};
+	$singleStranded = 1 if defined $phOptions->{'single_end'};
 }
 
 ################################################################################

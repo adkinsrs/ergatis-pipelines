@@ -20,10 +20,6 @@
                 <key>--outdir</key>
                 <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;</value>
             </param>
-	    <param>
-                <key>--args</key>
-                <value>$;OTHER_PARAMETERS$;</value>
-            </param>
             <param>
                 <key>stdout</key>
                 <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/align_hisat2_split_stats.stdout</value>
@@ -32,6 +28,7 @@
                 <key>stderr</key>
                 <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/align_hisat2_split_stats.stderr</value>
             </param>
+            <arg>$;OTHER_ARGS$;</arg>
         </command>
     </commandSet>
 </commandSetRoot>
