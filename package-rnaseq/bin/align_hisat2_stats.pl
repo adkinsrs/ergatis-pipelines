@@ -215,7 +215,7 @@ sub get_total_reads_from_hisat_stderr {
       chomp;
 	  if (/(\d+) reads; of these:$/) {
         $total_reads = $1;
-		$total_reads *= 2 if $ss;
+		$total_reads *= 2 if !$ss;
 	  }
 	}
 	close HS_IN;
