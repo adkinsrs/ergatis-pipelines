@@ -33,7 +33,8 @@ setwd(output.dir)
 
 ## combine single file into a data matrix and output counting statistics
 data.tab <- read.delim( as.character(sample.info[1,3]), header=F, sep="\t" )
-idx <- which(data.tab=="__no_feature")
+idx <- grep("no_feature", data.tab$V1)[1]    # Should only be 1 match in HTSeq file
+#idx <- which(data.tab=="__no_feature")
 count.stat <- matrix(c("sum counted", "total", sum(data.tab[,2][1:(idx-1)]), sum(data.tab[,2])), nrow=2, ncol=2)
 count.stat <- rbind(data.tab[idx:nrow(data.tab),], count.stat)
 colnames(count.stat) <- c("Stat", as.character(sample.info[1,1]))

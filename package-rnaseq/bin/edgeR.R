@@ -172,7 +172,8 @@ compgroups <- unique(sample.groups)[1:2]
 counts.table <- loadCountsTable(sample.table,count.colnum=2)
 
 # remove non-gene rows from counts table
-idx <- which(rownames(counts.table)=="__no_feature")
+idx <- grep("no_feature", rownames(counts.table))[1]    # Should only be 1 match in HTSeq file
+#idx <- which(rownames(counts.table)=="__no_feature")
 counts.table <- counts.table[1:(idx-1),]
 rownames(counts.table) <- c(rownames(counts.table)[1:(idx-1)])
 counts.table <- counts.table[which(rowSums(counts.table[,1:ncol(counts.table)])>0),]
