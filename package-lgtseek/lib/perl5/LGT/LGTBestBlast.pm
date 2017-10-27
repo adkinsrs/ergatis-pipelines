@@ -262,9 +262,6 @@ sub _process_file {
         my $done = 0;
         foreach my $lineage (@$lineages) {
             $done = &_process_line( $fields, $tax, $lineage );
-			if ( $done == 1) {
-				#&_append_hits( $lineage->{best_rows}, $lineage->{name} );
-			}
         }
 
 		# Reinitialize hash for the next m8 query ID

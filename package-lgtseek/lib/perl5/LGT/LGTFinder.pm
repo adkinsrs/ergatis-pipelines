@@ -85,7 +85,7 @@ sub findLGT {
       or die
       "Couldn't open by_clone output: $output_dir/$filename\_by_clone.txt $!";
     print OUTCLONE
-      "Clone\tDonor-genera\tHost-genera\td-read\td-eval\td-align-len\td-lineage\td-hit-filter\th-read\th-eval\th-align-len\th-lineage\th-hit-filter\n";
+      "Clone\tDonor-genera\tRec-genera\td-read\td-eval\td-align-len\td-lineage\td-hit-filter\tr-read\tr-eval\tr-align-len\tr-lineage\tr-hit-filter\n";
     open OUTTRACE, ">$output_dir/$filename\_by_trace.txt"
       or die
       "Couldn't open by_trace output: $output_dir/$filename\_by_trace.txt $!";
@@ -116,10 +116,6 @@ sub findLGT {
             &_process_file($file, $options);
         }
 
-        # Get LGT in clones, and in the final trace
-        &find_lgt();
-        close OUTCLONE;
-        close OUTTRACE;
     } elsif ( $options->{input_file_list} ) {
         open IN, "<$options->{input_file_list}"
           or die "Unable to open input $options->{input_file_list}\n";
@@ -143,12 +139,12 @@ sub findLGT {
             print STDERR "======== &LGTFINDER: Processing $_ ========\n";
             &_process_file($_, $options);
         }
-
-        # Get LGT in clones (overall) and in the final trace (donor/host)
-        &find_lgt();
-        close OUTCLONE;
-        close OUTTRACE;
     }
+
+	# Get LGT in clones, and in the final trace
+	&find_lgt();
+	close OUTCLONE;
+	close OUTTRACE;
 
     my $valid_count =
       `grep ';$options->{lineage1};' $output_dir/$filename\_by_clone.txt | grep ';$options->{lineage2};' | wc -l`;
@@ -426,6 +422,10 @@ sub _find_lgt_in_clone {
         my $rlineage = join( ",",
             keys %{ $traces_by_template->{$clone}->{reverse}->{lineages} } );
 
+		# Occasionaly see first char as a comma.  Chop it off.
+        substr($forward, 0, 1) = "" if $forward =~ /^,/;
+        substr($reverse, 0, 1) = "" if $reverse =~ /^,/;
+
         if ( $forward && $reverse ) {
 
         	my $fwd_traces = [];
@@ -446,10 +446,6 @@ sub _find_lgt_in_clone {
                 )
             );
 
-			#template_id	F	trace_id	genera	trace_id,eval,align_len,lca,hit_filter
-			#my @Ffields = ( $clone, 'F', $nft, $forward, join( ",", @$fwd_traces ) );
-			#my $fline = join( "\t", @Ffields );
-
 			# Now for the reverse hit information
             my $rhit = $traces_by_template->{$clone}->{reverse}->{hit};
             my $nrt = scalar keys %{ $traces_by_template->{$clone}->{forward}->{traces} };
@@ -464,8 +460,6 @@ sub _find_lgt_in_clone {
                     )
                 )
             );
-			#my @Rfields = ( $clone, 'R', $nft, $reverse, join( ",", @$rev_traces ) );
-			#my $rline = join( "\t", @Rfields );
 
             my $output_line = 0;
 			# If our forward hit belongs to the host
