@@ -58,16 +58,16 @@
 					</commandSet>
 					<commandSet type="parallel">
 						<state>incomplete</state>
-						<commandSet type="serial">
-							<state>incomplete</state>
-							<name>lgt_mpileup.lgt_recipient</name>
-						</commandSet>
 						<!-- BWA & LCA -->
 						<commandSet type="serial">
 							<state>incomplete</state>
 							<commandSet type="serial">
 								<state>incomplete</state>
 								<name>lgt_bwa.lgt</name>
+							</commandSet>
+							<commandSet type="serial">
+								<state>incomplete</state>
+								<name>lgt_mpileup.lgt_refseq</name>
 							</commandSet>
 							<commandSet type="serial">
 								<state>incomplete</state>
@@ -108,6 +108,10 @@
 							<commandSet type="serial">
 								<state>incomplete</state>
 								<name>lgt_bwa.validation_r</name>
+							</commandSet>
+							<commandSet type="serial">
+								<state>incomplete</state>
+								<name>lgt_mpileup.lgt_recipient</name>
 							</commandSet>
 						</commandSet>
 					</commandSet>
