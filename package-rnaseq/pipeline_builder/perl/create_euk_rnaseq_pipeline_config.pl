@@ -157,12 +157,12 @@ create_euk_rnaseq_pipeline_config.pl - Creates the pipeline.layout and pipeline.
     deseq                    : generates the differential gene expression analysis results utilizing DESeq software.
     cufflinks                : generates the isoform identification analysis results utilizing the alignment BAM file(s).
     cuffmerge                : generates the isoform comparison analysis results utilizing the isoform GTF file(s).
-	cuffquant				 :
+	cuffquant				 : generates the quantified isoform expression analysis results utilizing the alignment SAM file(s)
     cuffdiff                 : generates the differential isoform expression analysis results utilizing the alignment SAM file(s).
-	cuffnorm				 :
+	cuffnorm				 : generates the normalized isoform expression analysis results utilizing the alignment SAM files(s).
  
     [with --cuffdiff_legacy option]
-	cuffcompare				 :
+	cuffcompare				 : generates the isoform comparison analysis results utilizing the reference GTF files(s)
 
 	[with --tophat_legacy option]
     bowtie_build             : generates the bowtie index files for a given reference file.
@@ -1502,8 +1502,10 @@ if ((defined $hCmdLineOption{'isoform_analysis'}) || (defined $hCmdLineOption{'d
 		# If coming from cuffquant, there will be a CXB_LISTFILE passed instead
 		if (defined $hCmdLineOption{'cufflinks_legacy'}) {
 		    $hParams{'SAM_LISTFILE'} = ["$sBamFileList", "path to list info file with information on all alignment SAM files sorted by position"];
+		    $hParams{'CXB_LISTFILE'} = ["", "path to list info file with information on all abundance CXB files"];
 		} else {
 			my $sCxbFileList = '$;REPOSITORY_ROOT$;/output_repository/cuffquant/$;PIPELINEID$;_profile/cuffquant.cxb.list';
+		    $hParams{'SAM_LISTFILE'} = ["", "path to list info file with information on all alignment SAM files sorted by position"];
 			$hParams{'CXB_LISTFILE'} = ["$sCxbFileList", "path to list info file with information on all abundance CXB files"];
 		}
 		add_config_section($fpPC, "create_cuffsuite_files", "cuffdiff");
@@ -1660,7 +1662,7 @@ sub is_gzipped {
 	}
 	else {
 		$sCmd = "file $sFile";
-		$sMsg = `$sCmd` or die "Cannot determine file type of $sFile";
+		$sMsg = `$sCmd`;
 		if ($sMsg =~ m/gzip/i) {
 			$bFlag = 1;
 		}
