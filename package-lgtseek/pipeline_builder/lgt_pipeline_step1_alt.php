@@ -12,7 +12,7 @@ include_once('header.php');
 */  ?>
 
 <!-- HTML5 coding style suggests to keep indenting to a minimum and seperate code blocks with blank lines -->
-<form id='lgt_pipeline_step1_form' method="post" action="lgt_pipeline_complete.php">
+<form id='lgt_pipeline_step1_form' method="post" action="lgt_pipeline_complete.php" enctype="multipart/form-data">
 <br>
 
 <fieldset name="Step1">
@@ -32,25 +32,27 @@ include_once('header.php');
 
 <fieldset name="Step3" style="display:none">
 <legend class="legend">STEP 3: Provide the necessary file information <sup><a href='./help.php#form' target='_blank'>?</a></sup></legend>
+<p id="multipleFileYes" style="display:none;">Note: Hold CTRL to select multiple files for input. Hold SHIFT to select all files between two clicked files.</p>
+<p id="multipleFileNo">It appears your browser does not allow for multiple file input.  You will only be able to have one input per field.</p>
 <div id="ddonor">
-<label for="tdonor">Donor reference/list/index</label><br>
-<input type="text" name="tdonor" id="tdonor" class="textbox" value=''><br><br>
+<label for="idonor">Donor reference file(s)</label><br>
+<input type="input" name="tdonor[]" id="tdonor" class="textbox" multiple value=''><br><br>
 </div>
 <div id="drecipient">
-<label for="trecipient">Recipient reference/list/index</label><br>
-<input type="text" name="trecipient" id="trecipient" class="textbox" value=''><br><br>
+<label for="irecipient">Recipient reference file(s)</label><br>
+<input type="input" name="trecipient[]" id="trecipient" class="textbox" multiple value=''><br><br>
 </div>
 <div id="drefseq">
-<label for="trefseq">RefSeq reference/list/index</label><br>
-<input type="text" name="trefseq" id="trefseq" class="textbox" value=''><br><br>
+<label for="irefseq">RefSeq reference file(s)</label><br>
+<input type="input" name="trefseq[]" id="trefseq" class="textbox" multiple value=''><br><br>
 </div>
 <div id="dbam">
-<label for="tbam">BAM file or list</label><br>
-<input type="text" name="tbam" id="tbam" class="textbox" value=''><br>
+<label for="ibam">BAM file(s)</label><br>
+<input type="input" name="tbam[]" id="tbam" class="textbox" multiple value=''><br>
 </div>
 <div id="dfastq">
-<label for="tfastq">FASTQ file or list</label><br>
-<input type="text" name="tfastq" id="tfastq" class="textbox" value=''><br>
+<label for="ifastq">FASTQ file(s)</label><br>
+<input type="input" name="tfastq" id="tfastq" class="textbox" multiple value=''><br>
 </div>
 <div id="dsra">
 <label for="tsra">SRA ID</label><br>
