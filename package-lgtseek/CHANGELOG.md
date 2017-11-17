@@ -1,4 +1,8 @@
 # CHANGELOG
+
+11/9/17
+* Move 'lgt_mpileup.lgt_donor' and 'lgt_mpileup.lgt_recipient' to use the validated BAM files as input instead of the classifed putative LGT reads
+
 6/22/17
 * Each use case will run a BLAST search using both donor LGT condidates and recipient LGT candidates
 
