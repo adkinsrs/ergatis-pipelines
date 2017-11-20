@@ -134,8 +134,7 @@ sub filterBlast {
     my $list = &_create_list_of_outputs($args);
 
     foreach my $lineage (@$lineages) {
-        close $lineage->{handle}
-          ; ##  or confess "=== &LGTBestBlast - Can't close output filehandle because: $! ===\n";
+        close $lineage->{handle}; 
     }
 
     return {
@@ -193,8 +192,8 @@ sub _init_lineages {
             (
                 {
                     'lineage'   => $args->{lineage1},
-                    'tophit'    => 1,                  #$args->{lineage1tophit},
                     'best_e'    => 100,			# Dummy value so next will always be better
+					'best_bit'	=> 0,
                     'id'        => '',
                     'handle'    => $out1,
                     'best_rows' => [],
@@ -202,8 +201,8 @@ sub _init_lineages {
                 },
                 {
                     'lineage'   => $args->{lineage2},
-                    'tophit'    => 1,                  #$args->{lineage2tophit},
                     'best_e'    => 100,
+					'best_bit'	=> 0,
                     'id'        => '',
                     'handle'    => $out2,
                     'best_rows' => [],
@@ -215,8 +214,8 @@ sub _init_lineages {
     push( @$lineages,
         {
             'lineage' => 'cellular organisms',    ## KBS 01.05.13
-            'tophit'    => 1,
             'best_e'    => 100,
+			'best_bit'	=> 0,
             'id'        => '',
             'handle'    => $out3,
             'best_rows' => [],
@@ -264,8 +263,8 @@ sub _process_file {
             $done = &_process_line( $fields, $tax, $lineage );
         }
 
-		# Reinitialize hash for the next m8 query ID
         if ($done) {
+			# Reinitialize for the next m8 query ID
             $filter_hits = [];
         }
     }
@@ -338,48 +337,40 @@ sub _process_line {
 
     my $finished_id = 0;
 
-    # If we are still on the current query ID
-	#print $lineage->{id} . " LINEAGE " . $lineage->{lineage}\n";
-	#print $fields->[0] . " FIRST FIELD\n";
-	
 	# If our best lineage ID has been identified as the current query ID...
 	if ( $lineage->{id} eq $fields->[0] ) {
-        if ( $lineage->{tophit} ) {
-
-            # Determining how to handle equal or better hits
-            if ( $fields->[10] == $lineage->{best_e} ) {
-				# Before updating lineage hash, make sure the hit lineage matches current lineage hash iteration
-                if ( $tax->{lineage} =~ /$lineage->{lineage}/ ) {
-					# If our hit is equally as good as our best, then allow for more than one best hit
-                    push( @{ $lineage->{best_rows} }, $fields );
-                    # print STDERR "Here with: $lineage->{lineage\n";
-                }
-            } elsif ( $fields->[10] < $lineage->{best_e} ) {
-            	# If hit is lower than our best lineage row, it becomes the new best lineage
-                if ( $tax->{lineage} =~ /$lineage->{lineage}/ ) {
-                    $lineage->{best_e}    = $fields->[10];
-                    $lineage->{best_rows} = [$fields];
-                }
-            }
-        }
+		# SAdkins - 11/20/17 - Changed from using best e-val to best bit score instead
+		# Determining how to handle equal or better hits
+		if ( $fields->[11] == $lineage->{best_bit} ) {
+			# Before updating lineage hash, make sure the hit lineage matches current lineage hash iteration
+			if ( $tax->{lineage} =~ /$lineage->{lineage}/ ) {
+				# If our hit is equally as good as our best, then allow for more than one best hit
+				push( @{ $lineage->{best_rows} }, $fields );
+			}
+		} elsif ( $fields->[11] > $lineage->{best_bit} ) {
+			# If hit's score is better than our best lineage row, it becomes the new best lineage
+			if ( $tax->{lineage} =~ /$lineage->{lineage}/ ) {
+				$lineage->{best_bit}  = $fields->[11];
+				$lineage->{best_rows} = [$fields];
+			}
+		}
     } else {    # If we are ready to move on to the next Query ID
-        if ( $lineage->{tophit} ) {
+		# We have finished a hit
+		&_print_hits($lineage);
+		$finished_id = 1;
 
-            # We have finished a hit
-            &_print_hits($lineage);
-            $finished_id = 1;
-
-            # Initialize new lineage query ID provided our taxon lineage matches what's in the lineage hash
-            if ( $tax->{lineage} =~ /$lineage->{lineage}/ ) {
-                $lineage->{id}        = $fields->[0];
-                $lineage->{best_e}    = $fields->[10];
-                $lineage->{best_rows} = [$fields];
-            } else {
-                $lineage->{best_rows} = [];
-                $lineage->{id}        = '';
-                $lineage->{best_e}    = 100;
-            }
-        }
+		# If new query ID is under same lineage, store immediately... otherwise just wait until that lineage is processed later.
+		if ( $tax->{lineage} =~ /$lineage->{lineage}/ ) {
+			$lineage->{id}        = $fields->[0];
+			$lineage->{best_e}    = $fields->[10];
+			$lineage->{best_bit}  = $fields->[11];
+			$lineage->{best_rows} = [$fields];
+		} else {
+			$lineage->{id}        = '';
+			$lineage->{best_e}    = 100;
+			$lineage->{best_bit}  = 0;
+			$lineage->{best_rows} = [];
+		}
     }
 
     if ( &_filter_hit( $tax->{name} ) ) {
