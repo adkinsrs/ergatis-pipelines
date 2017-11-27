@@ -1,5 +1,12 @@
 # CHANGELOG
 
+11/22/17
+* Adding "blastdb_alias" component to split the NT database into subsets based on accession IDs
+* Lots of redesign of the pipeline
+  * Putative LGT-classified reads will be queried against two NT-database subsets... one for bacterial genes, and one for eukaryotic genes
+  * This affects downstream components that normally determined the bacterial/eukaryotic lineage of read hits
+  * Final LGT list will be determined by H-score (bitscore of Euk hit - bitscore of Bac hit)
+
 11/9/17
 * Move 'lgt_mpileup.lgt_donor' and 'lgt_mpileup.lgt_recipient' to use the validated BAM files as input instead of the classifed putative LGT reads
 

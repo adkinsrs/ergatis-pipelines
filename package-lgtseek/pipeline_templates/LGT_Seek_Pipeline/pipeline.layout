@@ -37,6 +37,10 @@
 						<state>incomplete</state>
 						<name>split_multifasta.fasta_r</name>
 					</commandSet>
+                    <commandSet type="serial">
+                        <state>incomplete</state>
+                        <name>blastdb_alias.bac</name>
+                    </commandSet>
 					<commandSet type="serial">
 						<state>incomplete</state>
 						<name>blastn_plus.nt_r</name>
@@ -84,6 +88,10 @@
 						<state>incomplete</state>
 						<name>split_multifasta.fasta_d</name>
 					</commandSet>
+                    <commandSet type="serial">
+                        <state>incomplete</state>
+                        <name>blastdb_alias.euk</name>
+                    </commandSet>
 					<commandSet type="serial">
 						<state>incomplete</state>
 						<name>blastn_plus.nt_d</name>

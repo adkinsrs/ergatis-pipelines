@@ -17,12 +17,8 @@
                 <value>$;MAPPING_FILE$;</value>
             </param>
             <param>
-                <key>--host_lineage</key>
-                <value>$;HOST_LINEAGE$;</value>
-            </param>
-            <param>
-                <key>--donor_lineage</key>
-                <value>$;DONOR_LINEAGE$;</value>
+                <key>--lineage</key>
+                <value>$;LINEAGE$;</value>
             </param>
             <param>
                 <key>--filter_lineage</key>
@@ -34,16 +30,16 @@
             </param>
             <param>
                 <key>--names_file</key>
-				<value>$;NCBITAX$;/names.dmp</value>
+				        <value>$;NCBITAX$;/names.dmp</value>
             </param>
             <param>
                 <key>--nodes_file</key>
-				<value>$;NCBITAX$;/nodes.dmp</value>
-			</param>
-			<param>
-				<key>--tax_id_file</key>
-				<value>$;GI2TAX$;</value>
-			</param>
+				        <value>$;NCBITAX$;/nodes.dmp</value>
+			      </param>
+			      <param>
+				       <key>--tax_id_file</key>
+				       <value>$;GI2TAX$;</value>
+			      </param>
             <param>
                 <key>--host</key>
                 <value>$;HOST$;</value>
@@ -107,15 +103,15 @@
             <param>
                 <key>--min_length</key>
                 <value>$;MIN_LENGTH$;</value>
-			</param>
-			<param>
-				<key>--max_overlap</key>
-				<value>$;MAX_OVERLAP$;</value>
-			</param>
-			<param>
-				<key>--ref_lineage</key>
-				<value>$;HOST_LINEAGE$;</value>
-			</param>
+			      </param>
+      			<param>
+      				<key>--max_overlap</key>
+      				<value>$;MAX_OVERLAP$;</value>
+      			</param>
+      			<param>
+      				<key>--ref_lineage</key>
+      				<value>$;LINEAGE$;</value>
+      			</param>
             <param>
                 <key>--output_dir</key>
                 <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/</value>

@@ -12,31 +12,12 @@
             <executable>mkdir</executable>
             <arg>-p -m 777 $;OUTPUT_DIRECTORY$;</arg>
         </command>
-        <command>
             <type>RunUnixCommand</type>
-            <name>formatdb</name>
+            <name>create blast db alias</name>
             <state>incomplete</state>
-	    <executable>$;BIN_DIR$;/formatdb</executable>
-	    <param>
-		<key>--input_file_list</key>
-		<value>$;INPUT_FILE_LIST$;</value>
-	    </param>
-	    <param>
-		<key>--input_files</key>
-		<value>$;INPUT_FILES$;</value>
-	    </param>
-	    <param>
-		<key>--makeblastdb_path</key>
-		<value>$;MAKEBLASTDB_EXEC$;</value>
-	    </param>
-	    <param>
-		<key>--protein</key>
-		<value>$;PROTEIN$;</value>
-	    </param>
-	    <param>
-		<key>--database_name</key>
-		<value>$;OUTPUT_DIRECTORY$;/$;DATABASE_NAME$;</value>
-	    </param>
+            <executable>$;BLASTPLUS_BIN$;/blastdb_aliastool</executable>
+            <arg>-seqidlist $;INPUT_FILE$; -db $;DATABASE_PATH$; -dbtype $;DB_TYPE$; -out $;OUTPUT_DIRECTORY$;/$;DATABASE_NAME$;</arg>
+        <command>
         </command>
     </commandSet>
 </commandSetRoot>

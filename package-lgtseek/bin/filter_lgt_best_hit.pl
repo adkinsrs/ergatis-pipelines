@@ -40,11 +40,8 @@ B<--tmp_dir,-T>
 B<--trace_mapping,-t>
 	Optional. Tab-delimited mapping file that lists the trace ID, clone/mate_pair template ID, and directionality of the read
 
-B<--donor_lineage,-d>
+B<--lineage,-l>
 	Name of the donor to find LCA on
-
-B<--host_lineage,-h>
-	Name of the host/recipient to find LCA on
 
 B<--filter_lineage,-f>
 	Optional. Lineage to filter out as bad (example would be 'vector', which would filter out anything that has a best hit to vector or where a hit overlaps vector by more than the filter_min_overlap).
@@ -93,9 +90,7 @@ B<--help>
 =head1 OUTPUT
 
     Three output files containing information about the best hit and LCA for a given query.
-	One output will correspond to traces mapping to the host genome
-	One output will correspond to traces mapping to the donor genome
-	The final output will correspond to the overall mate clones
+	The output will correspond to traces mapping to the provided lineage
 
 =head1  CONTACT
 
@@ -126,12 +121,11 @@ my $SAMTOOLS_BIN = '/usr/local/bin/samtools';
 my %options;
 
 my $results = GetOptions (\%options,
-                         "input_file|i=s",
-                         "output_dir|o=s",
+             "input_file|i=s",
+             "output_dir|o=s",
 						 'tmp_dir|T=s',
 						 'trace_mapping|t=s',
-						 'donor_lineage|d=s',
-						 'host_lineage|h=s',
+						 'lineage|l=s',
 						 'filter_lineage|f=s',
 						 'filter_min_overlap|m=s',
 						 'tax_id_file=s',
@@ -140,10 +134,10 @@ my $results = GetOptions (\%options,
 						 'host|h=s',
 						 'db|d=s',
 						 'collection|c=s',
-                         "log|l=s",
-                         "debug=s",
-                         "help"
-                          );
+             "log|l=s",
+             "debug=s",
+             "help"
+             );
 
 &check_options(\%options);
 
@@ -168,8 +162,7 @@ my $files = LGT::LGTBestBlast->filterBlast({
 		'gitaxon'				=> $gi_tax_obj,
 		'output_dir'			=> $options{output_dir},
 		'blast'					=> $options{input_file},
-		'lineage1'				=> $options{donor_lineage},
-		'lineage2'				=> $options{host_lineage},
+		'lineage'				=> $options{lineage},
 		'trace_mapping'			=> $options{trace_mapping},
 		'filter_lineage'		=> $options{filter_lineage},
 		'filter_min_overlap'	=> $options{filter_min_overlap}
@@ -194,7 +187,7 @@ sub check_options {
    }
 
    if (!(length $opts->{'names_file'} && length $opts->{'nodes_file'})
-     || !( -e $opts->{'names_file'} && -e $opts->{'nodes_file'})) { 
+     || !( -e $opts->{'names_file'} && -e $opts->{'nodes_file'})) {
        &_log($DEBUG, "Both --names_file and --nodes_file were not provided or invalid.  Will use Entrez to determine taxonomy lineage instead.");
        $no_flatfiles = 1;
    }

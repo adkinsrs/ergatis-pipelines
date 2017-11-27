@@ -32,16 +32,10 @@ $Carp::MaxArgLen = 0;
 $|               = 1;
 
 # Globals
-my $clones_by_clone_id = {};
-my $trace_lookup       = {};
 my $filter_hits        = [];
-my $lineages           = [];
+my $lineage            = [];
 my $gi2tax;
-my $overallfile;
-my $out1file;
-my $out2file;
-my $out3;
-my $trace_mapping_file;
+my $outfile;
 my $FILTER_MIN_OVERLAP = 50;
 my $BLAST_BIN = '/usr/local/bin/blastall';
 my $BLAST_CMD_ARGS = ' -p blastn -e 1 -m8';
@@ -55,10 +49,8 @@ my $min_overlap;
  Function: Returns the path to filtered blast reports
  Returns :  Hash ref. of filtered blast hits.
 
-            list_file     => list of the files below (overall,out1,out2)
-            overall_blast => Lin1 & Lin2 hits,
-            out1file_file => lineage1 hits,
-            out2file_file => lineage2 hits,
+            list_file     => list of the files below
+            outfile => best lineage hits,
 
  Args    : A hash containing potentially several config options:
 
@@ -67,8 +59,7 @@ my $min_overlap;
            db - One or more fasta files to use a host references
            output_dir - One or more fasta files to use as donor references
            blast_bin - path to blast (Can also contain some arguments)
-           lineage1 - Lineage for donor
-           lineage2 - Lineage for host
+           lineage - Lineage to donor or host reference
            gitaxon - A GiTaxon object
 
 =cut
@@ -101,24 +92,11 @@ sub filterBlast {
     # Get the basename of the input file.
     my ( $name, $directories, $suffix ) = fileparse( $input, qr/\.[^.]*/ );
 
-    # Open the overall file
-    $overallfile = $args->{overalloutput};
-    if ( !$args->{overalloutput} && $args->{output_dir} ) {
-        $overallfile = $args->{output_dir} . "/$name\_overall.out";
-
-        # print STDERR "Printing to $overallfile\n";
-    }
-    open $out3, ">$overallfile"
-      or confess "Unable to open overall output $overallfile\n";
-
-    my $trace_mapping_file = $args->{trace_mapping};
-
-    &_read_map_file( $args->{trace_mapping} );
-    &_init_lineages( $args, $name );
+    &_init_lineage( $args, $name );
 
     $args->{blast_bin} = $BLAST_BIN if !defined ($args->{blast_bin});
     my $fh;
-	# Use blast results if already provided, otherwise run blast to get results
+	  # Use blast results if already provided, otherwise run blast to get results
     if ( $args->{blast} ) {
 		print STDERR "Opening blast input.\n";
         open( $fh, "<$input" ) or confess "Unable to open $input\n";
@@ -133,95 +111,38 @@ sub filterBlast {
     &_process_file($fh);
     my $list = &_create_list_of_outputs($args);
 
-    foreach my $lineage (@$lineages) {
-        close $lineage->{handle}; 
-    }
+    close $lineage->{handle};
 
     return {
         list_file     => $list,
-        overall_blast => $overallfile,
-        out1file_file => $out1file,
-        out2file_file => $out2file
+        outfile => $outfile,
     };
 }
 
-# Read in the trace mapping file if one was provided
-sub _read_map_file {
-    my $map_file = shift;
-    if ($map_file) {
-        print STDERR "Reading the map file\n";
-        open MAP, "<$map_file" or confess "Unable to open $map_file\n";
-        while (<MAP>) {
-            my @fields = split;
-            $trace_lookup->{ $fields[0] } = {
-                'template_id' => $fields[2],
-                'trace_end'   => $fields[1]
-            };
-            if ( !$clones_by_clone_id->{ $fields[2] } ) {
-                $clones_by_clone_id->{ $fields[2] } = {
-                    'forward' => {},
-                    'reverse' => {}
-                };
-            }
-        }
-        close MAP;
-        print STDERR "Done reading the map file\n";
-    }
-}
-
 # Initialize the lineage hashes for the donor, the host, and overall
-sub _init_lineages {
+sub _init_lineage {
     my $args = shift;
     my $name = shift;
-    if ( $args->{lineage1} && $args->{lineage2} ) {
-        $out1file = $args->{output1};
+    if ( $args->{lineage}) {
+        my $lineage_name = $args->{lineage}
+        $outfile = $args->{output};
         if ( !$args->{output1} && $args->{output_dir} ) {
-            $out1file = $args->{output_dir} . "/$name\_lineage1.out";
+            $outfile = $args->{output_dir} . "/$name\_$lineage_name.out";
         }
-        open my $out1, ">$out1file"
-          or confess "Unable to open lineage1 output $out1file\n";
+        open my $out_fh, ">$outfile"
+          or confess "Unable to open lineage1 output $outfile\n";
 
-        $out2file = $args->{output2};
-        if ( !$args->{output1} && $args->{output_dir} ) {
-            $out2file = $args->{output_dir} . "/$name\_lineage2.out";
-        }
-        open my $out2, ">$out2file"
-          or confess "Unable to open lineage2 output $out2file\n";
-
-        push( @$lineages,
-            (
+        my $lineage =
                 {
-                    'lineage'   => $args->{lineage1},
+                    'lineage'   => $args->{lineage},
                     'best_e'    => 100,			# Dummy value so next will always be better
-					'best_bit'	=> 0,
+					          'best_bit'	=> 0,
                     'id'        => '',
-                    'handle'    => $out1,
+                    'handle'    => $out_fh,
                     'best_rows' => [],
-                    'name'      => 'lineage1'
-                },
-                {
-                    'lineage'   => $args->{lineage2},
-                    'best_e'    => 100,
-					'best_bit'	=> 0,
-                    'id'        => '',
-                    'handle'    => $out2,
-                    'best_rows' => [],
-                    'name'      => 'lineage2'
-                }
-            )
-        );
+                    'name'      => 'lineage'
+                };
     }
-    push( @$lineages,
-        {
-            'lineage' => 'cellular organisms',    ## KBS 01.05.13
-            'best_e'    => 100,
-			'best_bit'	=> 0,
-            'id'        => '',
-            'handle'    => $out3,
-            'best_rows' => [],
-            'name'      => 'overall'
-        }
-    );
 }
 
 # Process the BLAST m8 output.
@@ -230,106 +151,43 @@ sub _process_file {
     use Data::Dumper;
     while (my $line = <$fh>) {
         chomp $line;
-        my @new_fields = split( /\t/, $line );
+        my @fields = split( /\t/, $line );
         my $tax;
         my $found_tax = 0;
 
         # If we already have lineage info in here we'll not append it again
-        if ( $new_fields[14] ) {
+        if ( $fields[14] ) {
             $found_tax = 1;
             $tax       = {
-                'taxon_id' => $new_fields[12],
-                'lineage'  => $new_fields[14],
-                'name'     => $new_fields[13]
+                'taxon_id' => $fields[12],
+                'lineage'  => $fields[14],
+                'name'     => $fields[13]
             };
         }
         else {
-            $tax = $gi2tax->getTaxon( $new_fields[1] );
+            $tax = $gi2tax->getTaxon( $fields[1] );
         }
 
-		# If taxon info was not already in m8 file, add it
-		if (!$found_tax) {
-			push (@new_fields, ($tax->{taxon_id}, $tax->{name}, $tax->{lineage} ) );
-		}
-		# Die if we are missing key info
-		carp "Unable to find name or lineage for taxon_id $tax->{'taxon_id'} in trace $new_fields[1]\n"
-			unless $tax->{name};
-        carp "Unable to find taxon info for $new_fields[1]\n" unless $tax->{taxon_id};
+    		# If taxon info was not already in m8 file, add it
+    		if (!$found_tax) {
+    			push (@fields, ($tax->{taxon_id}, $tax->{name}, $tax->{lineage} ) );
+    		}
+    		# Die if we are missing key info
+    		carp "Unable to find name or lineage for taxon_id $tax->{'taxon_id'} in trace $fields[1]\n"
+    			unless $tax->{name};
+        carp "Unable to find taxon info for $fields[1]\n" unless $tax->{taxon_id};
 
-        my $fields = &_add_trace_info( \@new_fields );
+        my $fields_w_trace = &_add_trace_info( \@fields );
 
         my $done = 0;
-        foreach my $lineage (@$lineages) {
-            $done = &_process_line( $fields, $tax, $lineage );
-        }
+        $done = &_process_line( $fields_w_trace, $tax, $lineage );
 
-        if ($done) {
-			# Reinitialize for the next m8 query ID
-            $filter_hits = [];
-        }
+        $filter_hits = [] if $done;
     }
     close $fh;
 
     # here we'll take care of the last trace in the file.
-    foreach my $lineage (@$lineages) {
-		&_append_hits( $lineage->{best_rows}, $lineage->{name} );
-        &_print_hits($lineage);
-    }
-}
-
-# Append finished query ID information into the clone and trace hash
-### Shaun Adkins - 11/16/15 - I don't see where the clone hash or trace hash are used anywhere
-sub _append_hits {
-    my $hits      = shift;
-    my $list_name = shift;
-
-    my $template_id = $hits->[0]->[12];
-
-    my $clone = $clones_by_clone_id->{$template_id};
-
-    map {
-        # Check what strand we're on
-        if ( $_->[13] eq 'F' ) {
-            # Create the trace entry
-            if ( !$clone->{'forward'}->{ $_->[0] } ) {
-                $clone->{'forward'}->{ $_->[0] } = {
-                    'trace_id'   => $_->[0],
-                    "$list_name" => []
-                };
-            }
-            if ( !$clone->{'forward'}->{ $_->[0] }->{$list_name} ) {
-                $clone->{'forward'}->{ $_->[0] }->{$list_name} = [];
-            }
-            push(
-                @{ $clone->{'forward'}->{ $_->[0] }->{$list_name} },
-                {
-                    'accession' => $_->[1],
-                    'pid'       => $_->[2],
-
-                }
-            );
-        } elsif ( $_->[13] eq 'R' ) {
-
-            # Create the trace entry
-            if ( !$clone->{'reverse'}->{ $_->[0] } ) {
-                $clone->{'reverse'}->{ $_->[0] } = {
-                    'trace_id'   => $_->[0],
-                    "$list_name" => []
-                };
-            }
-            if ( !$clone->{'reverse'}->{ $_->[0] }->{$list_name} ) {
-                $clone->{'reverse'}->{ $_->[0] }->{$list_name} = [];
-            }
-            push(
-                @{ $clone->{'reverse'}->{ $_->[0] }->{$list_name} },
-                {
-                    'accession' => $_->[1],
-                    'pid'       => $_->[2],
-
-                }
-            );
-        }
-    } @$hits;
+    &_print_hits($lineage);
 }
 
 sub _process_line {
@@ -342,36 +200,22 @@ sub _process_line {
 		# SAdkins - 11/20/17 - Changed from using best e-val to best bit score instead
 		# Determining how to handle equal or better hits
 		if ( $fields->[11] == $lineage->{best_bit} ) {
-			# Before updating lineage hash, make sure the hit lineage matches current lineage hash iteration
-			if ( $tax->{lineage} =~ /$lineage->{lineage}/ ) {
 				# If our hit is equally as good as our best, then allow for more than one best hit
 				push( @{ $lineage->{best_rows} }, $fields );
-			}
 		} elsif ( $fields->[11] > $lineage->{best_bit} ) {
-			# If hit's score is better than our best lineage row, it becomes the new best lineage
-			if ( $tax->{lineage} =~ /$lineage->{lineage}/ ) {
 				$lineage->{best_bit}  = $fields->[11];
 				$lineage->{best_rows} = [$fields];
-			}
 		}
-    } else {    # If we are ready to move on to the next Query ID
+  } else {    # If we are ready to move on to the next Query ID
 		# We have finished a hit
 		&_print_hits($lineage);
 		$finished_id = 1;
 
-		# If new query ID is under same lineage, store immediately... otherwise just wait until that lineage is processed later.
-		if ( $tax->{lineage} =~ /$lineage->{lineage}/ ) {
-			$lineage->{id}        = $fields->[0];
-			$lineage->{best_e}    = $fields->[10];
-			$lineage->{best_bit}  = $fields->[11];
-			$lineage->{best_rows} = [$fields];
-		} else {
-			$lineage->{id}        = '';
-			$lineage->{best_e}    = 100;
-			$lineage->{best_bit}  = 0;
-			$lineage->{best_rows} = [];
-		}
-    }
+		# Store new hit as the first 'best hit'.
+		$lineage->{id}        = $fields->[0];
+		$lineage->{best_e}    = $fields->[10];
+		$lineage->{best_bit}  = $fields->[11];
+		$lineage->{best_rows} = [$fields];
 
     if ( &_filter_hit( $tax->{name} ) ) {
         push( @$filter_hits, $fields );
@@ -397,39 +241,28 @@ sub _print_hits {
     }
 }
 
-# Append trace information to the m8 hit.
-# Adds 'template_id', which is assuned to the query name if trace mapping file doesn't exist
+# Append trace information to the passed-in m8 hit.
+# Adds 'template_id', which is assuned to the query name
 # Adds 'trace_end', which is either forward or reverse.
 sub _add_trace_info {
     my $list = shift;
 
     my $id = $list->[0];
-    if ( $trace_lookup->{ $id } ) {
-        push( @$list,
-            (
-                $trace_lookup->{$id}->{'template_id'},
-                $trace_lookup->{$id}->{'trace_end'}
-            )
-        );
-    } elsif ( !$trace_mapping_file ) {
 
-        # Ghetto way of checking for directionality.
-        my $dir = 'F';
-        if ( $id =~ /(.*)[\_\/](\d)/ ) {
-			# Determine forward and reverse by which mate pair it is
-            if ( $2 == 1 ) {
-                push( @$list, ( $1, 'F' ) );
-            }
-            elsif ( $2 == 2 ) {
-                push( @$list, ( $1, 'R' ) );
-            }
-            else {
-                print STDERR "Couldn't figure out the clone name from $list->[0] assuming F\n";
-                push( @$list, ( $1, 'F' ) );
-            }
+    # Ghetto way of checking for directionality.
+    my $dir = 'F';
+    if ( $id =~ /(.*)[\_\/](\d)/ ) {
+	# Determine forward and reverse by which mate pair it is
+        if ( $2 == 1 ) {
+            push( @$list, ( $1, 'F' ) );
         }
-    } else {
-        print STDERR "couldn't find trace info for $list->[0]\n";
+        elsif ( $2 == 2 ) {
+            push( @$list, ( $1, 'R' ) );
+        }
+        else {
+            print STDERR "Couldn't figure out the clone name from $list->[0] assuming F\n";
+            push( @$list, ( $1, 'F' ) );
+        }
     }
     return $list;
 }
@@ -501,9 +334,7 @@ sub _create_list_of_outputs {
     }
     open OUT, ">$out_dir/$name\_filtered_blast.list"
       or confess "Unable to open $out_dir/$name\_filtered_blast.list\n";
-    print OUT "$overallfile\n";
-    print OUT "$out1file\n";
-    print OUT "$out2file\n";
+    print OUT "$outfile\n";
     close OUT;
     return "$out_dir/$name\_filtered_blast.list";
 }
