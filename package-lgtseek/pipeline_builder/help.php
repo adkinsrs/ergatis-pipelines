@@ -42,8 +42,10 @@ include_once('header.php');
 							<ul>
 								<li>SRP - Study ID</li>
 								<li>SRR - Run ID</li>
-								<li>SRS - Sample ID</li>
-								<li>SRX - Experiment ID</li>
+								<ul>
+									<li>Special note for SRS (sample) or SRX (experiment) IDs</li>
+Normally the way SRA files are acquired is by using a 'wget' command on the NCBI Trace FTP site.  However they have removed the SRS and SRX IDs from the FTP directory due to the growing size of the SRA database.  So these IDs must be converted into either SRP (study) or SRR (run) IDs which can be accomplished by searching for the SRS or SRX ID from the Run Selector at https://trace.ncbi.nlm.nih.gov/Traces/study/?go=home and using that as the input.
+								</ul>
 							</ul>
 							</li>
 							<li>

@@ -135,14 +135,12 @@ sub CreateFilePath {
 	$sFile = "/sra/sra-instant/reads/";
 # Volume is the directory on FTP with first 6 characters from the SRA id
 	$sVol = substr($sRunId, 0, 6);
-	if($sRunId =~ /^SRX/) {
-		$sFile .= "ByExp/sra/SRX/$sVol/$sRunId/*";
-	} elsif($sRunId =~ /^SRR/) {
+	if($sRunId =~ /^SRR/) {
 		$sFile .= "ByRun/sra/SRR/$sVol/$sRunId/*";
-	} elsif($sRunId =~ /^SRS/) {
-		$sFile .= "BySample/sra/SRS/$sVol/$sRunId/*";
 	} elsif($sRunId =~ /^SRP/) {
 		$sFile .= "ByStudy/sra/SRP/$sVol/$sRunId/*"
+	} elsif($sRunId =~ /^SR(S|X)/) {
+		printLogMsg($ERROR, "ERROR : $sSubName :: Sample and Experiment SRA IDs are not supported in NCBI FTP site anymore.  Cannot support $sRunId id.  Please use a Study or Run ID instead.");
 	} elsif($sRunId =~ /\/+/) {
 # If user has specified the complete path of the file to be downloaded from FTP site
 		$sFile = $sRunId;
