@@ -37,9 +37,6 @@ B<--output_dir,-o>
 B<--tmp_dir,-T>
 	Directory to store temporary files
 
-B<--trace_mapping,-t>
-	Optional. Tab-delimited mapping file that lists the trace ID, clone/mate_pair template ID, and directionality of the read
-
 B<--lineage,-l>
 	Name of the donor to find LCA on
 
@@ -124,7 +121,6 @@ my $results = GetOptions (\%options,
              "input_file|i=s",
              "output_dir|o=s",
 						 'tmp_dir|T=s',
-						 'trace_mapping|t=s',
 						 'lineage|l=s',
 						 'filter_lineage|f=s',
 						 'filter_min_overlap|m=s',
@@ -163,7 +159,6 @@ my $files = LGT::LGTBestBlast->filterBlast({
 		'output_dir'			=> $options{output_dir},
 		'blast'					=> $options{input_file},
 		'lineage'				=> $options{lineage},
-		'trace_mapping'			=> $options{trace_mapping},
 		'filter_lineage'		=> $options{filter_lineage},
 		'filter_min_overlap'	=> $options{filter_min_overlap}
 	});
