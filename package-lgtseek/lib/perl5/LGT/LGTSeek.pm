@@ -958,125 +958,6 @@ sub downloadCGHub {
     return \@bams_downloaded_list;
 }
 
-=head2 runBWA
-
- Title   : runBWA
- Usage   : $lgtseek->runBWA(({'base' => 'SRX01234','path' => '/path/to/files'})
- Function: Run bwa using the lgt_bwa wrapper
- Returns : The path to the bam file
- Args    : The input fasq/bam files and references which can be done a few different ways:
-
-           # For files like /path/to/files/SRR01234_1.fastq and /path/to/files/SRR01234_2.fastq
-           {
-              'input_dir' => '/path/to/files/',
-              'input_base' => 'SRR01234',
-              'reference' => '/path/to/references/hg19.fa'
-           }
-
-           # For bam files and a list of references
-           {
-              'input_bam' => '/path/to/files/SRR01234.bam',
-              'reference_list' => '/path/to/references/all_refs.list'
-           }
-
-=cut
-
-sub runBWA {
-    my ( $self, $config ) = @_;
-    if ( $self->{verbose} ) {
-        print STDERR "======== &runBWA: Start ========\n";
-    }
-    $self->{ergatis_bin} =
-      $config->{ergatis_bin} ? $config->{ergatis_bin} : $self->{ergatis_bin};
-    my $output_dir =
-      $config->{output_dir} ? $config->{output_dir} : $self->{output_dir};
-
-# Check for a bwa path. If we don't have one we'll just hope it's in our global path.
-    $self->{bwa_path} =
-      $config->{bwa_path} ? $config->{bwa_path} : $self->{bwa_path};
-    $self->{bwa_path} = $self->{bwa_path} ? $self->{bwa_path} : 'bwa';
-    my $num_threads =
-      defined $config->{threads} ? $config->{threads} : $self->{threads};
-    $self->_run_cmd("mkdir -p $output_dir");
-
-    my $conf = {
-        num_aligns => 3,
-        bwa_path   => $self->{bwa_path},
-        output_dir => $output_dir,
-        threads    => $num_threads,
-    };
-
-# Build the command string;
-# my @cmd = ("$self->{ergatis_dir}/lgt_bwa --num_aligns=3 --bwa_path=$self->{bwa_path}");
-
-    my $suff = '.sam';
-    if ( $config->{output_bam} ) {
-        $suff = '.bam';
-        $conf->{output_bam} = 1;
-    }
-
-    my $basename = $config->{input_base};
-
-    # Handle making up the lgt_bwa command with a bam file
-    if ( $config->{input_bam} ) {
-        if ( $self->empty_chk( { input => $config->{input_bam} } ) == 1 ) {
-            print STDERR
-              "*** Error *** &runBWA input: $config->{input_bam} is empty.\n";
-            return [ $config->{input_bam} ];
-        }
-        my ( $name, $path, $suff ) =
-          fileparse( $config->{input_bam}, ( "_prelim.bam", ".bam" ) );
-        $basename           = $name;
-        $conf->{input_base} = $basename;
-        $conf->{input_bam}  = $config->{input_bam};
-    }
-    elsif ( $config->{input_dir} && $config->{input_base} ) {
-        $conf->{input_dir}  = $config->{input_dir};
-        $conf->{input_base} = $config->{input_base};
-    }
-    else {
-        $self->fail(
-"Must provide either a value to either input_bam or to input_base and input_dir\n"
-        );
-    }
-
-    my $pre = '';
-    if ( $config->{reference} ) {
-        my ( $name, $dir, $suff ) =
-          fileparse( $config->{reference}, qr/\.[^\.]+/ );
-        $pre = "$name\_";
-        $conf->{ref_file} = $config->{reference};
-    }
-    elsif ( $config->{reference_list} ) {
-        $conf->{ref_file_list} = $config->{reference_list};
-    }
-    else {
-        die
-"Must provide a value for either reference or reference_list to run bwa\n";
-    }
-
-    $conf->{overwrite} = $config->{overwrite};
-    map { $conf->{$_} = $config->{other_opts}->{$_}; }
-      keys %{ $config->{other_opts} };
-    $conf->{run_lca}     = $config->{run_lca};
-    $conf->{lgtseek}     = $self;
-    $conf->{cleanup_sai} = $config->{cleanup_sai};
-    $conf->{out_file}    = $config->{out_file};
-    LGT::LGTbwa::runBWA($conf);
-
-    my @files = split( /\n/,
-        $self->_run_cmd("find $output_dir -name '*$pre$basename$suff'") );
-    map { chomp $_; } @files;
-    if ( $self->{verbose} ) {
-        print STDERR join( "\n", @files );
-        print STDERR "\n";
-    }
-    if ( $self->{verbose} ) {
-        print STDERR "======== &runBWA: Finished ========\n";
-    }
-    return \@files;
-}
-
 =head2 bwaPostProcess
 
  Title   : bwaPostProcess
@@ -1226,7 +1107,7 @@ sub _bwaPostProcessSingle {
 
     unless ($counts_only) {
 		 my $prefix = $config->{output_prefix} ? $config->{output_prefix} : '';
-		 
+
 		 $class_to_file_name = {
 			 'single_map' => "$output_dir/" . $prefix . ".single_map.bam",
 			 'no_map'	=> "$output_dir/" . $prefix . ".no_map.bam",
@@ -1307,7 +1188,7 @@ sub _bwaPostProcessSingle {
 
          if ($more_lines) {
              my $paired_class = $class;
-			
+
 			 unless ($counts_only) {
 				 # print the single lines to the single_map file (if we are keeping this output file)
 				 if ( $classes_each->{$paired_class} eq "single" ) {
@@ -1414,7 +1295,7 @@ sub _bwaPostProcessDonorHostPaired {
          my $all_host_h_fh, "| $samtools view -S -b -o " . $class_to_file_name->{"all_recipient_host"} . " -"
      ) or die "Unable to open donor microbiome file for writing\n";
      open ( my $inf_fh,
-        "| $samtools view -S -b -o " . $class_to_file_name->{"lgt_infected_host"} . " -" 
+        "| $samtools view -S -b -o " . $class_to_file_name->{"lgt_infected_host"} . " -"
 	 ) or die "Unable to open LGT recipient file for writing\n";
 
      my $class_to_file = {

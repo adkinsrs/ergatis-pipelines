@@ -1,14 +1,10 @@
 #!/usr/local/bin/perl -w
 
 #########################################################################################
-#											#
-# Name	      : lgt_bwa.pl								#
-# Version     : 1.0									#
-# Project     : LGT Seek Pipeline							#
-# Description : Script to align reads to a reference using BWA				#
-# Author      : Sonia Agrawal								#
-# Date        : September 1, 2015							#
-#											#
+# Name	      : bwa_mem.pl
+# Project     : LGT Seek Pipeline
+# Description : Script to align reads to a reference using BWA-mem algorithm
+# Author      : Shaun Adkins
 #########################################################################################
 
 use strict;
@@ -305,7 +301,7 @@ sub align_BWA {
         $tmp_dir_env = 'TMP_DIR=' . $cmd_line_args->{'tmp_dir'} . ' ';
 	}
 
-	# Same files passed from lgt_bwa component to another lgt_bwa component may have .bwa.prelim.filtered.bam endings.  This doesn't break the script by having it but I would like to keep the name decently short - SAdkins 4/18/16
+	# Same files passed from bwa_mem component to another bwa_mem component may have .bwa.prelim.filtered.bam endings.  This doesn't break the script by having it but I would like to keep the name decently short - SAdkins 4/18/16
 	$outfile =~ s/bwa\.prelim\.filtered\.//g;
 
     $cmd =

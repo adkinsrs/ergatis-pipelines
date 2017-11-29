@@ -6,11 +6,11 @@
 			<state>incomplete</state>
 			<commandSet type="serial">
 				<state>incomplete</state>
-				<name>lgt_bwa.recipient</name>
+				<name>bwa_aln.recipient</name>
 			</commandSet>
 			<commandSet type="serial">
 				<state>incomplete</state>
-				<name>lgt_bwa.donor</name>
+				<name>bwa_aln.donor</name>
 			</commandSet>
 			<commandSet type="serial">
 				<state>incomplete</state>
@@ -63,7 +63,7 @@
 					</commandSet>
 					<commandSet type="serial">
 						<state>incomplete</state>
-						<name>lgt_bwa.validation_r</name>
+						<name>bwa_aln.validation_r</name>
 					</commandSet>
 					<commandSet type="serial">
 						<state>incomplete</state>
@@ -114,7 +114,7 @@
 					</commandSet>
 					<commandSet type="serial">
 						<state>incomplete</state>
-						<name>lgt_bwa.validation_d</name>
+						<name>bwa_aln.validation_d</name>
 					</commandSet>
 					<commandSet type="serial">
 						<state>incomplete</state>

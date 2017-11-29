@@ -76,8 +76,8 @@ else
     echo "All-recipient BAM file is not present, skipping..."
 fi
 
-donor_lgt_blast_bam=${output_repo}/lgt_bwa/${pipeline_id}_validation_d/lgt_bwa.bam.list
-recipient_lgt_blast_bam=${output_repo}/lgt_bwa/${pipeline_id}_validation_r/lgt_bwa.bam.list
+donor_lgt_blast_bam=${output_repo}/bwa_aln/${pipeline_id}_validation_d/bwa_aln.bam.list
+recipient_lgt_blast_bam=${output_repo}/bwa_aln/${pipeline_id}_validation_r/bwa_aln.bam.list
 
 if [ -f $donor_lgt_blast_bam ]; then
     echo "Now copying donor Blast BAM file..."

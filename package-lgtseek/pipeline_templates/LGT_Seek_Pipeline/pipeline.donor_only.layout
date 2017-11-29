@@ -54,7 +54,7 @@
 						</commandSet>
 						<commandSet type="serial">
 							<state>incomplete</state>
-							<name>lgt_bwa.validation_d</name>
+							<name>bwa_aln.validation_d</name>
 						</commandSet>
 						<commandSet type="serial">
 							<state>incomplete</state>
@@ -106,7 +106,7 @@
 						</commandSet>
 					</commandSet>
 				</commandSet>
-				<!-- DONOR side --> 
+				<!-- DONOR side -->
 				<commandSet type="serial">
 					<state>incomplete</state>
 					<commandSet type="serial">

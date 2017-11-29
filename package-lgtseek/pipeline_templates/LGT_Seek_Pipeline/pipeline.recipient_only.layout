@@ -67,7 +67,7 @@
 							<state>incomplete</state>
 							<commandSet type="serial">
 								<state>incomplete</state>
-								<name>lgt_bwa.lgt</name>
+								<name>bwa_aln.lgt</name>
 							</commandSet>
 							<commandSet type="serial">
 								<state>incomplete</state>
@@ -115,7 +115,7 @@
 							</commandSet>
 							<commandSet type="serial">
 								<state>incomplete</state>
-								<name>lgt_bwa.validation_r</name>
+								<name>bwa_aln.validation_r</name>
 							</commandSet>
 							<commandSet type="serial">
 								<state>incomplete</state>
@@ -124,7 +124,7 @@
 						</commandSet>
 					</commandSet>
 				</commandSet>
-			</commandSet>           
+			</commandSet>
 		</commandSet>
 	</commandSet>
 </commandSetRoot>

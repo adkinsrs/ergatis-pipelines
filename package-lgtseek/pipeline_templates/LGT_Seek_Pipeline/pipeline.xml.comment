@@ -5,4 +5,4 @@ Currently in the pipeline, certain components need the following parameters fill
 [lgt_build_bwa_index recipient] - $;INPUT_FILE$; - the Host/Recipient fasta reference
 [lgt_build_bwa_index refseq] - $;INPUT_FILES$; - The Refseq fasta sequence
 [lgt_mpileup lgt] - $;FASTA_REF$; - The Host/Recipient fasta reference
-all lgt_bwa components - $;BASENAME$; - The filename of the indexed reference (example - if /path/to/ref.fa then use "ref.fa")
+all bwa_aln components - $;BASENAME$; - The filename of the indexed reference (example - if /path/to/ref.fa then use "ref.fa")

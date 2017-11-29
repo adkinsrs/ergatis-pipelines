@@ -92,7 +92,7 @@ sub ConvertSRS {
 	}
 
 	# Creating a blank .pair file using the SRA ID.
-	# Reason:  lgt_bwa component accepts an input_directory of fastq files, so iterating over
+	# Reason:  bwa_aln component accepts an input_directory of fastq files, so iterating over
 	# 			a fastq list with paired-end fastq files results in two groups iterating over
 	# 			the same directory.  This ensures the directory is iterated over just once in
 	# 			that component.
