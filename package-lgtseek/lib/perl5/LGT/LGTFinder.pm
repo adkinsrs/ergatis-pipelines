@@ -411,7 +411,6 @@ sub get_overlap_length {
 }
 
 sub _find_lgt_in_clone {
-    my $lgt_by_genera = {};
     foreach my $clone ( keys %$traces_by_template ) {
         my $forward = join( ",",
             keys %{ $traces_by_template->{$clone}->{forward}->{genera} } );
@@ -433,7 +432,6 @@ sub _find_lgt_in_clone {
 
 			# Get forward hit information
             my $fhit = $traces_by_template->{$clone}->{forward}->{hit};
-            my $nft = scalar keys %{ $traces_by_template->{$clone}->{forward}->{traces} };
             push(
                 @$fwd_traces,
                 join(
@@ -448,7 +446,6 @@ sub _find_lgt_in_clone {
 
 			# Now for the reverse hit information
             my $rhit = $traces_by_template->{$clone}->{reverse}->{hit};
-            my $nrt = scalar keys %{ $traces_by_template->{$clone}->{forward}->{traces} };
             push(
                 @$rev_traces,
                 join(
@@ -472,9 +469,6 @@ sub _find_lgt_in_clone {
                     join( ",", @$fwd_traces )
                 );
                 $output_line = join( "\t", @outfields );
-
-                # print STDERR "$fline\n$rline\n";
-                push( @{ $lgt_by_genera->{$reverse} }, $clone );
             }
 			# If our reverse hit belongs to the host
             elsif ($rlineage =~ /$ref_lineage/
@@ -487,7 +481,6 @@ sub _find_lgt_in_clone {
                     join( ",", @$rev_traces )
                 );
                 $output_line = join( "\t", @outfields );
-                push( @{ $lgt_by_genera->{$forward} }, $clone );
             }
 			# If neither hit belongs to the host
             else {
@@ -498,10 +491,6 @@ sub _find_lgt_in_clone {
                     join( ",", @$rev_traces )
                 );
                 $output_line = join( "\t", @outfields );
-                push(
-                    @{ $lgt_by_genera->{ $forward . ":" . $reverse } },
-                    $clone
-                );
 
             }
             if ($output_line) {
