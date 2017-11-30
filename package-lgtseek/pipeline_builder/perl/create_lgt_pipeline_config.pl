@@ -34,6 +34,12 @@ B<--donor_reference,-d>
 B<--host_reference,-h>
 	Path to the recipient reference fasta file, or list file (ends in .list).  If not provided, the script assumes this is a donor-only LGTSeek run.If the reference has already been indexed by BWA, the index files must be in the same directory as the reference(s).
 
+B<--bac_lineage>
+	Taxon name to search for in bacterial hits.  Will only consider best hits within that taxon lineage.
+
+	B<--euk_lineage>
+	Taxon name to search for in eukaryotic hits.  Will only consider best hits within that taxon lineage.
+
 B<--lgt_infected, -i>
 	Flag to indicate that the recipient reference is infected with LGT from the donor reference.  This will enable a different pipeline layout compared to the LGT-free use-case
 
@@ -44,7 +50,7 @@ B<--build_indexes,-B>
 	If the flag is enabled, will build indexes using BWA in the pipeline.  If you are using pre-build indexes it is important they are compatible with the version of BWA running in the pipeline (0.7.12 for internal Ergatis, 0.7.15 for Docker Ergatis).
 
 B<--skip_alignment,-S>
-    If the flag is enabled, then assumes the BAM input file has already been aligned to a reference, and will skipthe "bwa_aln" alignment step.  The input will instead be passed straight to the "lgtseek_classify_reads" component.  Note that this can only apply in the good donor/unknown recipient use case or the good recipient/unknown donor use case.  Furthermore, the genome reference will still be required for mpileup coverage downstream in the pipeline.
+	If the flag is enabled, then assumes the BAM input file has already been aligned to a reference, and will skipthe "bwa_aln" alignment step.  The input will instead be passed straight to the "lgtseek_classify_reads" component.  Note that this can only apply in the good donor/unknown recipient use case or the good recipient/unknown donor use case.  Furthermore, the genome reference will still be required for mpileup coverage downstream in the pipeline.
 
 B<--template_directory,-t>
 	Path of the template configuration and layout files used to create the pipeline config and layout files.
@@ -126,6 +132,8 @@ sub main {
 						  "lgt_infected|i",
 						  "donor_reference|d=s",
 						  "refseq_reference|r=s",
+							"bac_lineage=s",
+							"euk_lineage=s",
 						  "build_indexes|B",
 						  "skip_alignment|S",
 						  "template_directory|t=s",
