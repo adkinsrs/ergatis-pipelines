@@ -117,12 +117,12 @@ sub calc_hscore_of_reads {
   my ($read_scores, $outdir) = @_;
   my $outfile = $outdir . "/scores.txt";
   open OFH, ">$outfile" || &_log($ERROR, "Cannot open $outfile for writing: $!");
-  print OFH "#read\th_score\teuk/prok_ratio\n"
+  print OFH "#read\th_score\teuk/prok_ratio\n";
   foreach my $read (keys %{$read_scores}) {
     # Does a read have hits in both lineage types?
     if (defined $read_scores->{$read}->{'bac'} && $read_scores->{$read}->{'euk'}) {
       my $h_score = $read_scores->{$read}->{'euk'} - $read_scores->{$read}->{'bac'};
-      my $ratio = $read_scores->{$read}->{'euk'} / $read_scores->{$read}->{'bac'}
+      my $ratio = $read_scores->{$read}->{'euk'} / $read_scores->{$read}->{'bac'};
       print OFH "$read\t$h_score\t$ratio\n";
     }
   }
@@ -145,13 +145,13 @@ sub store_m8_hits {
   my ($m8_hits, $read_scores, $read_hits, $ref) = @_;
   open M8, $m8_hits || &_log($ERROR, "Cannot open $m8_hits for reading: $!");
   while (<M8>){
-    chomp
+    chomp;
     my @fields = split(/\t/);
     my $id = $fields[0];
     my $bit = $fields[11];
     $read_scores->{$id}->{$ref} = $bit;
     # There can be multiple best hits, tied for bitscore.
-    push @{$read_hits->{$id}->{$ref}} = $_;
+    push @{$read_hits->{$id}->{$ref}}, $_;
   }
   close M8;
 }
@@ -174,11 +174,11 @@ sub write_final_LGT {
         if ( $read =~ /(.*)([\_\/])(\d)/ ){
           $clone = $1;
           if ($3 eq '1') {
-            $read_mate = $1$2 ."2";
+            $read_mate = $1.$2 ."2";
           } elsif ($3 eq '2') {
-            $read_mate = $1$2 . "1";
+            $read_mate = $1.$2 . "1";
           } else {
-            &_log($ERROR, "Read $read did not end in '1' or '2'.  Cannot determine mate.")
+            &_log($ERROR, "Read $read did not end in '1' or '2'.  Cannot determine mate.");
           }
         }
 
@@ -197,28 +197,34 @@ sub write_final_LGT {
         #Donor hit info
         my @d_generas;
         my $d_lca;
+        my $d_evalue;
+        my $d_align_len;
         foreach my $entry (@d_fields) {
-          push @d_generas, $entry[13];
-          $d_lca = $entry[14] if (! defined $d_lca);
-          $d_lca = find_lca($entry[14], $d_lca);
+          push @d_generas, $entry->[13];
+          $d_lca = $entry->[14] if (! defined $d_lca);
+          $d_lca = find_lca($entry->[14], $d_lca);
+          $d_evalue = $entry->[10];  # Ideally e_value and length of alignment should be same for all tied hits
+          $d_align_len = $entry->[3];
         }
         my $d_genera = join(",", @d_generas);
-        my $d_evalue = $entry[10];  # Ideally e_value and length of alignment should be same for all tied hits
-        my $d_align_len = $entry[3];
+
         my $d_filter_hit = 0; # For now not filtering lineage
         my @d_parts = [$d_trace, $d_evalue, $d_align_len, $d_lca, $d_filter_hit];
 
         #Recipient hit info
         my @r_generas;
-        my $r_lca = '';
+        my $r_lca;
+        my $r_evalue;
+        my $r_align_len;
         foreach my $entry (@d_fields) {
-          push @r_generas, $entry[13];
-          $r_lca = $entry[14] if (! defined $r_lca);
-          $r_lca = find_lca($entry[14], $r_lca);
+          push @r_generas, $entry->[13];
+          $r_lca = $entry->[14] if (! defined $r_lca);
+          $r_lca = find_lca($entry->[14], $r_lca);
+          $r_evalue = $entry->[10];
+          $r_align_len = $entry->[3];
         }
         my $r_genera = join(",", @r_generas);
-        my $r_evalue = $entry[10];
-        my $r_align_len = $entry[3];
+
         my $r_filter_hit = 0;
         my @r_parts = [$r_trace, $r_evalue, $r_align_len, $r_lca, $r_filter_hit];
 
@@ -254,23 +260,23 @@ sub check_options {
 
    # If hits are in lists.  Extract them.  Assuming only 1 hits file is in a given list.
    if ($opts->{'euk_hits'} =~ '/.list$') {
-     open LIST $opts->{'euk_hits'} || die "Cannot open $opts->{'euk_hits'} for reading: $!";
+     open LIST, $opts->{'euk_hits'} || die "Cannot open $opts->{'euk_hits'} for reading: $!";
      while (<LIST>){
        chomp;
        $euk_file = $_;
      }
-     close LIST
+     close LIST;
    } else {
      $euk_file = $opts->{'euk_hits'};
    }
 
    if ($opts->{'bac_hits'} =~ '/.list$') {
-     open LIST $opts->{'bac_hits'} || die "Cannot open $opts->{'bac_hits'} for reading: $!";
+     open LIST, $opts->{'bac_hits'} || die "Cannot open $opts->{'bac_hits'} for reading: $!";
      while (<LIST>){
        chomp;
        $bac_file = $_;
      }
-     close LIST
+     close LIST;
    } else {
      $bac_file = $opts->{'bac_hits'};
    }
