@@ -224,6 +224,9 @@ sub main {
 		}
 	}
 
+	$config{"global"}->{'$;BAC_LINEAGE$;'} = defined $options{'bac_lineage'} ? $options{'bac_lineage'} : "Bacteria";
+	$config{"global"}->{'$;EUK_LINEAGE$;'} = defined $options{'euk_lineage'} ? $options{'euk_lineage'} : "Eukaryota";
+
 
 	# If the starting point is BAM input, then use that.
 	# Default is to point bwa_aln.recipient to use the sra2fastq output list
@@ -310,6 +313,8 @@ sub main {
 		$config{"lgtseek_classify_reads default"}->{'$;LGT_RECIPIENT_TOKEN$;'} = 'single_map';
 		$config{"lgtseek_classify_reads default"}->{'$;ALL_DONOR_TOKEN$;'} = 'no_map';
 		$config{"lgtseek_classify_reads default"}->{'$;ALL_RECIPIENT_TOKEN$;'} = 'all_map';
+		$config{"determine_final_lgt final"}->{'$;REFERENCE_TYPE$;'} = 'recipient';
+		$config{"determine_final_lgt final"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/get_aligned_reads/$;PIPELINEID$;_lgt_recipient/$;COMPONENT_NAME$;.list'
 
 		$config{"filter_dups_lc_seqs lgt_recipient"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgtseek_classify_reads/$;PIPELINEID$;_default/lgtseek_classify_reads.single_map.bam.list';
 		$config{"filter_dups_lc_seqs lgt_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgtseek_classify_reads/$;PIPELINEID$;_default/lgtseek_classify_reads.no_map.bam.list';
@@ -339,7 +344,6 @@ sub main {
 
 		# If recipient is infected with LGT, change mpileup to use LGT-infected BAM list
 		if ($lgt_infected) {
-			$config{'lgt_mpileup lgt_recipient'}->{'$;INPUT_FILE_LIST$;'} ='$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected/samtools_merge.bam.list';
 			$config{'sam2fasta fasta_r'}->{'$;INPUT_FILE$;'} ='$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected/samtools_merge.bam.list';
 			$config{'gather_lgtseek_files'}->{'RECIPIENT_LGT_BAM_OUTPUT'} = '$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_infected/filter_dups_lc_seqs.bam.list' if $included_subpipelines{'post'};
 		}
