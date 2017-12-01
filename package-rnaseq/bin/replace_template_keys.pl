@@ -1,11 +1,4 @@
-#!/usr/bin/perl
-
-eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
-    if 0; # not running under some shell
-
-eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
-    if 0; # not running under some shell
-
+#!/usr/bin/env perl
 #Create a complete workflow XML file (--output_xml) from a template
 #XML file (--template_xml) that contains a set of placeholders/keys.
 #The config file --component_conf provides a list of key=value pairs.
@@ -30,7 +23,6 @@ my $SKIPTAG='$;SKIP_WF_COMMAND$;';
 ## TODO: Figure out a better way to do this mapping
 my $dce_param_map = { 'OS' => "OS", 'EXECUTION_HOST' => "executionHost", 
                       'WORKINGDIR' => "workingDir", 'reqStartTime' => "reqStartTime" };
-my $default_memory='100M';                      
                       
 my $results = GetOptions (\%options, 
 			  'keys=s',
@@ -195,7 +187,6 @@ sub get_dce_spec_parameters {
     }
 
 	# Required to specify mem_free requirements when submitting to the grid.  This is to ensure jobs without that req have a default value.
-    $dce_block .= "<passthrough>-l mem_free=$default_memory</passthrough>\n" if ($dce_block !~ /<passthrough>[\w=\s-_]+<\/passthrough>/);
 
     $dce_block .= "</dceSpec>\n";
     return $dce_block;
@@ -305,19 +296,8 @@ sub replacekeys{
 		$remote_serial_flag = 1;
 	}
 	
-	# If we encounter a commandSeq tag
+	# If we encounter a commandSet tag
 	if ($remote_serial_flag && $line =~ /\<\/commandSet\>/) {
-		
-		# "Peek" next line, and if commandSet is just before end of file commandSetRoot, just ignore
-		# commandSetRoot is always the end of file, and a commandSet is always nested in it
-		#my $pos = tell(INPUTFILE);
-		#my $tmp_line = <INPUTFILE>;
-		#chomp $tmp_line;
-		#seek(INPUTFILE, $pos, 0);
-		#if ($tmp_line eq "</commandSetRoot>") {
-		#	push @inputxml, $line;
-		#	next();
-		#}
 		
         my $new_line = get_dce_spec_parameters($cfg) . $line;
 	    $line = $new_line;		
@@ -349,7 +329,6 @@ sub replacekeys{
 	    $line = '';
 	}
 	push @inputxml,$line;
-	#print OUTPUTFILE $line;
     }
     
     close INPUTFILE;
@@ -473,16 +452,6 @@ sub import_xml{
 	# If we encounter a commandSeq tag
 	if ($remote_serial_flag && $line =~ /\<\/commandSet\>/) {
 		
-		# "Peek" next line, and if commandSet is just before end of file commandSetRoot, just ignore
-		#my $pos = tell($fh);
-		#my $tmp_line = $fh;
-		#chomp $tmp_line;		
-		#seek($fh, $pos, 0);
-		#if ($tmp_line eq "</commandSetRoot>") {
-		#	push @inputxml, $line;
-		#	next();
-		#}
-	
         my $new_line = get_dce_spec_parameters($cfg) . $line;
 	    $line = $new_line;		
 	    

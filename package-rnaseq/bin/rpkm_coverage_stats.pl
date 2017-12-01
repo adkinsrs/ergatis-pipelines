@@ -529,7 +529,7 @@ sub Generate_Gene_BedFile {
     $sSortedFile .= '.sorted.bed';
 	
 	$sCmd = $phCmdLineOption->{'bedtools_bin_dir'}."/bedtools sort".
-			" -i ".$sBedFile.
+			" -i ".$sGroupedFile.
 			" -faidx ".$sIndexFile.
 			" > ".$sSortedFile;
 	

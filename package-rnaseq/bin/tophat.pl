@@ -268,11 +268,23 @@ sub set_environment {
 	
 	umask 0000;
 	
-	# adding bowtie executible path to user environment
-	$ENV{PATH} = $phOptions->{'bowtie_bin_dir'}.":".$ENV{PATH};
+	if ($phOptions->{'samtools_bin_dir'} == SAMTOOLS_BIN_DIR) {
+	    # adding samtools executible path to user environment
+	    $ENV{PATH} = $phOptions->{'samtools_bin_dir'}.":".$ENV{PATH};
+	    # adding bowtie executible path to user environment
+	    $ENV{PATH} = $phOptions->{'bowtie_bin_dir'}.":".$ENV{PATH};
+    } else {
+		# Need to ensure /usr/local/bin/ is not the start of PATH
+	    $ENV{PATH} = $phOptions->{'bowtie_bin_dir'}.":".$ENV{PATH};
+	    $ENV{PATH} = $phOptions->{'samtools_bin_dir'}.":".$ENV{PATH};
+	}
+	print "PATH - " . $ENV{PATH} . "\n";
+	my $retval = `bowtie --version`;
+	print "RETVAL - $retval\n";
 	
-	# adding samtools executible path to user environment
-	$ENV{PATH} = $phOptions->{'samtools_bin_dir'}.":".$ENV{PATH};
+	# Doing this the way Tophat does it in its code
+	my $retval = `samtools --version`;
+	print "RETVAL - $retval\n";
 }
 
 sub exec_command {
