@@ -1,9 +1,9 @@
 <commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="commandSet.xsd" type="instance">
+	<commandSet type="serial">
+		<state>incomplete</state>
+		<name>start</name>
 		<commandSet type="serial">
-				<state>incomplete</state>
-				<name>start</name>
-				<commandSet type="serial">
-						<state>incomplete</state>
+			<state>incomplete</state>
 			<commandSet type="serial">
 				<state>incomplete</state>
 				<name>lgtseek_classify_reads.default</name>
@@ -97,7 +97,7 @@
 					<!-- FINAL LGT PROCESSING -->
 					<commandSet type="serial">
 						<state>incomplete</state>
-						<name>determine_final_lgt.final/name>
+						<name>determine_final_lgt.final</name>
 					</commandSet>
 					<commandSet type="serial">
 						<state>incomplete</state>
@@ -126,4 +126,5 @@
 				</commandSet>
 			</commandSet>
 		</commandSet>
+	</commandSet>
 </commandSetRoot>
