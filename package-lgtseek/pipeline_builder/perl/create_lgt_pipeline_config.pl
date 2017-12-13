@@ -314,7 +314,7 @@ sub main {
 		$config{"lgtseek_classify_reads default"}->{'$;ALL_DONOR_TOKEN$;'} = 'no_map';
 		$config{"lgtseek_classify_reads default"}->{'$;ALL_RECIPIENT_TOKEN$;'} = 'all_map';
 		$config{"determine_final_lgt final"}->{'$;REFERENCE_TYPE$;'} = 'recipient';
-		$config{"determine_final_lgt final"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/get_aligned_reads/$;PIPELINEID$;_lgt_recipient/$;COMPONENT_NAME$;.list'
+		$config{"determine_final_lgt final"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/get_aligned_reads/$;PIPELINEID$;_lgt_recipient/$;COMPONENT_NAME$;.list';
 
 		$config{"filter_dups_lc_seqs lgt_recipient"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgtseek_classify_reads/$;PIPELINEID$;_default/lgtseek_classify_reads.single_map.bam.list';
 		$config{"filter_dups_lc_seqs lgt_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgtseek_classify_reads/$;PIPELINEID$;_default/lgtseek_classify_reads.no_map.bam.list';
