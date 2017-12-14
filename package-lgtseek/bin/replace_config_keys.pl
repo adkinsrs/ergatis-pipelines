@@ -1,7 +1,4 @@
-#!/usr/bin/perl
-
-eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
-    if 0; # not running under some shell
+#!/usr/bin/env perl
 
 #Example command line 
 #perl -I ../../lib/ replace_config_keys.pl --template_conf=/usr/local/devel/ANNOTATION/angiuoli/code/ergatis/workflow/wait/wait.default.user.config --output_conf=/tmp/test.config --keys=PIPELINEID=23 --debug=5 --log=my.log
@@ -11,6 +8,8 @@ use strict;
 use Config::IniFiles;
 use Ergatis::Logger;
 use Getopt::Long;
+
+my $WRITE_MODE = "0777";
 
 my %options;
 
@@ -56,6 +55,7 @@ if(!$ret){
 
 #Perform second key replacement for nested keys
 my $finalcfg = &replace_keys($cfg);
+$finalcfg->SetWriteMode($WRITE_MODE);
 $finalcfg->WriteConfig($options{'output_conf'});
 
 $logger->debug("Wrote configuration file $options{'output_conf'}");
