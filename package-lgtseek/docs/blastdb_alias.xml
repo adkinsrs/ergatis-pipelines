@@ -12,12 +12,12 @@
             <executable>mkdir</executable>
             <arg>-p -m 777 $;OUTPUT_DIRECTORY$;</arg>
         </command>
+        <command>
             <type>RunUnixCommand</type>
             <name>create blast db alias</name>
             <state>incomplete</state>
             <executable>$;BLASTPLUS_BIN$;/blastdb_aliastool</executable>
             <arg>-seqidlist $;INPUT_FILE$; -db $;DATABASE_PATH$; -dbtype $;DB_TYPE$; -out $;OUTPUT_DIRECTORY$;/$;DATABASE_NAME$;</arg>
-        <command>
         </command>
     </commandSet>
 </commandSetRoot>
