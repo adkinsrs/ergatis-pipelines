@@ -65,7 +65,6 @@ use Carp;
 $Carp::MaxArgLen = 0;
 use File::Basename;
 use Data::Dumper;
-use GiTaxon;
 use LGT::LGTBestBlast;
 use LGT::LGTFinder;
 use LGT::LGTbwa;
@@ -163,6 +162,8 @@ sub getGiTaxon {
     if ( $self->{verbose} ) {
         print STDERR "======== &getGiTaxon: Start ========\n";
     }
+
+    require GiTaxon;
 
     # If we already have a gitaxon object we'll just return it.
     if ( !$self->{gitaxon} ) {
