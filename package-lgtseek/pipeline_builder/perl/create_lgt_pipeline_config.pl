@@ -166,20 +166,20 @@ sub main {
 	# Write the pipeline.layout file
 	&write_pipeline_layout( $layout_writer, sub {
 		my ($writer) = @_;
-			&write_include($writer, $pipelines->{'sra'}) if( $included_subpipelines{'sra'} );
+		&write_include($writer, $pipelines->{'sra'}) if( $included_subpipelines{'sra'} );
 		# Use the right layout file if this run is donor-only, or both donor/host alignment
 		if ($donor_only) {
-				&write_include($writer, $pipelines->{'indexing'}, "pipeline.donor_only.layout") if( $included_subpipelines{'indexing'} );
-				unless ($skip_alignment) {
-					&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.donor_aln.layout") if( $included_subpipelines{'lgtseek'} );
-				}
-				&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.donor_only.layout") if( $included_subpipelines{'lgtseek'} );
+			&write_include($writer, $pipelines->{'indexing'}, "pipeline.donor_only.layout") if( $included_subpipelines{'indexing'} );
+			unless ($skip_alignment) {
+				&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.donor_aln.layout") if( $included_subpipelines{'lgtseek'} );
+			}
+			&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.donor_only.layout") if( $included_subpipelines{'lgtseek'} );
 		} elsif ($host_only) {
-				&write_include($writer, $pipelines->{'indexing'}, "pipeline.recipient_only.layout") if( $included_subpipelines{'indexing'} );
-				unless ($skip_alignment) {
-					&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.recipient_aln.layout") if( $included_subpipelines{'lgtseek'} );
-				}
-					&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.recipient_only.layout") if( $included_subpipelines{'lgtseek'} );
+			&write_include($writer, $pipelines->{'indexing'}, "pipeline.recipient_only.layout") if( $included_subpipelines{'indexing'} );
+			unless ($skip_alignment) {
+				&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.recipient_aln.layout") if( $included_subpipelines{'lgtseek'} );
+			}
+			&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.recipient_only.layout") if( $included_subpipelines{'lgtseek'} );
 		} else {
 			&write_include($writer, $pipelines->{'indexing'}) if( $included_subpipelines{'indexing'} );
 			if ($lgt_infected){
@@ -346,7 +346,10 @@ sub main {
 		if ($lgt_infected) {
 			$config{'sam2fasta fasta_r'}->{'$;INPUT_FILE$;'} ='$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected/samtools_merge.bam.list';
 			$config{'gather_lgtseek_files'}->{'RECIPIENT_LGT_BAM_OUTPUT'} = '$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_infected/filter_dups_lc_seqs.bam.list' if $included_subpipelines{'post'};
-		}
+		} else {
+        # For good donor, good LGT-free recipient, donor and recipient reads are the same so we just run split_multifasta once
+        $config{'blastn_plus nt_r'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/split_multifasta/$;PIPELINEID$;_fasta_d/split_multifasta.fsa.list';
+    }
 	}
 
 # If we are indexing references in the pipeline, we need to change some config inputs
