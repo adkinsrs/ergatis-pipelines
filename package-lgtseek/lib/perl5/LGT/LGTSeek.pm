@@ -65,9 +65,6 @@ use Carp;
 $Carp::MaxArgLen = 0;
 use File::Basename;
 use Data::Dumper;
-use LGT::LGTBestBlast;
-use LGT::LGTFinder;
-use LGT::LGTbwa;
 use LGT::Common;
 use XML::Simple qw(:strict);
 use Cwd;
@@ -1668,6 +1665,9 @@ sub bestBlast2 {
     if ( $self->{verbose} ) {
         print STDERR "======== &bestBlast2: Start ========\n";
     }
+
+    require LGT::LGTBestBlast;
+
     my $output_dir =
       defined $config->{output_dir}
       ? "$config->{output_dir}"
@@ -1726,6 +1726,9 @@ sub bestBlast2 {
 
 sub runLgtFinder {
     my ( $self, $config ) = @_;
+
+    require LGT::LGTFinder;
+
     if ( $config->{output_dir} ) {
         $self->_run_cmd("mkdir -p $config->{output_dir}");
     }
