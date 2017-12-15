@@ -33,7 +33,7 @@ $|               = 1;
 
 # Globals
 my $filter_hits = [];
-my $lineage     = [];
+my $lineage     = {};
 my $gi2tax;
 my $outfile;
 my $FILTER_MIN_OVERLAP = 50;
@@ -132,7 +132,7 @@ sub _init_lineage {
         open my $out_fh, ">$outfile"
           or confess "Unable to open lineage1 output $outfile\n";
 
-        my $lineage = {
+        $lineage = {
             'lineage' => $args->{lineage},
             'best_e'    => 100,      # Dummy value so next will always be better
             'best_bit'  => 0,
@@ -200,11 +200,11 @@ sub _process_line {
     # If our best lineage ID has been identified as the current query ID...
     if ( $lineage->{id} eq $fields->[0] ) {
 
-  # SAdkins - 11/20/17 - Changed from using best e-val to best bit score instead
-  # Determining how to handle equal or better hits
+        # SAdkins - 11/20/17 - Changed from using best e-val to best bit score instead
+        # Determining how to handle equal or better hits
         if ( $fields->[11] == $lineage->{best_bit} ) {
 
-# If our hit is equally as good as our best, then allow for more than one best hit
+            # If our hit is equally as good as our best, then allow for more than one best hit
             push( @{ $lineage->{best_rows} }, $fields );
         } elsif ( $fields->[11] > $lineage->{best_bit} ) {
             $lineage->{best_bit}  = $fields->[11];
