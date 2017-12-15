@@ -36,12 +36,6 @@ sub new {
     my ( $class, $args ) = @_;
 
     my $self = {};
-    # Get version of MongoDB being used
-    # Version is 'v#.#.#' or '#.#' so let's just get the first digit only.
-    my $version = $MongoDB::VERSION;
-    $version =~ s/^.// if $version =~ /^v/;
-    $version = substr($version, 0, 1);
-    $self->{'version'} = $version;
 
     # If we choose to not provide any taxonomy flatfiles, enable this property
     # This will cause all taxon entries to be added from the Entrez database
@@ -300,29 +294,14 @@ sub insert_chunk {
     my $coll  = shift;
     my $chunk = shift;
 
-    my $version = defined $self->{'version'} ? $self->{'version'} : 0.9;
-    if ($version < 1) {
-        $coll->batch_insert( $chunk, { 'safe' => 1 } );    # Uses older MongoDB
-    } else {
-        $coll->insert_many( $chunk, { 'safe' => 1 } );      # Uses newer MongoDB
-    }
+    $coll->insert_many( $chunk, { 'safe' => 1 } );      # Uses newer MongoDB
 }
 
 sub get_mongodb_connection {
     my ( $self, $dbname, $host ) = @_;
 
     # First we'll establish our connection to mongodb
-    my $conn;
-    my $version = defined $self->{'version'} ? $self->{'version'} : 0.9;
-    if ($version < 1) {
-        print STDERR "Using version of MongoDB before version 1.0\n";
-        require MongoDB::Connection;
-        $conn = MongoDB::Connection->new( host => $host );
-        $conn->query_timeout(60000000);
-    } else {
-        print STDERR "Using version of MongoDB after version 1.0\n";
-        $conn = MongoDB->connect( $host );
-    }
+    my $conn = MongoDB->connect( $host );
     return $conn->get_database($dbname);
 }
 
