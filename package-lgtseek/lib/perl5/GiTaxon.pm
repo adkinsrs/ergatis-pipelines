@@ -175,7 +175,7 @@ sub getTaxon {
                     print STDERR "Unable to find taxonid at NCBI\n";
                 }
                 else {
-                    my $res = $self->{'gi2taxon'}->replace_one(
+                    my $res = $self->{'gi2taxon'}->update_one(
                         { 'gi'     => "$gi" },
                         { '$set' => { 'gi'     => "$gi", 'taxon' => $taxonid } },
                         { 'upsert' => 1, 'safe' => 1 }
