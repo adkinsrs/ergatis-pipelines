@@ -163,7 +163,8 @@ sub getTaxon {
                 -eutil => 'esummary',
                 -email => 'example@foo.bar',
                 -db    => $self->{'type'},
-                -id    => [$gi]
+                -id    => [$gi],
+                -location => $EUTILS_PATH
             );
             while ( my $ds = $factory->next_DocSum ) {
                 my @res = $ds->get_contents_by_name('TaxId');
@@ -174,7 +175,7 @@ sub getTaxon {
                     print STDERR "Unable to find taxonid at NCBI\n";
                 }
                 else {
-                    my $res = $self->{'gi2taxon'}->update(
+                    my $res = $self->{'gi2taxon'}->replace_one(
                         { 'gi'     => "$gi" },
                         { '$set' => { 'gi'     => "$gi", 'taxon' => $taxonid } },
                         { 'upsert' => 1, 'safe' => 1 }
