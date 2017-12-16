@@ -52,8 +52,8 @@
 		<!--Processing-->
 		<commandSet type="remote-serial">
 			<state>incomplete</state>
-			<name>samtools merge distributed work</name>
-			<fileName>$;WORKFLOW_REPOSITORY$;/samtools_merge_distributed_work.xml.gz</fileName>
+			<name>get final LGT distributed work</name>
+			<fileName>$;WORKFLOW_REPOSITORY$;/determine_final_lgt_distributed_work.xml.gz</fileName>
 			<dceSpec type="sge">
 				<group>$;PROJECT_CODE$;</group>
 				<OS>linux</OS>
