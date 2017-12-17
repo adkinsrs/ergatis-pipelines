@@ -1,9 +1,6 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
-eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
-    if 0; # not running under some shell
-
-eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
+eval 'exec /usr/bin/env perl  -S $0 ${1+"$@"}'
     if 0; # not running under some shell
 
 #Create a complete workflow XML file (--output_xml) from a template
@@ -194,8 +191,9 @@ sub get_dce_spec_parameters {
                       "</group>\n";
     }
 
+	### SAdkins - 1/11/17 - Commenting this out.  We are worried this would allow users to be lazy and not specify a memory requirement, and grossly underestimate their requirements, and causing chaos on the grid.
 	# Required to specify mem_free requirements when submitting to the grid.  This is to ensure jobs without that req have a default value.
-    $dce_block .= "<passthrough>-l mem_free=$default_memory</passthrough>\n" if ($dce_block !~ /<passthrough>[\w=\s-_]+<\/passthrough>/);
+	#$dce_block .= "<passthrough>-l mem_free=$default_memory</passthrough>\n" if ($dce_block !~ /<passthrough>[\w=\s-_]+<\/passthrough>/);
 
     $dce_block .= "</dceSpec>\n";
     return $dce_block;
