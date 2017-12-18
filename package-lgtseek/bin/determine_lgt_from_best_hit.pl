@@ -106,13 +106,14 @@ my $results = GetOptions (\%options,
 
 # This this is a pipeline-specific script, making assumption list file points to one output file or has the output directly.
 open IN, $options{'aligned_list'} or &_log($ERROR, "Cannot open for reading:$!\n");
-while (<IN>);
+while (<IN>){
   chomp;
   if (/.reads/) {
 	$infile = $options{'aligned_list'};
   } else {
 	$infile = $_;
   last;
+}
 close IN;
 
 my $aligned_reads = store_aligned_reads($infile);
