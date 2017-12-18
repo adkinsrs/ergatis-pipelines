@@ -27,7 +27,7 @@ B<--bac_hits, -b>
   Path to Blast m8 file of read hits to Bacteria lineage. Alternatively a list file pointing to this file can be provided.
 
 B<--aligned_list, -a>
-  List of LGT reads known to align to a particular reference
+  List of LGT reads known to align to a particular reference.  Alternatively accepts a list file pointing to an ".aligned.reads" file.  Currently designed with the assumption only one file is in the list file.
 
 B<--aligned_reference, -r>
   Choose from 'donor' or 'recipient'.  The type of reference the reads from --aligned_list aligned to.
@@ -86,6 +86,7 @@ my $logfh;
 
 my %options;
 my $REFERENCE = 'donor';
+my $infile;
 my $read_scores_href;
 my $read_hits_href;
 my ($euk_file, $bac_file);
@@ -103,7 +104,18 @@ my $results = GetOptions (\%options,
 
 &check_options(\%options);
 
-my $aligned_reads = store_aligned_reads($options{'aligned_list'});
+# This this is a pipeline-specific script, making assumption list file points to one output file or has the output directly.
+open IN, $options{'aligned_list'} or &_log($ERROR, "Cannot open for reading:$!\n");
+while (<IN>);
+  chomp;
+  if (/.reads/) {
+	$infile = $options{'aligned_list'};
+  } else {
+	$infile = $_;
+  last;
+close IN;
+
+my $aligned_reads = store_aligned_reads($infile);
 store_m8_hits($bac_file, $read_scores_href, $read_hits_href, 'bac');
 store_m8_hits($euk_file, $read_scores_href, 'euk');
 

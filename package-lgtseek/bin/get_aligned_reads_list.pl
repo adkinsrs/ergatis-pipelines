@@ -106,7 +106,7 @@ sub process_bam {
   my $outdir = shift;
 
   my($filename, $dirs, $suffix) = fileparse($bam);
-  my $outfile = "$outdir/$filename.aligned.list";
+  my $outfile = "$outdir/$filename.aligned.reads";
 
   # Only show BAM reads that are mapped
   open( my $bam_fh, "$SAMTOOLS_BIN view -F $UNMAPPED_BIT $bam |") or &_log($ERROR, "Could not open $bam for reading: $!");

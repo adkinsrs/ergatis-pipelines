@@ -81,7 +81,7 @@
 									<state>incomplete</state>
 									<commandSet type="serial">
 										<state>incomplete</state>
-										<name>get_aligned_reads_list.lgt_donor</name>
+										<name>get_aligned_reads_list.lgt_recipient</name>
 									</commandSet>
 									<commandSet type="serial">
 										<state>incomplete</state>
@@ -122,7 +122,7 @@
 					</commandSet>
 					<commandSet type="serial">
 						<state>incomplete</state>
-						<name>lgt_create_validated_bam.lgt_dr/name>
+						<name>lgt_create_validated_bam.lgt_r/name>
 					</commandSet>
 					<commandSet type="serial">
 						<state>incomplete</state>

@@ -22,7 +22,7 @@
     <!-- Processing -->
       <command>
           <type>RunUnixCommand</type>
-          <name>create reads list</name>
+          <name>get aligned reads list</name>
           <state>incomplete</state>
           <executable>$;BIN_DIR$;/get_aligned_reads_list</executable>
           <param>
@@ -44,7 +44,7 @@
       </command>
         <command>
             <type>RunUnixCommand</type>
-            <name>create reads list</name>
+            <name>create list of output files</name>
             <state>incomplete</state>
             <executable>$;BIN_DIR$;/create_list_file</executable>
             <param>
@@ -53,7 +53,7 @@
             </param>
             <param>
                 <key>--regex</key>
-                <value>".*aligned\.list"</value>
+                <value>".*aligned\.reads"</value>
             </param>
             <param>
                 <key>--output_list</key>
