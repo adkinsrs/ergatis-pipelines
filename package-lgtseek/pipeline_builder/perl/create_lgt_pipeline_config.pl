@@ -347,9 +347,10 @@ sub main {
 			$config{'sam2fasta fasta_r'}->{'$;INPUT_FILE$;'} ='$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected/samtools_merge.bam.list';
 			$config{'gather_lgtseek_files'}->{'RECIPIENT_LGT_BAM_OUTPUT'} = '$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_infected/filter_dups_lc_seqs.bam.list' if $included_subpipelines{'post'};
 		} else {
-        # For good donor, good LGT-free recipient, donor and recipient reads are the same so we just run split_multifasta once
-        $config{'blastn_plus nt_r'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/split_multifasta/$;PIPELINEID$;_fasta_d/split_multifasta.fsa.list';
-    }
+            # For good donor, good LGT-free recipient, donor and recipient reads are the same so we just run split_multifasta once
+            $config{'blastn_plus nt_r'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/split_multifasta/$;PIPELINEID$;_fasta_d/split_multifasta.fsa.list';
+            $config{'bwa_aln validation_r'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_create_validated_bam/$;PIPELINEID$;_lgt_d/lgt_create_validate_bam.bam.list';
+        }
 	}
 
 # If we are indexing references in the pipeline, we need to change some config inputs
