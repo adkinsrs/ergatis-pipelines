@@ -118,7 +118,7 @@ close IN;
 
 my $aligned_reads = store_aligned_reads($infile);
 store_m8_hits( $bac_file, $read_scores_href, $read_hits_href, 'bac' );
-store_m8_hits( $euk_file, $read_scores_href, 'euk' );
+store_m8_hits( $euk_file, $read_scores_href, $read_hits_href, 'euk' );
 
 # Right now, the only use-cases where a read may have hits in both lineages would be use-case 1 and 2
 calc_hscore_of_reads( $read_scores_href, $options{'output_dir'} );

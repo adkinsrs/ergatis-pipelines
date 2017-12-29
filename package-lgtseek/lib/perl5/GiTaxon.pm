@@ -156,8 +156,7 @@ sub getTaxon {
           $self->{'gi2taxon'}->find_one( { 'gi' => "$gi" }, { 'taxon' => 1 } );
         if ($taxon_lookup) {
             $taxonid = $taxon_lookup->{'taxon'};
-        }
-        else {
+        } else {
 			#print STDERR "*** GiTaxon-getTaxon: Unable to find taxon for $gi, Checking NCBI\n";
             my $factory = Bio::DB::EUtilities->new(
                 -eutil => 'esummary',
