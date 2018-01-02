@@ -82,14 +82,14 @@ use LGT::Common;
 my $debug = 1;
 my ( $ERROR, $WARN, $DEBUG ) = ( 1, 2, 3 );
 my $logfh;
+my $read_scores;  #hashref
+my $read_hits;  #hashref
 
 ####################################################
-
 my %options;
 my $REFERENCE = 'donor';
 my $infile;
-my $read_scores_href;
-my $read_hits_href;
+
 my ( $euk_file, $bac_file );
 
 my $results = GetOptions(
@@ -107,34 +107,34 @@ open IN, $options{'aligned_list'}
   or &_log( $ERROR, "Cannot open for reading:$!\n" );
 while (<IN>) {
     chomp;
-    if (/.reads/) {
-        $infile = $options{'aligned_list'};
+    # List file will have a ".reads" file but ".reads" files will have alignments for first line
+    if (/.reads$/) {
+      &_log($DEBUG, "Determined " . $options{'aligned_list'} . " to be a list file");
+      $infile = $_;
     } else {
-        $infile = $_;
+        $infile = $options{'aligned_list'};
+
     }
     last;
 }
 close IN;
 
 my $aligned_reads = store_aligned_reads($infile);
-store_m8_hits( $bac_file, $read_scores_href, $read_hits_href, 'bac' );
-store_m8_hits( $euk_file, $read_scores_href, $read_hits_href, 'euk' );
+store_m8_hits( $bac_file, 'bac' );
+store_m8_hits( $euk_file, 'euk' );
 
 # Right now, the only use-cases where a read may have hits in both lineages would be use-case 1 and 2
-calc_hscore_of_reads( $read_scores_href, $options{'output_dir'} );
-write_final_LGT( $read_hits_href, $options{'output_dir'}, $aligned_reads,
-    $REFERENCE );
+calc_hscore_of_reads( $options{'output_dir'} );
+write_final_LGT( $options{'output_dir'}, $aligned_reads, $REFERENCE );
 
 exit(0);
 
 sub calc_hscore_of_reads {
-    my ( $read_scores, $outdir ) = @_;
-    my $outfile = $outdir . "/scores.txt";
+    my $outfile = shift . "/scores.txt";
     open OFH,
       ">$outfile" || &_log( $ERROR, "Cannot open $outfile for writing: $!" );
     print OFH "#read\th_score\teuk/prok_ratio\n";
     foreach my $read ( keys %{$read_scores} ) {
-
         # Does a read have hits in both lineage types?
         if ( defined $read_scores->{$read}->{'bac'}
             && $read_scores->{$read}->{'euk'} )
@@ -163,7 +163,7 @@ sub store_aligned_reads {
 }
 
 sub store_m8_hits {
-    my ( $m8_hits, $read_scores, $read_hits, $ref ) = @_;
+    my ( $m8_hits, $ref ) = @_;
     open M8,
       $m8_hits || &_log( $ERROR, "Cannot open $m8_hits for reading: $!" );
     while (<M8>) {
@@ -180,35 +180,34 @@ sub store_m8_hits {
 }
 
 sub write_final_LGT {
-    my ( $read_hits, $outdir, $aligned_reads, $aligned_ref ) = @_;
+    my ( $outdir, $aligned_reads, $aligned_ref ) = @_;
     my $outfile = $outdir . "/lgt_by_clone.txt";
     my %seen_hits;
     open OFH,
       ">$outfile" || &_log( $ERROR, "Cannot open $outfile for writing: $!" );
     foreach my $read ( keys %{$read_hits} ) {
 
-        # Donor reads match to 'euk' hits.  Recipient reads match to 'bac' hits.
-        if ( !exists $seen_hits{$read} ) {
+      # Figure out the name of the mate, and parse the clone template ID
+      my $read_mate;
+      my $clone;
+      if ( $read =~ /(.*)([\_\/])(\d)/ ) {
+          $clone = $1;
+          if ( $3 eq '1' ) {
+              $read_mate = $1 . $2 . "2";
+          } elsif ( $3 eq '2' ) {
+              $read_mate = $1 . $2 . "1";
+          } else {
+              &_log( $ERROR,
+                  "Read $read did not end in '1' or '2'.  Cannot determine mate."
+              );
+          }
+        }
 
-  # One read in the pair should always be in the list of reference-aligned reads
-            if ( exists $aligned_reads->{$read} ) {
-                my $read_mate;
-                my $clone;
+        # Only want to process unseen readpairs
+        if ( !exists $seen_hits{$clone} ) {
+            if ( exists $aligned_reads->{$clone} ) {
                 my @d_fields;    # Can have multiple m8 entries for 'best_hit'
                 my @r_fields;
-
-                if ( $read =~ /(.*)([\_\/])(\d)/ ) {
-                    $clone = $1;
-                    if ( $3 eq '1' ) {
-                        $read_mate = $1 . $2 . "2";
-                    } elsif ( $3 eq '2' ) {
-                        $read_mate = $1 . $2 . "1";
-                    } else {
-                        &_log( $ERROR,
-                            "Read $read did not end in '1' or '2'.  Cannot determine mate."
-                        );
-                    }
-                }
 
                 my ( $d_trace, $r_trace );
                 if ( $aligned_ref eq 'donor' ) {
@@ -299,6 +298,7 @@ sub check_options {
           || die "Cannot open $opts->{'euk_hits'} for reading: $!";
         while (<LIST>) {
             chomp;
+            &_log($DEBUG, "Determined " . $opts->{'euk_hits'} . " to be a list file");
             $euk_file = $_;
         }
         close LIST;
@@ -311,6 +311,7 @@ sub check_options {
           || die "Cannot open $opts->{'bac_hits'} for reading: $!";
         while (<LIST>) {
             chomp;
+            &_log($DEBUG, "Determined " . $opts->{'bac_hits'} . " to be a list file");
             $bac_file = $_;
         }
         close LIST;
