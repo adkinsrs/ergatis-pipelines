@@ -187,25 +187,25 @@ sub write_final_LGT {
       ">$outfile" || &_log( $ERROR, "Cannot open $outfile for writing: $!" );
     foreach my $read ( keys %{$read_hits} ) {
 
-      # Figure out the name of the mate, and parse the clone template ID
-      my $read_mate;
-      my $clone;
-      if ( $read =~ /(.*)([\_\/])(\d)/ ) {
-          $clone = $1;
-          if ( $3 eq '1' ) {
-              $read_mate = $1 . $2 . "2";
-          } elsif ( $3 eq '2' ) {
-              $read_mate = $1 . $2 . "1";
-          } else {
-              &_log( $ERROR,
-                  "Read $read did not end in '1' or '2'.  Cannot determine mate."
-              );
-          }
-        }
-
         # Only want to process unseen readpairs
-        if ( !exists $seen_hits{$clone} ) {
-            if ( exists $aligned_reads->{$clone} ) {
+        if ( !exists $seen_hits{$read} ) {
+            if ( exists $aligned_reads->{$read} ) {
+
+              my $read_mate;
+              my $clone;
+              if ( $read =~ /(.*)([\_\/])(\d)/ ) {
+                  $clone = $1;
+                  if ( $3 eq '1' ) {
+                      $read_mate = $1 . $2 . "2";
+                  } elsif ( $3 eq '2' ) {
+                      $read_mate = $1 . $2 . "1";
+                  } else {
+                      &_log( $ERROR,
+                          "Read $read did not end in '1' or '2'.  This read may be unpaired.  Cannot proceed unless mate can be determined."
+                      );
+                  }
+                }
+
                 my @d_fields;    # Can have multiple m8 entries for 'best_hit'
                 my @r_fields;
 

@@ -28,6 +28,7 @@ use Getopt::Long qw(:config no_ignore_case no_auto_abbrev);
 use Pod::Usage;
 use File::Basename;
 use Bio::Perl;
+use LGT:Common;
 $|++;
 
 my %options = ();
@@ -218,7 +219,7 @@ sub process_file2 {
         if(!$paired || !$reads_seen->{$fields[0]}) {
 
             # Parse the flag
-            my $flag = &parseFlag($fields[1]);
+            my $flag = parse_flag($fields[1]);
 
             # Skip if this is a secondary alignment
             next if($flag->{secondary});
@@ -333,7 +334,7 @@ sub process_file_hlgt {
             if(!$working_reads->{$fields[0]}) {
                 $working_reads->{$fields[0]} = {};
             }
-            my $flag = &parseFlag($fields[1]);
+            my $flag = parse_flag($fields[1]);
             next if($flag->{secondary});
             my $seq = $fields[9];
             my $qual = $fields[10];
@@ -427,28 +428,4 @@ sub dec2bin {
     my $str = unpack("B32", pack("N", shift));
     $str =~ s/^0+(?=\d)//;   # otherwise you'll get leading zeros
     return $str;
-}
-
-sub parseFlag {
-    my $int = shift;
-    my $rawbin = dec2bin($int);
-    my $rev = scalar $rawbin;
-    if($rev eq $rawbin) {
-    #    print "ERROR $rev $rawbin\n";
-    }
-    my $bin = sprintf("%011d", $rev);
-    my $final_bin = reverse $bin;
-    return {
-        'paired' => substr($final_bin, 0, 1),
-        'proper' => substr($final_bin, 1, 1),
-        'qunmapped' => substr($final_bin, 2, 1),
-        'munmapped' => substr($final_bin, 3, 1),
-        'qrev' => substr($final_bin, 4, 1),
-        'mrev' => substr($final_bin, 5, 1),
-        'first' => substr($final_bin, 6, 1),
-        'last' => substr($final_bin, 7, 1),
-        'secondary' => substr($final_bin, 8, 1),
-        'failqual' => substr($final_bin, 9, 1),
-        'pcrdup' => substr($final_bin, 10, 1)
-    };
 }

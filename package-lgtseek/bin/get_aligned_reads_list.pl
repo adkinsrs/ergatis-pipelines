@@ -63,6 +63,7 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
 use Pod::Usage;
 use File::Basename;
+use LGT::Common;
 
 my $debug = 1;
 my ($ERROR, $WARN, $DEBUG) = (1,2,3);
@@ -114,7 +115,21 @@ sub process_bam {
 
   # Print readnames to output if read mapped to this BAM's reference
   while (<$bam_fh>) {
-    print $out_fh (( split /\t/, $_, 2 )[0], "\n");
+    my ($name, $bitflag, $rest) = split /\t/, $_, 3;
+    my $flags = parse_flag($bitflag);
+    my $final_name;
+    if ( $flags->{paired} }
+      if ( $flags->{first} ) {
+        $final_name = $name . "/1";
+      } else {
+        $final_name = $name . "/2";
+      }
+    } else {
+      # For the LGTSeek pipeline, unpaired data will not pass the 'determine_final_lgt' component
+      $final_name = $name;
+    }
+
+    print $out_fh "$final_name\n";
   }
 
   close $out_fh;
