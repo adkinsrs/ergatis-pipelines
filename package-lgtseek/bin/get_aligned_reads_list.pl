@@ -118,7 +118,7 @@ sub process_bam {
     my ($name, $bitflag, $rest) = split /\t/, $_, 3;
     my $flags = parse_flag($bitflag);
     my $final_name;
-    if ( $flags->{paired} ) }
+    if ( $flags->{paired} ) {
       if ( $flags->{first} ) {
         $final_name = $name . "/1";
       } else {
