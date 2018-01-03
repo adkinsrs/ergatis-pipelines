@@ -28,7 +28,7 @@ use Getopt::Long qw(:config no_ignore_case no_auto_abbrev);
 use Pod::Usage;
 use File::Basename;
 use Bio::Perl;
-use LGT:Common;
+use LGT::Common;
 $|++;
 
 my %options = ();
