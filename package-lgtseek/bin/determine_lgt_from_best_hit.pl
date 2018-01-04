@@ -137,7 +137,7 @@ sub calc_hscore_of_reads {
     foreach my $read ( keys %{$read_scores} ) {
         # Does a read have hits in both lineage types?
         if ( defined $read_scores->{$read}->{'bac'}
-            && $read_scores->{$read}->{'euk'} )
+            && defined $read_scores->{$read}->{'euk'} )
         {
             my $h_score =
               $read_scores->{$read}->{'euk'} - $read_scores->{$read}->{'bac'};
@@ -206,9 +206,6 @@ sub write_final_LGT {
                   }
                 }
 
-                my @d_fields;    # Can have multiple m8 entries for 'best_hit'
-                my @r_fields;
-
                 my ( $d_trace, $r_trace );
                 if ( $aligned_ref eq 'donor' ) {
                     $d_trace = $read;
@@ -218,10 +215,19 @@ sub write_final_LGT {
                     $r_trace = $read;
                 }
 
-                push( @d_fields,
-                    split( /\t/, $read_hits->{$d_trace}->{'euk'} ) );
-                push( @r_fields,
-                    split( /\t/, $read_hits->{$r_trace}->{'bac'} ) );
+                next if ! defined $read_hits->{$d_trace}->{'euk'}
+                  || ! defined $read_hits->{$r_trace}->{'bac'};
+
+                # Want donors found in Euks and recipients found in Bacs from Blastn
+                my (@d_fields, @r_fields);    # Can have multiple m8 entries for 'best_hit'
+                foreach my $hit ( @{$read_hits->{$d_trace}->{'euk'}} ) {
+                  my @entry = split( /\t/, $hit );
+                  push( @d_fields, \@entry );
+                }
+                foreach my $hit ( @{$read_hits->{$r_trace}->{'bac'}} ) {
+                  my @entry = split( /\t/, $hit );
+                  push( @r_fields, \@entry );
+                }
 
                 #Donor hit info
                 my @d_generas;
@@ -229,42 +235,41 @@ sub write_final_LGT {
                 my $d_evalue;
                 my $d_align_len;
                 foreach my $entry (@d_fields) {
-                    push @d_generas, $entry->[13];
-                    $d_lca = $entry->[14] if ( !defined $d_lca );
-                    $d_lca = find_lca( $entry->[14], $d_lca );
-                    $d_evalue = $entry->[10]
-                      ; # Ideally e_value and length of alignment should be same for all tied hits
-                    $d_align_len = $entry->[3];
+                  push @d_generas, $entry->[13];
+                  $d_lca = $entry->[14] if ( !defined $d_lca );
+                  $d_lca = find_lca( [$entry->[14], $d_lca] );
+                  # Ideally e_value and length of alignment should be same for all tied hits
+                  $d_evalue = $entry->[10];
+                  $d_align_len = $entry->[3];
                 }
                 my $d_genera = join( ",", @d_generas );
 
                 my $d_filter_hit = 0;    # For now not filtering lineage
                 my @d_parts =
-                  [ $d_trace, $d_evalue, $d_align_len, $d_lca, $d_filter_hit ];
+                  ( $d_trace, $d_evalue, $d_align_len, $d_lca, $d_filter_hit );
 
                 #Recipient hit info
                 my @r_generas;
                 my $r_lca;
                 my $r_evalue;
                 my $r_align_len;
-                foreach my $entry (@d_fields) {
-                    push @r_generas, $entry->[13];
-                    $r_lca = $entry->[14] if ( !defined $r_lca );
-                    $r_lca       = find_lca( $entry->[14], $r_lca );
-                    $r_evalue    = $entry->[10];
-                    $r_align_len = $entry->[3];
+                foreach my $entry (@r_fields) {
+                  push @r_generas, $entry->[13];
+                  $r_lca = $entry->[14] if ( !defined $r_lca );
+                  $r_lca       = find_lca( [$entry->[14], $r_lca] );
+                  $r_evalue    = $entry->[10];
+                  $r_align_len = $entry->[3];
                 }
                 my $r_genera = join( ",", @r_generas );
 
                 my $r_filter_hit = 0;
                 my @r_parts =
-                  [ $r_trace, $r_evalue, $r_align_len, $r_lca, $r_filter_hit ];
+                  ( $r_trace, $r_evalue, $r_align_len, $r_lca, $r_filter_hit );
 
                 # Putting it all together...
                 print OFH "$clone\t$d_genera\t$r_genera\t";
-                print OFH join( "\t", @d_parts );
-                print OFH join( "\t", @r_parts );
-                print OFH "\n";
+                print OFH join( "\t", @d_parts ) . "\t";
+                print OFH join( "\t", @r_parts ) . "\n";
 
                 $seen_hits{$read}      = 1;
                 $seen_hits{$read_mate} = 1;
