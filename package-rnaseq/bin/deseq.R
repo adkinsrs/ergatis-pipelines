@@ -181,12 +181,13 @@ for (k in 1:(length(pheno)-1)) {
 		# get read counts for each group for the top 30 most significant DEGs
 		# order output by absolute LFC
 		res <- res[order(-abs(res$log2FoldChange)),]
+		out <- res
 		
 		# Change column names for clarity and brevity
-		#colnames(res) <- c("Feature.ID", "Read.Count.All", paste("Read.Count.", pheno[m], sep=""), paste("Read.Count.", pheno[k], sep=""), "FC", paste("LFC(", pheno[k], "/", pheno[m], ")", sep=""), "p.Value", "FDR", "NA", "NA")
-		colnames(res) <- c("Feature.ID", "Read.Count.All", paste("Read.Count.", pheno[m], sep=""), paste("Read.Count.", pheno[k], sep=""), "FC", paste("LFC(", pheno[k], "/", pheno[m], ")", sep=""), "p.Value", "FDR")	
+		#colnames(out) <- c("Feature.ID", "Read.Count.All", paste("Read.Count.", pheno[m], sep=""), paste("Read.Count.", pheno[k], sep=""), "FC", paste("LFC(", pheno[k], "/", pheno[m], ")", sep=""), "p.Value", "FDR", "NA", "NA")
+		colnames(out) <- c("Feature.ID", "Read.Count.All", paste("Read.Count.", pheno[m], sep=""), paste("Read.Count.", pheno[k], sep=""), "FC", paste("LFC(", pheno[k], "/", pheno[m], ")", sep=""), "p.Value", "FDR")	
 		# write data to tsv file
-		write.table(res, file.path(paste(pheno[k], "_vs_", pheno[m], ".de_genes.txt", sep="")), na="", quote=F, row.names=F, sep="\t")
+		write.table(out, file.path(paste(pheno[k], "_vs_", pheno[m], ".de_genes.txt", sep="")), na="", quote=F, row.names=F, sep="\t")
 
 		sig.genes <- res[res$padj<=0.05,]
 		print(dim(sig.genes))
