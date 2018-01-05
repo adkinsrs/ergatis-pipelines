@@ -15,7 +15,7 @@
 ## tcreasy
 
 rm(list=ls(all=T))
-cat("\n***** Starting DESeq (v1.10.1) analysis ******\n\n")
+cat("\n***** Starting DESeq (v1.24.0) analysis ******\n\n")
 
 # input arguments
 args <- commandArgs(TRUE)
@@ -53,13 +53,13 @@ for (i in 2:nrow(sample.info)) {
 
 
 colnames(data.tab) <- c("ID", as.character(sample.info[,1]))
-write.table(data.tab, file.path("all_counts"), na="", quote=F, row.names=F, sep="\t")
-write.table(count.stat, file.path("count_stat"), na="", quote=F, row.names=F, sep="\t")
+write.table(data.tab, file.path("all_counts"), na="NA", quote=F, row.names=F, sep="\t")
+write.table(count.stat, file.path("count_stat"), na="NA", quote=F, row.names=F, sep="\t")
 
 
 # remove genes without reads for all samples
 data.tab <- data.tab[which(rowSums(data.tab[,2:ncol(data.tab)])>0),]
-write.table(data.tab, file.path("all_counts_noZero"), na="", quote=F, row.names=F, sep="\t")
+write.table(data.tab, file.path("all_counts_noZero"), na="NA", quote=F, row.names=F, sep="\t")
 cat(paste("\n* There are ", ncol(data.tab)-1, " samples and ", nrow(data.tab), " genes used for DE analysis\n", sep=""))
 
 
@@ -95,6 +95,7 @@ if (sum(ifelse((data.frame(table(as.character(sample.info[,2])))$Freq < 2), 1, 0
 	#  - sharingMode = "fit-only"
 	#  - fitType = "local"
 	#
+	cat("\t* Estimating dispersions without replicates ...\n")
 	cds <- estimateDispersions(cds, method="blind", sharingMode="fit-only", fitType="local")
 } else {
 	# WITH FEW replicates (2 or less replicates)
@@ -104,6 +105,7 @@ if (sum(ifelse((data.frame(table(as.character(sample.info[,2])))$Freq < 2), 1, 0
 	#  - sharingMode = "fit-only"
 	#  - fitType = "local"
 	#
+	cat("\t* Estimating dispersions with replicates ...\n")
 	cds <- estimateDispersions(cds, method="pooled", sharingMode="fit-only", fitType="local")
 }
 
@@ -139,7 +141,7 @@ hmcol = colorRampPalette(brewer.pal(9, "RdBu"))(100)
 # output to tab file
 out <- cbind(rownames(exprs(vsd)), exprs(vsd))
 colnames(out) <- c("ID", colnames(exprs(vsd)))
-write.table(out, file.path("all_counts_noZero_normalized"), na="", sep="\t", quote=F, row.names=F)
+write.table(out, file.path("all_counts_noZero_normalized"), na="NA", sep="\t", quote=F, row.names=F)
 
 # Heatmap showing clustering of samples
 dists = dist( t( exprs(vsd) ) )
@@ -169,6 +171,9 @@ for (k in 1:(length(pheno)-1)) {
 		
 		cat("\n* Results Snippet: res\n")
 		print(head(res))
+		print(dim(res))
+		print(summary(res$pval))
+		print(summary(res$padj))
 		
 		# plot the results using FDR=0.05 as the cutoff
 		ma.title <- paste("DEG MA Plot", " (FDR < 0.05)", sep="")
@@ -181,68 +186,73 @@ for (k in 1:(length(pheno)-1)) {
 		# get read counts for each group for the top 30 most significant DEGs
 		# order output by absolute LFC
 		res <- res[order(-abs(res$log2FoldChange)),]
-		out <- res
+		tmp <- res
 		
 		# Change column names for clarity and brevity
-		#colnames(out) <- c("Feature.ID", "Read.Count.All", paste("Read.Count.", pheno[m], sep=""), paste("Read.Count.", pheno[k], sep=""), "FC", paste("LFC(", pheno[k], "/", pheno[m], ")", sep=""), "p.Value", "FDR", "NA", "NA")
-		colnames(out) <- c("Feature.ID", "Read.Count.All", paste("Read.Count.", pheno[m], sep=""), paste("Read.Count.", pheno[k], sep=""), "FC", paste("LFC(", pheno[k], "/", pheno[m], ")", sep=""), "p.Value", "FDR")	
+		#colnames(tmp) <- c("Feature.ID", "Read.Count.All", paste("Read.Count.", pheno[m], sep=""), paste("Read.Count.", pheno[k], sep=""), "FC", paste("LFC(", pheno[k], "/", pheno[m], ")", sep=""), "p.Value", "FDR", "NA", "NA")
+		colnames(tmp) <- c("Feature.ID", "Read.Count.All", paste("Read.Count.", pheno[m], sep=""), paste("Read.Count.", pheno[k], sep=""), "FC", paste("LFC(", pheno[k], "/", pheno[m], ")", sep=""), "p.Value", "FDR")	
 		# write data to tsv file
-		write.table(out, file.path(paste(pheno[k], "_vs_", pheno[m], ".de_genes.txt", sep="")), na="", quote=F, row.names=F, sep="\t")
+		write.table(tmp, file.path(paste(pheno[k], "_vs_", pheno[m], ".de_genes.txt", sep="")), na="NA", quote=F, row.names=F, sep="\t")
 
-		sig.genes <- res[res$padj<=0.05,]
+		cat("\n* Results Snippet: sig.genes\n")
+		sig.genes <- res[!(is.na(res$padj)) & (res$padj<=0.05),]
 		print(dim(sig.genes))
 		
 		if(nrow(sig.genes) < 2) {
-			sig.genes <- res[res$pval<=0.05,]
+			sig.genes <- res[!(is.na(res$pval)) & (res$pval<=0.05),]
 			print(dim(sig.genes))
 		}
 		
-		if(nrow(sig.genes) > 30) {
-			sig.genes <- sig.genes[1:30,]
-			print(dim(sig.genes))
+		if(nrow(sig.genes) >= 2) {
+			if(nrow(sig.genes) > 30) {
+				sig.genes <- sig.genes[1:30,]
+				print(dim(sig.genes))
+			}
+			
+			cat("\n* Results Snippet: sig.genes\n")
+			print(head(sig.genes))
+			
+			read.counts <- cbind(as.numeric(sig.genes[,3]), as.numeric(sig.genes[,4]))
+	
+			colnames(read.counts) <- c(pheno[m], pheno[k])
+			rownames(read.counts) <- c(sig.genes[,1])
+			
+			cat("\n* Results Snippet: read.counts.1\n")
+			print(head(read.counts))
+	
+			# draw heatmap of normalized read counts for the significant genes of each sample
+			sig.title <- paste("Top Significant DEGs", " (per condition)", sep="")		
+			heatmap.2(read.counts, col=hmcol, trace="none", main=sig.title, margin=c(13,13), cexRow=0.8, cexCol=0.8, keysize=1.0)
+			
+			read.counts <- sig.genes[,c(1,6)]
+			colnames(read.counts) <- c("ID", "LFC")
+			read.counts <- merge(read.counts, out, by="ID", x.all=TRUE)
+			read.counts <- read.counts[order(-abs(read.counts$LFC)),]
+			
+			cat("\n* Results Snippet: read.counts.2\n")
+			print(head(read.counts))
+			
+			write.table(read.counts, file.path(paste(pheno[k], "_vs_", pheno[m], ".top30.counts.txt", sep="")), na="NA", quote=F, row.names=F, sep="\t")
+			
+			hmap <- read.delim(file.path(paste(pheno[k], "_vs_", pheno[m], ".top30.counts.txt", sep="")), header=T, sep="\t" )
+			
+			cat("\n* Results Snippet: hmap.1\n")
+			print(head(hmap))
+			
+			hmap <- hmap[,c(3:ncol(hmap))]
+			colnames(hmap) <- c(colnames(read.counts)[3:ncol(read.counts)])
+			rownames(hmap) <- c(read.counts[,1])
+			hmap <- data.matrix(hmap)
+			
+			cat("\n* Results Snippet: hmap.2\n")
+			print(head(hmap))
+			
+			# draw heatmap of normalized read counts for the significant genes of each sample
+			sig.title <- paste("Top Significant DEGs",  " (per sample)", sep="\n")		
+			heatmap.2(hmap, col=hmcol, trace="none", main=sig.title, margin=c(13,13), cexRow=0.8, cexCol=0.8, keysize=1.0)
+		} else {
+			cat("\n* No significant DE genes found! Check study design and/or read counts!\n")
 		}
-		
-		cat("\n* Results Snippet: sig.genes\n")
-		print(head(sig.genes))
-		
-		read.counts <- cbind(as.numeric(sig.genes[,3]), as.numeric(sig.genes[,4]))
-
-		colnames(read.counts) <- c(pheno[m], pheno[k])
-		rownames(read.counts) <- c(sig.genes[,1])
-		
-		cat("\n* Results Snippet: read.counts.1\n")
-		print(head(read.counts))
-
-		# draw heatmap of normalized read counts for the significant genes of each sample
-		sig.title <- paste("Top Significant DEGs", " (per condition)", sep="")		
-		heatmap.2(read.counts, col=hmcol, trace="none", main=sig.title, margin=c(13,13), cexRow=0.8, cexCol=0.8, keysize=1.0)
-		
-		read.counts <- sig.genes[,c(1,6)]
-		colnames(read.counts) <- c("ID", "LFC")
-		read.counts <- merge(read.counts, out, by="ID", x.all=TRUE)
-		read.counts <- read.counts[order(-abs(read.counts$LFC)),]
-		
-		cat("\n* Results Snippet: read.counts.2\n")
-		print(head(read.counts))
-		
-		write.table(read.counts, file.path(paste(pheno[k], "_vs_", pheno[m], ".top30.counts.txt", sep="")), na="", quote=F, row.names=F, sep="\t")
-		
-		hmap <- read.delim(file.path(paste(pheno[k], "_vs_", pheno[m], ".top30.counts.txt", sep="")), header=T, sep="\t" )
-		
-		cat("\n* Results Snippet: hmap.1\n")
-		print(head(hmap))
-		
-		hmap <- hmap[,c(3:ncol(hmap))]
-		colnames(hmap) <- c(colnames(read.counts)[3:ncol(read.counts)])
-		rownames(hmap) <- c(read.counts[,1])
-		hmap <- data.matrix(hmap)
-		
-		cat("\n* Results Snippet: hmap.2\n")
-		print(head(hmap))
-		
-		# draw heatmap of normalized read counts for the significant genes of each sample
-		sig.title <- paste("Top Significant DEGs",  " (per sample)", sep="\n")		
-		heatmap.2(hmap, col=hmcol, trace="none", main=sig.title, margin=c(13,13), cexRow=0.8, cexCol=0.8, keysize=1.0)
 	}
 }
 
