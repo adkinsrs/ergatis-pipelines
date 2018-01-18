@@ -1243,8 +1243,8 @@ sub _bwaPostProcessDonorHostPaired {
     my $classes_both = {
          'UM_MU' => 'lgt',
          'MU_UM' => 'lgt',
-         'UM_MM' => 'integration_site_rec',
-         'MU_MM' => 'integration_site_rec',
+         'UM_MM' => 'integration_site_rec',	#lgt-infected case
+         'MU_MM' => 'integration_site_rec',	#lgt-infected case
          'UU_UM' => 'integration_site_rec',
          'UU_MU' => 'integration_site_rec',
          'MM_UM' => 'integration_site_donor',
@@ -1265,6 +1265,7 @@ sub _bwaPostProcessDonorHostPaired {
          'lgt_host'  => "$output_dir/" . $prefix . ".lgt_recipient.bam",
          'all_donor_donor' => "$output_dir/" . $prefix . ".all_donor.bam",
          'all_recipient_host' => "$output_dir/" . $prefix . ".all_recipient.bam",
+         'lgt_infected_donor' => "$output_dir/" . $prefix . ".lgt_infected_donor.bam"
          'lgt_infected_host' => "$output_dir/" . $prefix . ".lgt_infected_recipient.bam"
     };
 
@@ -1293,6 +1294,9 @@ sub _bwaPostProcessDonorHostPaired {
          my $all_host_h_fh, "| $samtools view -S -b -o " . $class_to_file_name->{"all_recipient_host"} . " -"
      ) or die "Unable to open donor microbiome file for writing\n";
      open ( my $inf_fh,
+        "| $samtools view -S -b -o " . $class_to_file_name->{"lgt_infected_donor"} . " -"
+	 ) or die "Unable to open LGT recipient file for writing\n";
+     open ( my $inf_fh,
         "| $samtools view -S -b -o " . $class_to_file_name->{"lgt_infected_host"} . " -"
 	 ) or die "Unable to open LGT recipient file for writing\n";
 
@@ -1301,7 +1305,8 @@ sub _bwaPostProcessDonorHostPaired {
          'lgt_host'                     => $lgth_fh,
          'all_donor_donor'              => $all_donor_d_fh,
          'all_recipient_host'           => $all_host_h_fh,
-         'lgt_infected_host'            => $inf_fh
+         'lgt_infected_donor'           => $inf_d_fh
+         'lgt_infected_host'            => $inf_h_fh
      };
 
      my $donor_bam = $config->{donor_bam};
@@ -1449,6 +1454,9 @@ sub _bwaPostProcessDonorHostPaired {
                  print {
                      $class_to_file->{ "lgt_infected_host" }
                  } "$hr1_line\n$hr2_line\n";
+				 print {
+					 $class_to_file->{ "lgt_infected_donor" }
+				 } "$dr1_line\n$dr2_line\n";
 
 			}
              # Increment the total count

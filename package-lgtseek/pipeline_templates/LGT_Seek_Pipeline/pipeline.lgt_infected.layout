@@ -24,60 +24,7 @@
 				<state>incomplete</state>
 				<commandSet type="parallel">
 					<state>incomplete</state>
-					<!-- INFECTED RECIPIENT -->
-					<commandSet type="serial">
-						<state>incomplete</state>
-						<commandSet type="serial">
-							<state>incomplete</state>
-							<name>filter_dups_lc_seqs.lgt_recipient</name>
-						</commandSet>
-						<commandSet type="serial">
-							<state>incomplete</state>
-							<name>filter_dups_lc_seqs.infected</name>
-						</commandSet>
-						<commandSet type="serial">
-							<state>incomplete</state>
-							<name>concatenate_files.lgt_infected</name>
-						</commandSet>
-						<commandSet type="serial">
-							<state>incomplete</state>
-							<name>samtools_merge.lgt_infected</name>
-						</commandSet>
-						<!-- BLAST & LCA -->
-						<commandSet type="serial">
-							<state>incomplete</state>
-							<commandSet type="serial">
-								<state>incomplete</state>
-								<name>sam2fasta.fasta_r</name>
-							</commandSet>
-							<commandSet type="serial">
-								<state>incomplete</state>
-								<name>split_multifasta.fasta_r</name>
-							</commandSet>
-							<!-- BAC BLAST -->
-							<commandSet type="serial">
-								<state>incomplete</state>
-								<name>blastdb_alias.bac</name>
-							</commandSet>
-							<commandSet type="serial">
-								<state>incomplete</state>
-								<name>blastn_plus.nt_r</name>
-							</commandSet>
-							<commandSet type="serial">
-								<state>incomplete</state>
-								<name>concatenate_files.blast_r</name>
-							</commandSet>
-							<commandSet type="serial">
-								<state>incomplete</state>
-								<name>blast_lgt_finder.lgt_r</name>
-							</commandSet>
-							<commandSet type="serial">
-								<state>incomplete</state>
-								<name>blast2lca.lgt_r</name>
-							</commandSet>
-						</commandSet>
-					</commandSet>
-					<!-- DONOR -->
+					<!-- MERGE DONOR LGT AND INFECTED -->
 					<commandSet type="serial">
 						<state>incomplete</state>
 						<commandSet type="serial">
@@ -86,7 +33,19 @@
 						</commandSet>
 						<commandSet type="serial">
 							<state>incomplete</state>
-							<name>get_aligned_reads_list.lgt_donor</name>
+							<name>filter_dups_lc_seqs.lgt_infected_d</name>
+						</commandSet>
+						<commandSet type="serial">
+							<state>incomplete</state>
+							<name>concatenate_files.lgt_infected_d</name>
+						</commandSet>
+						<commandSet type="serial">
+							<state>incomplete</state>
+							<name>samtools_merge.lgt_infected_d</name>
+						</commandSet>
+						<commandSet type="serial">
+							<state>incomplete</state>
+							<name>get_aligned_reads_list.merged_donor</name>
 						</commandSet>
 						<commandSet type="serial">
 							<state>incomplete</state>
@@ -96,7 +55,33 @@
 							<state>incomplete</state>
 							<name>split_multifasta.fasta_d</name>
 						</commandSet>
-						<!-- EUK BLAST -->
+					</commandSet>
+					<!-- MERGE RECIPIENT LGT AND INFECTED -->
+					<commandSet type="serial">
+						<state>incomplete</state>
+						<commandSet type="serial">
+							<state>incomplete</state>
+							<name>filter_dups_lc_seqs.lgt_recipient</name>
+						</commandSet>
+						<commandSet type="serial">
+							<state>incomplete</state>
+							<name>filter_dups_lc_seqs.infected_r</name>
+						</commandSet>
+						<commandSet type="serial">
+							<state>incomplete</state>
+							<name>concatenate_files.lgt_infected_r</name>
+						</commandSet>
+						<commandSet type="serial">
+							<state>incomplete</state>
+							<name>samtools_merge.lgt_infected_r</name>
+						</commandSet>
+					</commandSet>
+				</commandSet>
+				<commandSet type="parallel">
+					<state>incomplete</state>
+					<!-- EUK BLAST -->
+					<commandSet type="serial">
+						<state>incomplete</state>
 						<commandSet type="serial">
 							<state>incomplete</state>
 							<name>blastdb_alias.euk</name>
@@ -116,6 +101,30 @@
 						<commandSet type="serial">
 							<state>incomplete</state>
 							<name>blast2lca.lgt_d</name>
+						</commandSet>
+					</commandSet>
+					<!-- BAC BLAST -->
+					<commandSet type="serial">
+						<state>incomplete</state>
+						<commandSet type="serial">
+							<state>incomplete</state>
+							<name>blastdb_alias.bac</name>
+						</commandSet>
+						<commandSet type="serial">
+							<state>incomplete</state>
+							<name>blastn_plus.nt_r</name>
+						</commandSet>
+						<commandSet type="serial">
+							<state>incomplete</state>
+							<name>concatenate_files.blast_r</name>
+						</commandSet>
+						<commandSet type="serial">
+							<state>incomplete</state>
+							<name>blast_lgt_finder.lgt_r</name>
+						</commandSet>
+						<commandSet type="serial">
+							<state>incomplete</state>
+							<name>blast2lca.lgt_r</name>
 						</commandSet>
 					</commandSet>
 				</commandSet>
