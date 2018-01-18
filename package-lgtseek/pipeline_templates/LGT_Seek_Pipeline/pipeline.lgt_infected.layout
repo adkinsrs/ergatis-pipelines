@@ -33,7 +33,7 @@
 						</commandSet>
 						<commandSet type="serial">
 							<state>incomplete</state>
-							<name>filter_dups_lc_seqs.lgt_infected_d</name>
+							<name>filter_dups_lc_seqs.infected_d</name>
 						</commandSet>
 						<commandSet type="serial">
 							<state>incomplete</state>
