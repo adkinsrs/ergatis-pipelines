@@ -128,6 +128,10 @@
 					<state>incomplete</state>
 					<name>lgt_create_validated_bam.lgt_d</name>
 				</commandSet>
+				<commandSet type="serial">
+					<state>incomplete</state>
+					<name>lgt_create_validated_bam.lgt_r/name>
+				</commandSet>
 				<commandSet type="parallel">
 					<state>incomplete</state>
 					<commandSet type="serial">
