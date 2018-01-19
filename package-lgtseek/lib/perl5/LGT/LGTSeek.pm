@@ -1293,10 +1293,10 @@ sub _bwaPostProcessDonorHostPaired {
      open (
          my $all_host_h_fh, "| $samtools view -S -b -o " . $class_to_file_name->{"all_recipient_host"} . " -"
      ) or die "Unable to open donor microbiome file for writing\n";
-     open ( my $inf_fh,
+     open ( my $inf_d_fh,
         "| $samtools view -S -b -o " . $class_to_file_name->{"lgt_infected_donor"} . " -"
 	 ) or die "Unable to open LGT recipient file for writing\n";
-     open ( my $inf_fh,
+     open ( my $inf_h_fh,
         "| $samtools view -S -b -o " . $class_to_file_name->{"lgt_infected_host"} . " -"
 	 ) or die "Unable to open LGT recipient file for writing\n";
 
