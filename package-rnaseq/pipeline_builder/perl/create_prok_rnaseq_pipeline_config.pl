@@ -19,7 +19,7 @@ create_prok_rnaseq_pipeline_config.pl - Creates the pipeline.layout and pipeline
 
     create_prok_rnaseq_pipeline_config.pl --s <samples_file> --c <config_file> [--r <reference_fasta>] 
                                           [--qual <quality_score_format>] [--gtf <annotation_file>] 
-                                          [--bowtie_build] [--quality_stats] [--quality_trimming] 
+                                          [--build_indexes] [--quality_stats] [--quality_trimming] 
                                           [--alignment] [--idxfile <bowtie_index>] [--visualization] 
                                           [--diff_gene_expr] [--comparison_groups <str>] [--count]  
                                           [--file_type <SAM|BAM>] [--sorted <position|name>] 
@@ -44,7 +44,7 @@ create_prok_rnaseq_pipeline_config.pl - Creates the pipeline.layout and pipeline
 
     --annotation_format               = annotation file format (gtf/gff3)
 
-    --bowtie_build                   = execute bowtie_build component. Requires '--r'.
+    --build_indexes                   = execute bowtie_build component. Requires '--r'.
 
     --quality_stats                  = execute fastx_quality_stats component.
 
@@ -55,7 +55,7 @@ create_prok_rnaseq_pipeline_config.pl - Creates the pipeline.layout and pipeline
                                        #Sample_ID<tab>Group_ID<tab>Mate_Pair_1<tab>Mate_Pair_2
 
         --idxfile <bowtie_index>  = /path/to/bowtie index file for alignment of all samples.
-                                       Required for '--alignment' if not specifying '--bowtie_build'.
+                                       Required for '--alignment' if not specifying '--build_indexes'.
 
     --visualization                  = execute bam2bigwig component.
                                        Requires additional information in sample file if not specifying '--alignment'.
@@ -167,7 +167,7 @@ my $sHelpHeader = "\nThis is ".PROGRAM." version ".VERSION."\n";
 
 GetOptions( \%hCmdLineOption,
 			'sample_file|s=s', 'config_file|c=s', 'reffile|r=s', 'quality|qual=i', 'gtffile|gtf=s',
-			'bowtie_build', 'quality_stats', 'quality_trimming', 'alignment', 'idxfile=s', 
+			'build_indexes', 'quality_stats', 'quality_trimming', 'alignment', 'idxfile=s', 
 			'visualization', 'rpkm_analysis', 'annotation_format=s', 
 			'diff_gene_expr', 'comparison_groups=s', 'count', 'file_type=s', 'sorted=s', 
 			'repository_root|rr=s', 'ergatis_ini|ei=s', 
@@ -220,7 +220,7 @@ if (defined $hCmdLineOption{'outdir'}) {
 $sOutDir = File::Spec->canonpath($sOutDir);
 $sOutDir = File::Spec->rel2abs($sOutDir);
 
-$sTemplateDir = $RealBin."/../../pipeline_templates/Prokaryotic_RNA_Seq_Analysis";
+$sTemplateDir = $RealBin."/../global_pipeline_templates/Prokaryotic_RNA_Seq_Analysis";
 if (defined $hCmdLineOption{'template_dir'}) {
     $sTemplateDir = $hCmdLineOption{'template_dir'};
 }
@@ -497,7 +497,7 @@ my $oPL = new XML::Writer( 'OUTPUT' => $fpPL, 'DATA_MODE' => 1, 'DATA_INDENT' =>
 # Initiate pipeline.layout
 init_pipeline_layout($oPL);
 
-if (defined $hCmdLineOption{'bowtie_build'}) {
+if (defined $hCmdLineOption{'build_indexes'}) {
 	die "Error! Reference FastA file undefined !!!\n" if (!(defined $hCmdLineOption{'reffile'}));
 	
 	if (defined ($hConfig{'bowtie_build'}{'BOWTIE_INDEX_PREFIX'})) {
