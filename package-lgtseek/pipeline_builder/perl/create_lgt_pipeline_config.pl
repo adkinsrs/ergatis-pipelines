@@ -349,6 +349,7 @@ sub main {
 		# If recipient is infected with LGT, change mpileup to use LGT-infected BAM list
 		if ($lgt_infected) {
 			$config{'sam2fasta fasta_d'}->{'$;INPUT_FILE$;'} ='$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected_d/samtools_merge.bam.list';
+			$config{'determine_final_lgt'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/get_aligned_reads_list/$;PIPELINEID$;_merged_donor/get_aligned_reads_list.list';
 			$config{'gather_lgtseek_files'}->{'RECIPIENT_LGT_BAM_OUTPUT'} = '$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected_r/samtools_merge.bam.list' if $included_subpipelines{'post'};
 			$config{'gather_lgtseek_files'}->{'DONOR_LGT_BAM_OUTPUT'} = '$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected_d/samtools_merge.bam.list' if $included_subpipelines{'post'};
         }
