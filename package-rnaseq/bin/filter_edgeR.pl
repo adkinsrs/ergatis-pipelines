@@ -327,8 +327,10 @@ sub run_filter_checks {
 	#}
 	
 	$nMax = max @rcs;
-	if( $nMax < $param->{'RC'} ) {
-		$filtered = 1;
+	if (exists $param->{'RC'}) {
+		if( $nMax < $param->{'RC'} ) {
+			$filtered = 1;
+		}
 	}
 		
 	return $filtered;
@@ -365,6 +367,7 @@ sub write_to_excel {
 	    if ($_ =~ /^ID/) {
 		$len = chr((64 + scalar(@arr) - 3));
 		$len = "a" if (ord($len) < 97); # If $len is Unicode value < 97
+		$len = "z" if (ord($len) > 122); # If $len is Unicode value > 122
 		$worksheet->set_column("A:$len",30);
 	    }
 	    $t = 0;
