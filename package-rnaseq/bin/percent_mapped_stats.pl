@@ -340,7 +340,7 @@ if ( $hCmdLineOption{'org-type'} eq 'euk' ) {
 
 print "Removing BED files........\n";
 $sCmd = "rm " . $sOutDir . "/*.bed";
-#exec_command($sCmd);
+exec_command($sCmd);
 
 exit;
 
