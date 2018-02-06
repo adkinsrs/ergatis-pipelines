@@ -1,9 +1,9 @@
-#!/usr/bin/perl 
+#!/usr/bin/perl
 
 eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
-    if 0; # not running under some shell
+  if 0;    # not running under some shell
 ################################################################################
-### This program generates coverage statistics from the sorted by name alignment 
+### This program generates coverage statistics from the sorted by name alignment
 ### BAM file across the genic, exonic, intronic, and/or intergenic regions.
 ################################################################################
 
@@ -23,7 +23,7 @@ use constant FALSE => 0;
 use constant TRUE  => 1;
 
 use constant VERSION => '0.1.0';
-use constant PROGRAM => eval { ($0 =~ m/(\w+\.pl)$/) ? $1 : $0 };
+use constant PROGRAM => eval { ( $0 =~ m/(\w+\.pl)$/ ) ? $1 : $0 };
 
 use constant BEDTOOLS_BIN_DIR => '/usr/local/packages/bedtools';
 use constant SAMTOOLS_BIN_DIR => '/usr/local/bin';
@@ -33,110 +33,126 @@ use constant SAMTOOLS_BIN_DIR => '/usr/local/bin';
 ##############################################################################
 
 my %hCmdLineOption = ();
-my $sHelpHeader = "\nThis is ".PROGRAM." version ".VERSION."\n";
+my $sHelpHeader    = "\nThis is " . PROGRAM . " version " . VERSION . "\n";
 
 my (@aRegions);
-my ($sRefFile, $sBamFile, $sAnnotationFile);
-my ($sGenicFile, $sGenicBedFile, $sExonicBedFile, $sIntronicBedFile, $sIntergenicBedFile);
-my ($sOutDir, $sSizeFile, $sOutFile, $sSortedFile, $sSummaryFile);
-my ($Exon_inter,$intergenic_inter,$intron_inter,$genic_inter);
-my ($e_file, $in_file, $it_file, $fout, $finalfile, $uniqfile);
-my ($sPrefix, $sSampleId, $sRegion, $nTotalMappedReads, $nUniqueMappedReads);
-my ($sCmd, $sOpt);
-my ($bDebug, $bVerbose);
+my ( $sRefFile, $sBamFile, $sAnnotationFile );
+my (
+    $sGenicFile,       $sGenicBedFile, $sExonicBedFile,
+    $sIntronicBedFile, $sIntergenicBedFile
+);
+my ( $sOutDir, $sSizeFile, $sOutFile, $sSortedFile, $sSummaryFile );
+my ( $Exon_inter, $intergenic_inter, $intron_inter, $genic_inter );
+my ( $e_file, $in_file, $it_file, $fout, $finalfile, $uniqfile );
+my ( $sPrefix, $sSampleId, $sRegion, $nTotalMappedReads, $nUniqueMappedReads );
+my ( $sCmd,    $sOpt );
+my ( $bDebug,  $bVerbose );
 my $out_flag = 0;
 
 ##############################################################################
 ### Main
 ##############################################################################
 
+GetOptions(
+    \%hCmdLineOption,         'reffile|r=s',
+    'infile|i=s',             'annotation|a=s',
+    'annotationfiletype|t=s', 'feature|f=s',
+    'attribute|id=s',         'groupby|g=s',
+    'outdir|o=s',             'bedtools_bin_dir|b=s',
+    'samtools_bin_dir|s=s',   'org-type|org=s',
+    'verbose|v',              'debug',
+    'help',                   'man'
+) or pod2usage(2);
 
-GetOptions( \%hCmdLineOption,
-            'reffile|r=s', 'infile|i=s', 'annotation|a=s', 
-            'annotationfiletype|t=s', 'feature|f=s', 'attribute|id=s', 'groupby|g=s', 
-            'outdir|o=s', 'bedtools_bin_dir|b=s', 'samtools_bin_dir|s=s','org-type|org=s', 
-            'verbose|v',
-            'debug',
-            'help',
-            'man') or pod2usage(2);
-
-if ($hCmdLineOption{'help'} || 
-	(! defined $hCmdLineOption{'reffile'}) || 
-	(! defined $hCmdLineOption{'infile'}) || 
-	(! defined $hCmdLineOption{'annotation'}) ||
-        (! defined $hCmdLineOption{'org-type'}) || 
-	(! defined $hCmdLineOption{'annotationfiletype'})) { 
-    pod2usage( -msg => $sHelpHeader, -exitval => 1);
+if (   $hCmdLineOption{'help'}
+    || ( !defined $hCmdLineOption{'reffile'} )
+    || ( !defined $hCmdLineOption{'infile'} )
+    || ( !defined $hCmdLineOption{'annotation'} )
+    || ( !defined $hCmdLineOption{'org-type'} )
+    || ( !defined $hCmdLineOption{'annotationfiletype'} ) )
+{
+    pod2usage( -msg => $sHelpHeader, -exitval => 1 );
 }
 
-if (($hCmdLineOption{'annotationfiletype'} !~ m/^bed$/i) && 
-	($hCmdLineOption{'annotationfiletype'} !~ m/^gtf$/i) &&
-	($hCmdLineOption{'annotationfiletype'} !~ m/^gff3$/i)) {
-    die "\tERROR: Annotation file format needs to be a BED, GTF or GFF3 format file\n";
+if (   ( $hCmdLineOption{'annotationfiletype'} !~ m/^bed$/i )
+    && ( $hCmdLineOption{'annotationfiletype'} !~ m/^gtf$/i )
+    && ( $hCmdLineOption{'annotationfiletype'} !~ m/^gff3?$/i ) )
+{
+    die
+      "\tERROR: Annotation file format needs to be a BED, GTF or GFF3 format file\n";
 }
 
-if (($hCmdLineOption{'annotationfiletype'} =~ m/^(gtf|gff3)$/i) && 
-	((! defined $hCmdLineOption{'feature'}) || (! defined $hCmdLineOption{'attribute'}))) {
-    die "\tERROR: 'feature' and 'attribute' required for GTF and GFF3 annotation file formats\n";
+if (
+    ( $hCmdLineOption{'annotationfiletype'} =~ m/^(gtf|gff3)$/i )
+    && (   ( !defined $hCmdLineOption{'feature'} )
+        || ( !defined $hCmdLineOption{'attribute'} ) )
+  )
+{
+    die
+      "\tERROR: 'feature' and 'attribute' required for GTF and GFF3 annotation file formats\n";
 }
 
-if ($hCmdLineOption{'org-type'} ne 'prok' && $hCmdLineOption{'org-type'} ne 'euk'){
+if (   $hCmdLineOption{'org-type'} ne 'prok'
+    && $hCmdLineOption{'org-type'} ne 'euk' )
+{
     die "\tERROR: Enter organism type: (prokaryote|prok / eukaryote|euk )\n";
 }
 
-if ($hCmdLineOption{'org-type'} eq 'euk' && ! defined $hCmdLineOption{'groupby'}) {
-    die "\tError: 'group-by' parameter required for eukaryotes.";}
+if ( $hCmdLineOption{'org-type'} eq 'euk'
+    && !defined $hCmdLineOption{'groupby'} )
+{
+    die "\tError: 'group-by' parameter required for eukaryotes.";
+}
 
-pod2usage( -exitval => 0, -verbose => 2) if $hCmdLineOption{'man'};
+pod2usage( -exitval => 0, -verbose => 2 ) if $hCmdLineOption{'man'};
 
-
-$bDebug   = (defined $hCmdLineOption{'debug'}) ? TRUE : FALSE;
-$bVerbose = (defined $hCmdLineOption{'verbose'}) ? TRUE : FALSE;
+$bDebug   = ( defined $hCmdLineOption{'debug'} )   ? TRUE : FALSE;
+$bVerbose = ( defined $hCmdLineOption{'verbose'} ) ? TRUE : FALSE;
 
 $sOutDir = File::Spec->curdir();
-if (defined $hCmdLineOption{'outdir'}) {
+if ( defined $hCmdLineOption{'outdir'} ) {
     $sOutDir = $hCmdLineOption{'outdir'};
 
-    if (! -e $sOutDir) {
-        mkdir($hCmdLineOption{'outdir'}) ||
-            croak "ERROR! Cannot create output directory\n";
-    }
-    elsif (! -d $hCmdLineOption{'outdir'}) {
-            croak "ERROR! $hCmdLineOption{'outdir'} is not a directory\n";
+    if ( !-e $sOutDir ) {
+        mkdir( $hCmdLineOption{'outdir'} )
+          || croak "ERROR! Cannot create output directory\n";
+    } elsif ( !-d $hCmdLineOption{'outdir'} ) {
+        croak "ERROR! $hCmdLineOption{'outdir'} is not a directory\n";
     }
 }
 $sOutDir = File::Spec->canonpath($sOutDir);
 
-if (! (defined $hCmdLineOption{'bedtools_bin_dir'}) ) {
-	$hCmdLineOption{'bedtools_bin_dir'} = BEDTOOLS_BIN_DIR;
+if ( !( defined $hCmdLineOption{'bedtools_bin_dir'} ) ) {
+    $hCmdLineOption{'bedtools_bin_dir'} = BEDTOOLS_BIN_DIR;
 }
 
-if (! (defined $hCmdLineOption{'samtools_bin_dir'}) ) {
-	$hCmdLineOption{'samtools_bin_dir'} = SAMTOOLS_BIN_DIR;
+if ( !( defined $hCmdLineOption{'samtools_bin_dir'} ) ) {
+    $hCmdLineOption{'samtools_bin_dir'} = SAMTOOLS_BIN_DIR;
 }
-
 
 # process reference file
 
-$hCmdLineOption{'reffile'} = File::Spec->rel2abs($hCmdLineOption{'reffile'});
-($_, $_, $sRefFile) = File::Spec->splitpath($hCmdLineOption{'reffile'});
+$hCmdLineOption{'reffile'} = File::Spec->rel2abs( $hCmdLineOption{'reffile'} );
+( $_, $_, $sRefFile ) = File::Spec->splitpath( $hCmdLineOption{'reffile'} );
 
 symlink $hCmdLineOption{'reffile'}, "$sOutDir/$sRefFile";
 
 if ( -e "$hCmdLineOption{'reffile'}.fai" ) {
-	symlink "$hCmdLineOption{'reffile'}.fai", "$sOutDir/$sRefFile.fai";
-}
-else {
-	($bDebug || $bVerbose) ? 
-		print STDERR "\nIndexing $sRefFile .....\n" : ();
-	
-	$sCmd = $hCmdLineOption{'samtools_bin_dir'}."/samtools faidx".
-			" ".$sOutDir."/".$sRefFile;
-	
-	exec_command($sCmd);
-	
-	($bDebug || $bVerbose) ? 
-		print STDERR "Indexing $sRefFile ..... done\n" : ();
+    symlink "$hCmdLineOption{'reffile'}.fai", "$sOutDir/$sRefFile.fai";
+} else {
+    ( $bDebug || $bVerbose ) ? print STDERR "\nIndexing $sRefFile .....\n" : ();
+
+    $sCmd =
+        $hCmdLineOption{'samtools_bin_dir'}
+      . "/samtools faidx" . " "
+      . $sOutDir . "/"
+      . $sRefFile;
+
+    exec_command($sCmd);
+
+    ( $bDebug || $bVerbose )
+      ? print STDERR "Indexing $sRefFile ..... done\n"
+      : ();
 }
 
 # process chromosome size file
@@ -146,8 +162,7 @@ $sPrefix =~ s/\.([A-za-z])+$//;
 
 $sSizeFile = File::Spec->rel2abs("$sOutDir/$sPrefix.chromosome.sizes");
 
-($bDebug || $bVerbose) ? 
-	print STDERR "\nGenerating $sSizeFile .....\n" : ();
+( $bDebug || $bVerbose ) ? print STDERR "\nGenerating $sSizeFile .....\n" : ();
 
 my $sIndexFile = "$sOutDir/$sRefFile.fai";
 
@@ -155,132 +170,179 @@ $sCmd = "cut -f1,2 $sIndexFile > $sSizeFile";
 
 exec_command($sCmd);
 
-($bDebug || $bVerbose) ? 
-	print STDERR "Generating $sSizeFile ..... done\n" : ();
+( $bDebug || $bVerbose )
+  ? print STDERR "Generating $sSizeFile ..... done\n"
+  : ();
 
-$hCmdLineOption{'infile'} = File::Spec->rel2abs($hCmdLineOption{'infile'});
-($_, $_, $sBamFile) = File::Spec->splitpath($hCmdLineOption{'infile'});
+$hCmdLineOption{'infile'} = File::Spec->rel2abs( $hCmdLineOption{'infile'} );
+( $_, $_, $sBamFile ) = File::Spec->splitpath( $hCmdLineOption{'infile'} );
 
 $sSampleId = $sBamFile;
 $sSampleId =~ s/\.accepted_hits.sorted_by_name//;
 $sSampleId =~ s/\.bam$//;
 
-
-if ($hCmdLineOption{'org-type'} eq 'euk') {
+if ( $hCmdLineOption{'org-type'} eq 'euk' ) {
 
     ####Exonic Bed File
-    $sSortedFile = Process_Annotation(\%hCmdLineOption, $hCmdLineOption{'annotation'}, $hCmdLineOption{'annotationfiletype'}, $sIndexFile, "exonic", $sOutDir);
-   
+    $sSortedFile = Process_Annotation(
+        \%hCmdLineOption,
+        $hCmdLineOption{'annotation'},
+        $hCmdLineOption{'annotationfiletype'},
+        $sIndexFile, "exonic", $sOutDir
+    );
+
     ####Genic Bed File
-    $sGenicFile = Generate_Gene_BedFile(\%hCmdLineOption, $hCmdLineOption{'annotation'}, $hCmdLineOption{'annotationfiletype'}, $sIndexFile, "genic", $sOutDir);
+    $sGenicFile = Generate_Gene_BedFile(
+        \%hCmdLineOption,
+        $hCmdLineOption{'annotation'},
+        $hCmdLineOption{'annotationfiletype'},
+        $sIndexFile, "genic", $sOutDir
+    );
 
     ####Intronic Bed file
-    $sIntronicBedFile = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sSortedFile, ".exonic.sorted.bed");
+    $sIntronicBedFile =
+      Init_OutFileName( \%hCmdLineOption, $sOutDir, $sSortedFile,
+        ".exonic.sorted.bed" );
     $sIntronicBedFile .= '.intronic.sorted.bed';
-    $sCmd = $hCmdLineOption{'bedtools_bin_dir'}."/bedtools subtract".
-	  		    " -s -a ".$sGenicFile.
-			    " -b ".$sSortedFile.
-			    " > ".$sIntronicBedFile;
+    $sCmd =
+        $hCmdLineOption{'bedtools_bin_dir'}
+      . "/bedtools subtract"
+      . " -s -a "
+      . $sGenicFile . " -b "
+      . $sSortedFile . " > "
+      . $sIntronicBedFile;
     exec_command($sCmd);
 
-    
-    if ( -z $sIntronicBedFile) {
-    	($bDebug || $bVerbose) ? 
-			print STDERR "WARNING! No introns detected in $hCmdLineOption{'annotation'}\n" : ();
+    if ( -z $sIntronicBedFile ) {
+        ( $bDebug || $bVerbose )
+          ? print STDERR
+          "WARNING! No introns detected in $hCmdLineOption{'annotation'}\n"
+          : ();
         $hCmdLineOption{'org-type'} = "prok";
-	$out_flag = 1; 
+        $out_flag = 1;
     }
-}
-else {    
-    $sGenicFile = Process_Annotation(\%hCmdLineOption, $hCmdLineOption{'annotation'}, $hCmdLineOption{'annotationfiletype'}, $sIndexFile, "genic", $sOutDir);
+} else {
+    $sGenicFile = Process_Annotation(
+        \%hCmdLineOption,
+        $hCmdLineOption{'annotation'},
+        $hCmdLineOption{'annotationfiletype'},
+        $sIndexFile, "genic", $sOutDir
+    );
 }
 
-$sGenicBedFile = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sGenicFile, ".sorted.bed");
+$sGenicBedFile =
+  Init_OutFileName( \%hCmdLineOption, $sOutDir, $sGenicFile, ".sorted.bed" );
 $sGenicBedFile .= '.sanitized.bed';
-$sCmd = $hCmdLineOption{'bedtools_bin_dir'}."/bedtools merge".
-			" -s -i ".$sGenicFile." > ".$sGenicBedFile;
+$sCmd =
+    $hCmdLineOption{'bedtools_bin_dir'}
+  . "/bedtools merge"
+  . " -s -i "
+  . $sGenicFile . " > "
+  . $sGenicBedFile;
 exec_command($sCmd);
 
 # Sadkins - 7/25/17 - During a test run, the merge unsorted the sorted bed file
-my $sGenicSortedBedFile = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sGenicBedFile, ".sanitized.bed");
-$sGenicSortedBedFile .= '.sorted.sanitized.bed';
-$sCmd = $hCmdLineOption{'bedtools_bin_dir'}."/bedtools sort".
-		" -faidx $sIndexFile".
-		" -i $sGenicBedFile > $sGenicSortedBedFile";
-exec_command($sCmd);
+# So need to re-sort the sanitized file
+# my $sGenicSortedBedFile =
+#   Init_OutFileName( \%hCmdLineOption, $sOutDir, $sGenicBedFile,
+#     ".sanitized.bed" );
+# $sGenicSortedBedFile .= '.sorted.sanitized.bed';
+# $sCmd =
+#     $hCmdLineOption{'bedtools_bin_dir'}
+#   . "/bedtools sort"
+#   . " -faidx $sIndexFile"
+#   . " -i $sGenicBedFile > $sGenicSortedBedFile";
+# exec_command($sCmd);
 
 ####Intergenic Bed file
-$sIntergenicBedFile = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sGenicSortedBedFile, ".genic.sorted.sanitized.bed");
-$sIntergenicBedFile .= '.intergenic.sanitized.bed';
-$sCmd = $hCmdLineOption{'bedtools_bin_dir'}."/bedtools complement".
-			" -i ".$sGenicSortedBedFile.
-			" -g ".$sSizeFile.
-			" > ".$sIntergenicBedFile;
-exec_command($sCmd);
-
-my $sIntergenicSortedBedFile = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sIntergenicBedFile, ".intergenic.sanitized.bed");
-$sIntergenicSortedBedFile .= '.intergenic.sorted.sanitized.bed';
-$sCmd = $hCmdLineOption{'bedtools_bin_dir'}."/bedtools sort".
-		" -faidx $sIndexFile".
-		" -i $sIntergenicBedFile > $sIntergenicSortedBedFile ";
+# Should be already sorted and sanitized
+$sIntergenicBedFile =
+  Init_OutFileName( \%hCmdLineOption, $sOutDir, $sGenicBedFile,
+    ".genic.sanitized.bed" );
+$sIntergenicBedFile .= '.intergenic.bed';
+$sCmd =
+    $hCmdLineOption{'bedtools_bin_dir'}
+  . "/bedtools complement" . " -i "
+  . $sGenicBedFile . " -g "
+  . $sSizeFile . " > "
+  . $sIntergenicBedFile;
 exec_command($sCmd);
 
 ###Bed tools intersect
-
-if ($hCmdLineOption{'org-type'} eq 'euk') {
-    $Exon_inter = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sSortedFile, ".bed");
-    $Exon_inter .= '.intersect.bed'; 
-    bed_intersect(\%hCmdLineOption,$hCmdLineOption{'infile'},$sSortedFile,$Exon_inter); 
-    $intron_inter = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sIntronicBedFile, ".bed");
+if ( $hCmdLineOption{'org-type'} eq 'euk' ) {
+    $Exon_inter =
+      Init_OutFileName( \%hCmdLineOption, $sOutDir, $sSortedFile, ".bed" );
+    $Exon_inter .= '.intersect.bed';
+    bed_intersect( \%hCmdLineOption, $hCmdLineOption{'infile'},
+        $sSortedFile, $Exon_inter );
+    $intron_inter =
+      Init_OutFileName( \%hCmdLineOption, $sOutDir, $sIntronicBedFile, ".bed" );
     $intron_inter .= '.intersect.bed';
-    bed_intersect(\%hCmdLineOption,$hCmdLineOption{'infile'},$sIntronicBedFile,$intron_inter);  
-    $intergenic_inter = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sIntergenicSortedBedFile, ".bed");
+    bed_intersect(
+        \%hCmdLineOption,  $hCmdLineOption{'infile'},
+        $sIntronicBedFile, $intron_inter
+    );
+    $intergenic_inter =
+      Init_OutFileName( \%hCmdLineOption, $sOutDir, $sIntergenicBedFile,
+        ".bed" );
     $intergenic_inter .= '.intersect.bed';
-    bed_intersect(\%hCmdLineOption,$hCmdLineOption{'infile'},$sIntergenicSortedBedFile,$intergenic_inter);
-}
-else {
-    $genic_inter = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sGenicFile, ".bed");
+    bed_intersect(
+        \%hCmdLineOption,          $hCmdLineOption{'infile'},
+        $sIntergenicBedFile, $intergenic_inter
+    );
+} else {
+    $genic_inter =
+      Init_OutFileName( \%hCmdLineOption, $sOutDir, $sGenicBedFile, ".sanitized.bed" );
     $genic_inter .= '.intersect.bed';
-    bed_intersect(\%hCmdLineOption,$hCmdLineOption{'infile'},$sGenicFile,$genic_inter);  
-    $intergenic_inter = Init_OutFileName(\%hCmdLineOption, $sOutDir, $sIntergenicSortedBedFile, ".bed");
+    bed_intersect( \%hCmdLineOption, $hCmdLineOption{'infile'},
+        $sGenicBedFile, $genic_inter );
+    $intergenic_inter =
+      Init_OutFileName( \%hCmdLineOption, $sOutDir, $sIntergenicBedFile,
+        ".bed" );
     $intergenic_inter .= '.intersect.bed';
-    bed_intersect(\%hCmdLineOption,$hCmdLineOption{'infile'},$sIntergenicSortedBedFile,$intergenic_inter);
+    bed_intersect(
+        \%hCmdLineOption,          $hCmdLineOption{'infile'},
+        $sIntergenicBedFile, $intergenic_inter
+    );
 
 }
-
 
 ###Call mapped subroutine to calculate % reads mapping to exon, intron and intergenic region
+if ( $hCmdLineOption{'org-type'} eq 'euk' ) {
 
-if ($hCmdLineOption{'org-type'} eq 'euk') {
-    
-    $finalfile = $sOutDir."/".$sSampleId.".Percent.txt";
-    open ($e_file, "<$Exon_inter") or die "Error! Cannot open the file.";
-    open ($in_file,"<$intron_inter") or die "Error! Cannot open the file.";
-    open ($it_file,"<$intergenic_inter") or die "Error! Cannot open the file.";
-    open ($fout,">$finalfile") or die "Error! Cannot open the file.";
-    mapped_euk ($e_file, $in_file, $it_file,$fout);
+    $finalfile = $sOutDir . "/" . $sSampleId . ".Percent.txt";
+    open( $e_file,  "<$Exon_inter" )   or die "Error! Cannot open the file.";
+    open( $in_file, "<$intron_inter" ) or die "Error! Cannot open the file.";
+    open( $it_file, "<$intergenic_inter" )
+      or die "Error! Cannot open the file.";
+    open( $fout, ">$finalfile" ) or die "Error! Cannot open the file.";
+    mapped_euk( $e_file, $in_file, $it_file, $fout );
 
 ##########For few test runs..Check unique reads obtained using mapped_euk with NH:i:1 option from bam file.
-    $uniqfile = $sOutDir."/".$sSampleId.".uniq_reads.txt";
-    $sCmd = $hCmdLineOption{'samtools_bin_dir'}."/samtools view -F 260 ".$hCmdLineOption{'infile'}." | grep NH:i:1 | wc -l > ".$uniqfile;
+    $uniqfile = $sOutDir . "/" . $sSampleId . ".uniq_reads.txt";
+    $sCmd =
+        $hCmdLineOption{'samtools_bin_dir'}
+      . "/samtools view -F 260 "
+      . $hCmdLineOption{'infile'}
+      . " | grep NH:i:1 | wc -l > "
+      . $uniqfile;
     exec_command($sCmd);
 
-}
-else {
-    $finalfile= $sOutDir."/".$sSampleId.".Percent.txt";
-    open ($e_file, "<$genic_inter") or die "Error! Cannot open the file.";
-    open ($it_file,"<$intergenic_inter") or die "Error! Cannot open the file.";
-    open ($fout,">$finalfile") or die "Error! Cannot open the file.";
-    mapped_prok ($e_file,$it_file,$fout, $out_flag);
+} else {
+    $finalfile = $sOutDir . "/" . $sSampleId . ".Percent.txt";
+    open( $e_file, "<$genic_inter" ) or die "Error! Cannot open the file.";
+    open( $it_file, "<$intergenic_inter" )
+      or die "Error! Cannot open the file.";
+    open( $fout, ">$finalfile" ) or die "Error! Cannot open the file.";
+    mapped_prok( $e_file, $it_file, $fout, $out_flag );
 
 }
 
 print "Removing BED files........\n";
-$sCmd = "rm ".$sOutDir."/*.bed";
-exec_command($sCmd);
+$sCmd = "rm " . $sOutDir . "/*.bed";
+#exec_command($sCmd);
 
 exit;
-
 
 ##############################################################################
 ### Subroutines
@@ -289,218 +351,253 @@ exit;
 ###Percent reads mapping to genic and intergenic region for prokaryotes.
 sub mapped_prok {
 
-my  $genic_file = shift;
-my  $inter_file = shift;
-my  $fout = shift;
-my $out_flag = shift;
-my  ($g_count,$it_count,$p_genic,$p_inter,$it_line);
-my  ($k,$k1,$tag,$read1,$read_g,$read_it);
-my  $t_genic = 0;
-my  $t_inter = 0;  
-my  $uniq_reads = 0;
-my  $total_reads = 0;
-my  $t_count = 0;
-my  %hcount = ();
+    my $genic_file = shift;
+    my $inter_file = shift;
+    my $fout       = shift;
+    my $out_flag   = shift;
+    my ( $g_count, $it_count, $p_genic, $p_inter, $it_line );
+    my ( $k, $k1, $tag, $read1, $read_g, $read_it );
+    my $t_genic     = 0;
+    my $t_inter     = 0;
+    my $uniq_reads  = 0;
+    my $total_reads = 0;
+    my $t_count     = 0;
+    my %hcount      = ();
 
-while (<$genic_file>) {
-    chomp($_);
-    $read_g = (split (/\t/,$_))[3];
-    $read1 = (split (/\//,$read_g))[0];
-    $tag = (split (/\//,$read_g))[1];
-    if (! (defined $tag)){ $tag = 0;}
-    $it_line = <$inter_file>;
-    chomp($it_line);
-    $read_it = (split (/\t/,$it_line))[3];
-    ##Check if reads in genic and intergenic file is same.
-    if ($read_g ne $read_it) {
-        die "Error: The input files are not correct. Use sorted by name BAM file";
-    }
-    if (!(exists $hcount{$read1})) {
-        foreach $k (keys %hcount) {
-            foreach $k1 (keys %{$hcount{$k}}) {
-               $total_reads++;                                   # Increment Total Mapped Read Count
-               if ($hcount{$k}{$k1}[0] == 1) {$uniq_reads++;}    # Increment Unique Mapped Read Count
-               if ($hcount{$k}{$k1}[1] >= 1) {$t_genic++;}       # Increment Genic Mapped Read Count
-               elsif ($hcount{$k}{$k1}[2] >= 1) {$t_inter++;}    # Increment Intergenic Mapped Read Count
-           }
+    while (<$genic_file>) {
+        chomp($_);
+        $read_g = ( split( /\t/, $_ ) )[3];
+        $read1  = ( split( /\//, $read_g ) )[0];
+        $tag    = ( split( /\//, $read_g ) )[1];
+        if ( !( defined $tag ) ) { $tag = 0; }
+        $it_line = <$inter_file>;
+        chomp($it_line);
+        $read_it = ( split( /\t/, $it_line ) )[3];
+        ##Check if reads in genic and intergenic file is same.
+        if ( $read_g ne $read_it ) {
+            die
+              "Error: The input files are not correct. Use sorted by name BAM file";
         }
-        %hcount = ();
-    }
-    
-    $hcount{$read1}{$tag} = [0,0,0] if (!(exists $hcount{$read1}{$tag}));
+        if ( !( exists $hcount{$read1} ) ) {
+            foreach $k ( keys %hcount ) {
+                foreach $k1 ( keys %{ $hcount{$k} } ) {
+                    $total_reads++;    # Increment Total Mapped Read Count
+                    if ( $hcount{$k}{$k1}[0] == 1 ) {
+                        $uniq_reads++;
+                    }                  # Increment Unique Mapped Read Count
+                    if ( $hcount{$k}{$k1}[1] >= 1 ) {
+                        $t_genic++;
+                    }                  # Increment Genic Mapped Read Count
+                    elsif ( $hcount{$k}{$k1}[2] >= 1 ) {
+                        $t_inter++;
+                    }                  # Increment Intergenic Mapped Read Count
+                }
+            }
+            %hcount = ();
+        }
 
-    $g_count = (split (/\t/,$_))[6];             # Read genic map count for read
-    $it_count = (split (/\t/,$it_line))[6];      # Read intergenic map count for read
-    
-    if ($g_count >= 1) {
-	$hcount{$read1}{$tag}[1]++;             # Increment Genic Count
+        $hcount{$read1}{$tag} = [ 0, 0, 0 ]
+          if ( !( exists $hcount{$read1}{$tag} ) );
+
+        $g_count = ( split( /\t/, $_ ) )[-1];    # Read genic map count for read
+        $it_count =
+          ( split( /\t/, $it_line ) )[-1];   # Read intergenic map count for read
+
+        if ( $g_count >= 1 ) {
+            $hcount{$read1}{$tag}[1]++;     # Increment Genic Count
+        } elsif ( $it_count >= 1 ) {
+            $hcount{$read1}{$tag}[2]++;     # Increment Intergenic Count
+        } else {
+            print
+              "Unmapped read '$read1' encountered. Error, if input BAM file was from TopHat. May be encountered in Bowtie output\n"
+              if $hCmdLineOption{'debug'};
+        }
+
+        # Total number of maps for each read
+        $hcount{$read1}{$tag}[0] =
+          $hcount{$read1}{$tag}[1] + $hcount{$read1}{$tag}[2];
     }
-    elsif ($it_count >= 1) {
-	$hcount{$read1}{$tag}[2]++;             # Increment Intergenic Count
-    }
-    else {
-        print "Unmapped read '$read1' encountered. Error, if input BAM file was from TopHat. May be encountered in Bowtie output\n";
-    }
-    
-    # Total number of maps for each read
-    $hcount{$read1}{$tag}[0] = $hcount{$read1}{$tag}[1] + $hcount{$read1}{$tag}[2];
-}
 
 ###For the last read in the hash.
-foreach $k (keys %hcount) {
-    foreach $k1 (keys %{$hcount{$k}}) {
-        $total_reads++;                                   # Increment Total Mapped Read Count
-        if ($hcount{$k}{$k1}[0] == 1) {$uniq_reads++;}    # Increment Unique Mapped Read Count
-        if ($hcount{$k}{$k1}[1] >= 1) {$t_genic++;}       # Increment Genic Mapped Read Count
-        elsif ($hcount{$k}{$k1}[2] >= 1) {$t_inter++;}    # Increment Intergenic Mapped Read Count
+    foreach $k ( keys %hcount ) {
+        foreach $k1 ( keys %{ $hcount{$k} } ) {
+            $total_reads++;    # Increment Total Mapped Read Count
+            if ( $hcount{$k}{$k1}[0] == 1 ) {
+                $uniq_reads++;
+            }                  # Increment Unique Mapped Read Count
+            if ( $hcount{$k}{$k1}[1] >= 1 ) {
+                $t_genic++;
+            }                  # Increment Genic Mapped Read Count
+            elsif ( $hcount{$k}{$k1}[2] >= 1 ) {
+                $t_inter++;
+            }                  # Increment Intergenic Mapped Read Count
+        }
     }
-}
-    
 
-close $genic_file;
-close $inter_file;
+    close $genic_file;
+    close $inter_file;
 
-
-$p_genic = sprintf("%.2f",eval(($t_genic/$total_reads)*100));
-$p_inter = sprintf("%.2f",eval(($t_inter/$total_reads)*100));
-print $fout "\#Total reads mapped:\t$total_reads\n";
-print $fout "\#Uniquely mapped reads:\t$uniq_reads\n";
-if ($out_flag == 1) {
-    print $fout "\#Exon\tIntron\tIntergenic\n";
-    print $fout "$p_genic\t0\t$p_inter\n";
-} 
-else {
-    print $fout "\#Genic\tIntergenic\n";
-    print $fout "$p_genic\t$p_inter\n";
-}
-close $fout;
+    $p_genic = sprintf( "%.2f", eval( ( $t_genic / $total_reads ) * 100 ) );
+    $p_inter = sprintf( "%.2f", eval( ( $t_inter / $total_reads ) * 100 ) );
+    print $fout "\#Total reads mapped:\t$total_reads\n";
+    print $fout "\#Uniquely mapped reads:\t$uniq_reads\n";
+    if ( $out_flag == 1 ) {
+        print $fout "\#Exon\tIntron\tIntergenic\n";
+        print $fout "$p_genic\t0\t$p_inter\n";
+    } else {
+        print $fout "\#Genic\tIntergenic\n";
+        print $fout "$p_genic\t$p_inter\n";
+    }
+    close $fout;
 
 }
 
 ###Percent reads mapping to exon, intron and intergenic region for eukaryotes.
 sub mapped_euk {
 
-my  $exon_file = shift;
-my  $intron_file = shift;
-my  $inter_file = shift;
-my  $fout = shift;
-my  ($e_count,$in_count,$it_count,$p_exon,$p_intron,$p_inter,$in_line,$it_line);
-my  ($k,$k1,$tag,$read1,$read_e,$read_in,$read_it);
-my  $t_exon = 0;
-my  $t_intron = 0;
-my  $t_inter = 0;  
-my  $uniq_reads = 0;
-my  $total_reads = 0;
-my  $t_count = 0;
-my  %hcount = ();
+    my $exon_file   = shift;
+    my $intron_file = shift;
+    my $inter_file  = shift;
+    my $fout        = shift;
+    my (
+        $e_count,  $in_count, $it_count, $p_exon,
+        $p_intron, $p_inter,  $in_line,  $it_line
+    );
+    my ( $k, $k1, $tag, $read1, $read_e, $read_in, $read_it );
+    my $t_exon      = 0;
+    my $t_intron    = 0;
+    my $t_inter     = 0;
+    my $uniq_reads  = 0;
+    my $total_reads = 0;
+    my $t_count     = 0;
+    my %hcount      = ();
 
-while (<$exon_file>) {
-    chomp($_);
-    $read_e = (split (/\t/,$_))[3];
-    $read1 = (split (/\//,$read_e))[0];
-    $tag = (split (/\//,$read_e))[1];
-    if (! (defined $tag)){ $tag = 0;}
-    $in_line = <$intron_file>;
-    chomp($in_line);
-    $read_in = (split (/\t/,$in_line))[3];
-    $it_line = <$inter_file>;
-    chomp($it_line);
-    $read_it = (split (/\t/,$it_line))[3];
-    ##Check if reads in exon,intron and intergenic file is same.
-    if ($read_e ne $read_in or $read_e ne $read_it) {
-        die "Error: The input files are not correct. Use sorted by name bam file";
-    }
-
-	# If a new read is encountered, tally distribution of previous read
-    if (!(exists $hcount{$read1})) {
-        foreach $k (keys %hcount) {
-            foreach $k1 (keys %{$hcount{$k}}) {
-               $total_reads++;                                   # Increment Total Mapped Read Count
-               if ($hcount{$k}{$k1}[0] == 1) {$uniq_reads++;}    # Increment Unique Mapped Read Count
-               if ($hcount{$k}{$k1}[1] >= 1) {$t_exon++;}        # Increment Exonic Mapped Read Count
-               elsif ($hcount{$k}{$k1}[2] >= 1) {$t_intron++;}   # Increment Intronic Mapped Read Count
-               elsif ($hcount{$k}{$k1}[3] >= 1) {$t_inter++;}    # Increment Intergenic Mapped Read Count
-           }
+    while (<$exon_file>) {
+        chomp($_);
+        $read_e = ( split( /\t/, $_ ) )[3];
+        $read1  = ( split( /\//, $read_e ) )[0];
+        $tag    = ( split( /\//, $read_e ) )[1];
+        if ( !( defined $tag ) ) { $tag = 0; }
+        $in_line = <$intron_file>;
+        chomp($in_line);
+        $read_in = ( split( /\t/, $in_line ) )[3];
+        $it_line = <$inter_file>;
+        chomp($it_line);
+        $read_it = ( split( /\t/, $it_line ) )[3];
+        ##Check if reads in exon,intron and intergenic file is same.
+        if ( $read_e ne $read_in or $read_e ne $read_it ) {
+            die
+              "Error: The input files are not correct. Use sorted by name bam file";
         }
-		# Reset the hash table
-        %hcount = ();
-    }
-    
-	# Initialize new read in hash
-    $hcount{$read1}{$tag} = [0,0,0,0] if (!(exists $hcount{$read1}{$tag}));
 
-	# NOT COMPATABLE WITH HISAT2 - Sadkins 7/25/17
-	#$e_count = (split (/\t/,$_))[6];             # Read exonic map count for read
-	#$in_count = (split (/\t/,$in_line))[6];      # Read intronic map count for read
-	#$it_count = (split (/\t/,$it_line))[6];      # Read intergenic map count for read
-    
-    $e_count = (split (/\t/,$_))[-1];             # Read exonic map count for read
-    $in_count = (split (/\t/,$in_line))[-1];      # Read intronic map count for read
-    $it_count = (split (/\t/,$it_line))[-1];      # Read intergenic map count for read
+        # If a new read is encountered, tally distribution of previous read
+        if ( !( exists $hcount{$read1} ) ) {
+            foreach $k ( keys %hcount ) {
+                foreach $k1 ( keys %{ $hcount{$k} } ) {
+                    $total_reads++;    # Increment Total Mapped Read Count
+                    if ( $hcount{$k}{$k1}[0] == 1 ) {
+                        $uniq_reads++;
+                    }                  # Increment Unique Mapped Read Count
+                    if ( $hcount{$k}{$k1}[1] >= 1 ) {
+                        $t_exon++;
+                    }                  # Increment Exonic Mapped Read Count
+                    elsif ( $hcount{$k}{$k1}[2] >= 1 ) {
+                        $t_intron++;
+                    }                  # Increment Intronic Mapped Read Count
+                    elsif ( $hcount{$k}{$k1}[3] >= 1 ) {
+                        $t_inter++;
+                    }                  # Increment Intergenic Mapped Read Count
+                }
+            }
 
-    if ($e_count >= 1) {
-	$hcount{$read1}{$tag}[1]++;             # Increment Exonic Count
+            # Reset the hash table
+            %hcount = ();
+        }
+
+        # Initialize new read in hash
+        $hcount{$read1}{$tag} = [ 0, 0, 0, 0 ]
+          if ( !( exists $hcount{$read1}{$tag} ) );
+
+# NOT COMPATABLE WITH HISAT2 - Sadkins 7/25/17
+#$e_count = (split (/\t/,$_))[6];             # Read exonic map count for read
+#$in_count = (split (/\t/,$in_line))[6];      # Read intronic map count for read
+#$it_count = (split (/\t/,$it_line))[6];      # Read intergenic map count for read
+
+        $e_count = ( split( /\t/, $_ ) )[-1];   # Read exonic map count for read
+        $in_count =
+          ( split( /\t/, $in_line ) )[-1];    # Read intronic map count for read
+        $it_count =
+          ( split( /\t/, $it_line ) )[-1];  # Read intergenic map count for read
+
+        if ( $e_count >= 1 ) {
+            $hcount{$read1}{$tag}[1]++;     # Increment Exonic Count
+        } elsif ( $in_count >= 1 ) {
+            $hcount{$read1}{$tag}[2]++;     # Increment Intronic Count
+        } elsif ( $it_count >= 1 ) {
+            $hcount{$read1}{$tag}[3]++;     # Increment Intergenic Count
+        } else {
+            print
+              "Unmapped read '$read1' encountered. Error, if input BAM file was from TopHat. May be encountered in Bowtie output\n";
+        }
+
+        # Total number of maps for each read
+        $hcount{$read1}{$tag}[0] =
+          $hcount{$read1}{$tag}[1] +
+          $hcount{$read1}{$tag}[2] +
+          $hcount{$read1}{$tag}[3];
     }
-    elsif ($in_count >= 1) {
-	$hcount{$read1}{$tag}[2]++;             # Increment Intronic Count
-    }
-    elsif ($it_count >= 1) {
-	$hcount{$read1}{$tag}[3]++;             # Increment Intergenic Count
-    }
-    else {
-        print "Unmapped read '$read1' encountered. Error, if input BAM file was from TopHat. May be encountered in Bowtie output\n";
-    }
-    
-    # Total number of maps for each read
-    $hcount{$read1}{$tag}[0] = $hcount{$read1}{$tag}[1] + $hcount{$read1}{$tag}[2] + $hcount{$read1}{$tag}[3];
-}
 
 ###For the last read in the hash.
-foreach $k (keys %hcount) {
-    foreach $k1 (keys %{$hcount{$k}}) {
-        $total_reads++;                                   # Increment Total Mapped Read Count
-        if ($hcount{$k}{$k1}[0] == 1) {$uniq_reads++;}    # Increment Unique Mapped Read Count
-        if ($hcount{$k}{$k1}[1] >= 1) {$t_exon++;}        # Increment Exonic Mapped Read Count
-        elsif ($hcount{$k}{$k1}[2] >= 1) {$t_intron++;}   # Increment Intronic Mapped Read Count
-        elsif ($hcount{$k}{$k1}[3] >= 1) {$t_inter++;}    # Increment Intergenic Mapped Read Count
+    foreach $k ( keys %hcount ) {
+        foreach $k1 ( keys %{ $hcount{$k} } ) {
+            $total_reads++;    # Increment Total Mapped Read Count
+            if ( $hcount{$k}{$k1}[0] == 1 ) {
+                $uniq_reads++;
+            }                  # Increment Unique Mapped Read Count
+            if ( $hcount{$k}{$k1}[1] >= 1 ) {
+                $t_exon++;
+            }                  # Increment Exonic Mapped Read Count
+            elsif ( $hcount{$k}{$k1}[2] >= 1 ) {
+                $t_intron++;
+            }                  # Increment Intronic Mapped Read Count
+            elsif ( $hcount{$k}{$k1}[3] >= 1 ) {
+                $t_inter++;
+            }                  # Increment Intergenic Mapped Read Count
+        }
     }
-}
-close $exon_file;
-close $intron_file;
-close $inter_file;
+    close $exon_file;
+    close $intron_file;
+    close $inter_file;
 
+    $p_exon   = sprintf( "%.2f", eval( ( $t_exon / $total_reads ) * 100 ) );
+    $p_intron = sprintf( "%.2f", eval( ( $t_intron / $total_reads ) * 100 ) );
+    $p_inter  = sprintf( "%.2f", eval( ( $t_inter / $total_reads ) * 100 ) );
+    print $fout "\#Total reads mapped:\t$total_reads\n";
+    print $fout "\#Uniquely mapped reads:\t$uniq_reads\n";
+    print $fout "\#Exon\tIntron\tIntergenic\n";
+    print $fout "$p_exon\t$p_intron\t$p_inter\n";
 
-$p_exon = sprintf("%.2f",eval(($t_exon/$total_reads)*100));
-$p_intron = sprintf("%.2f",eval(($t_intron/$total_reads)*100));
-$p_inter = sprintf("%.2f",eval(($t_inter/$total_reads)*100));
-print $fout "\#Total reads mapped:\t$total_reads\n";
-print $fout "\#Uniquely mapped reads:\t$uniq_reads\n";
-print $fout "\#Exon\tIntron\tIntergenic\n";
-print $fout "$p_exon\t$p_intron\t$p_inter\n";
-
-close $fout;
+    close $fout;
 }
 
 ###Bed Intersect
 sub bed_intersect {
-    my $phCmdLineOption	= shift;
-    my $bam_file = shift;
-    my $bed_file = shift;
-    my $outfile = shift;
+    my $phCmdLineOption = shift;
+    my $bam_file        = shift;
+    my $bed_file        = shift;
+    my $outfile         = shift;
     my $sCmd;
-	# Sadkins - 7/25/17 - As of BEDtools v2.18.0, -abam is deprecated and -a will work
-    $sCmd = $phCmdLineOption->{'bedtools_bin_dir'}."/bedtools intersect".
-			" -a ".$bam_file.
-			#" -abam ".$bam_file.
-			" -b ".$bed_file.
-			" -bed -c ".
-			" > ".$outfile;
-   
-   exec_command($sCmd); 
+
+# Sadkins - 7/25/17 - As of BEDtools v2.18.0, -abam is deprecated and -a will work
+    $sCmd =
+        $phCmdLineOption->{'bedtools_bin_dir'}
+      . "/bedtools intersect" . " -a "
+      . $bam_file
+      . " -b " . $bed_file . " -bed -c "
+      . " > " . $outfile;
+
+    exec_command($sCmd);
 }
-
-
-
 
 # exec_command()
 #
@@ -509,7 +606,7 @@ sub bed_intersect {
 #
 # Required Parameters
 #   sCmd			= /path/to/output_directory
-#   
+#
 # Optional Parameters
 #   none
 #
@@ -525,25 +622,23 @@ sub bed_intersect {
 # Notes
 #
 sub exec_command {
-	my $sCmd = shift;
-	
-	if ((!(defined $sCmd)) || ($sCmd eq "")) {
-		die "\nSubroutine::exec_command : ERROR! Incorrect command!\n";
-	}
-	
-	my $nExitCode;
-	
-	print STDERR "\n$sCmd\n";
-	$nExitCode = system("$sCmd");
-	if ($nExitCode != 0) {
-		die "\tERROR! Command Failed!\n\t$!\n";
-	}
-	print STDERR "\n";
-	
-	return;
+    my $sCmd = shift;
+
+    if ( ( !( defined $sCmd ) ) || ( $sCmd eq "" ) ) {
+        die "\nSubroutine::exec_command : ERROR! Incorrect command!\n";
+    }
+
+    my $nExitCode;
+
+    print STDERR "\n$sCmd\n";
+    $nExitCode = system("$sCmd");
+    if ( $nExitCode != 0 ) {
+        die "\tERROR! Command Failed!\n\t$!\n";
+    }
+    print STDERR "\n";
+
+    return;
 }
-
-
 
 # Process_Annotation()
 #
@@ -572,63 +667,72 @@ sub exec_command {
 # Notes
 #
 sub Process_Annotation {
-    my $phCmdLineOption		= shift;
-    my $sAnnotationFile		= shift;
-    my $sExtension			= shift;
-	my $sIndexFile			= shift;
-    my $sRegion				= shift;
-    my $sOutDir				= shift;
+    my $phCmdLineOption = shift;
+    my $sAnnotationFile = shift;
+    my $sExtension      = shift;
+    my $sIndexFile      = shift;
+    my $sRegion         = shift;
+    my $sOutDir         = shift;
 
-    my $sSubName = (caller(0))[3];
+    my $sSubName = ( caller(0) )[3];
 
-    if (! ((defined $sAnnotationFile) &&
-           (defined $sExtension) &&
-		   (defined $sIndexFile) &&
-           (defined $sRegion) &&
-           (defined $sOutDir) &&
-           (defined $phCmdLineOption))) {
+    if (
+        !(
+               ( defined $sAnnotationFile )
+            && ( defined $sExtension )
+            && ( defined $sIndexFile )
+            && ( defined $sRegion )
+            && ( defined $sOutDir )
+            && ( defined $phCmdLineOption )
+        )
+      )
+    {
         croak "$sSubName - required parameters missing\n";
     }
 
     # Local variables
-    my $bDebug   = (defined $phCmdLineOption->{'debug'}) ? TRUE : FALSE;
-    my $bVerbose = (defined $phCmdLineOption->{'verbose'}) ? TRUE : FALSE;
-    
-    my ($sBedFile, $sSortedFile);
+    my $bDebug   = ( defined $phCmdLineOption->{'debug'} )   ? TRUE : FALSE;
+    my $bVerbose = ( defined $phCmdLineOption->{'verbose'} ) ? TRUE : FALSE;
 
-    # Start
+    my ( $sBedFile, $sSortedFile );
 
-#    ($bDebug) ? print STDERR "In $sSubName\n" : ();
+    ( $bDebug || $bVerbose )
+      ? print STDERR "\n\tProcessing annotation file $sAnnotationFile ...\n"
+      : ();
 
-    ($bDebug || $bVerbose) ? print STDERR "\n\tProcessing annotation file $sAnnotationFile ...\n" : ();
-	
-    if (($sExtension =~ m/^gtf$/i) || 
-		($sExtension =~ m/^gff3$/i)) {
-		$sBedFile = Process_GFF($phCmdLineOption, $sAnnotationFile, $sRegion,
-								$phCmdLineOption->{'feature'}, $phCmdLineOption->{'attribute'}, $sOutDir);
-	}
-	else {
-		$sBedFile = Init_OutFileName($phCmdLineOption, $sOutDir, $sAnnotationFile, ".bed");
-    	$sBedFile .= ".$sRegion.bed";
-    	
-    	$sCmd = "ln -s $sAnnotationFile $sBedFile";
-		exec_command($sCmd);
-	}
-	
-    $sSortedFile = Init_OutFileName($phCmdLineOption, $sOutDir, $sBedFile, ".bed");
+    if (   ( $sExtension =~ m/^gtf$/i )
+        || ( $sExtension =~ m/^gff3$/i ) )
+    {
+        $sBedFile = Process_GFF(
+            $phCmdLineOption, $sAnnotationFile, $sRegion,
+            $phCmdLineOption->{'feature'},
+            $phCmdLineOption->{'attribute'}, $sOutDir
+        );
+    } else {
+        $sBedFile =
+          Init_OutFileName( $phCmdLineOption, $sOutDir, $sAnnotationFile,
+            ".bed" );
+        $sBedFile .= ".$sRegion.bed";
+
+        $sCmd = "ln -s $sAnnotationFile $sBedFile";
+        exec_command($sCmd);
+    }
+
+    $sSortedFile =
+      Init_OutFileName( $phCmdLineOption, $sOutDir, $sBedFile, ".bed" );
     $sSortedFile .= '.sorted.bed';
-	
-	# Use reference index sort order as a basis to sort this file
-	$sCmd = $phCmdLineOption->{'bedtools_bin_dir'}."/bedtools sort".
-			" -faidx $sIndexFile".
-			" -i $sBedFile > $sSortedFile ";
-	
-	exec_command($sCmd);
-	
-    ($bDebug || $bVerbose) ? print STDERR "\n" : ();
 
-#    ($bDebug) ? print STDERR "Leaving $sSubName\n" : ();
-    
+    # Use reference index sort order as a basis to sort this file
+    $sCmd =
+        $phCmdLineOption->{'bedtools_bin_dir'}
+      . "/bedtools sort"
+      . " -faidx $sIndexFile"
+      . " -i $sBedFile > $sSortedFile ";
+
+    exec_command($sCmd);
+
+    ( $bDebug || $bVerbose ) ? print STDERR "\n" : ();
+
     return $sSortedFile;
 }
 
@@ -659,106 +763,128 @@ sub Process_Annotation {
 # Notes
 #
 sub Generate_Gene_BedFile {
-    my $phCmdLineOption		= shift;
-    my $sAnnotationFile		= shift;
-    my $sExtension			= shift;
-	my $sIndexFile			= shift;
-    my $sRegion				= shift;
-    my $sOutDir				= shift;
+    my $phCmdLineOption = shift;
+    my $sAnnotationFile = shift;
+    my $sExtension      = shift;
+    my $sIndexFile      = shift;
+    my $sRegion         = shift;
+    my $sOutDir         = shift;
 
-    my $sSubName = (caller(0))[3];
+    my $sSubName = ( caller(0) )[3];
 
-    if (! ((defined $sAnnotationFile) &&
-           (defined $sExtension) &&
-		   (defined $sIndexFile) &&
-           (defined $sRegion) &&
-           (defined $sOutDir) &&
-           (defined $phCmdLineOption))) {
+    if (
+        !(
+               ( defined $sAnnotationFile )
+            && ( defined $sExtension )
+            && ( defined $sIndexFile )
+            && ( defined $sRegion )
+            && ( defined $sOutDir )
+            && ( defined $phCmdLineOption )
+        )
+      )
+    {
         croak "$sSubName - required parameters missing\n";
     }
 
     # Local variables
-    my $bDebug   = (defined $phCmdLineOption->{'debug'}) ? TRUE : FALSE;
-    my $bVerbose = (defined $phCmdLineOption->{'verbose'}) ? TRUE : FALSE;
-    
-    my ($sBedFile, $sGroupedFile, $sSortedFile, $sTmpFile);
-    my ($sID, $sStrand, $sRefID, $nStart, $nEnd);
-    my ($fpBED, $fpTMP);
+    my $bDebug   = ( defined $phCmdLineOption->{'debug'} )   ? TRUE : FALSE;
+    my $bVerbose = ( defined $phCmdLineOption->{'verbose'} ) ? TRUE : FALSE;
+
+    my ( $sBedFile, $sGroupedFile, $sSortedFile, $sTmpFile );
+    my ( $sID, $sStrand, $sRefID, $nStart, $nEnd );
+    my ( $fpBED, $fpTMP );
 
     # Start
 
-#    ($bDebug) ? print STDERR "In $sSubName\n" : ();
+    #    ($bDebug) ? print STDERR "In $sSubName\n" : ();
 
-    ($bDebug || $bVerbose) ? print STDERR "\n\tProcessing annotation file $sAnnotationFile ...\n" : ();
-	
-    if (($sExtension =~ m/^gtf$/i) || 
-		($sExtension =~ m/^gff3$/i)) {
-		$sBedFile = Process_GFF($phCmdLineOption, $sAnnotationFile, "groupby",
-					$phCmdLineOption->{'feature'}, $phCmdLineOption->{'groupby'}, $sOutDir);
-	}
-	else {
-		$sBedFile = Init_OutFileName($phCmdLineOption, $sOutDir, $sAnnotationFile, ".bed");
-    	$sBedFile .= ".groupby.bed";
-    	
-    	$sCmd = "ln -s $sAnnotationFile $sBedFile";
-		exec_command($sCmd);
-	}
-	
-	$sTmpFile = Init_OutFileName($phCmdLineOption, $sOutDir, $sBedFile, ".groupby.bed");
+    ( $bDebug || $bVerbose )
+      ? print STDERR "\n\tProcessing annotation file $sAnnotationFile ...\n"
+      : ();
+
+    if (   ( $sExtension =~ m/^gtf$/i )
+        || ( $sExtension =~ m/^gff3$/i ) )
+    {
+        $sBedFile = Process_GFF(
+            $phCmdLineOption, $sAnnotationFile, "groupby",
+            $phCmdLineOption->{'feature'},
+            $phCmdLineOption->{'groupby'}, $sOutDir
+        );
+    } else {
+        $sBedFile =
+          Init_OutFileName( $phCmdLineOption, $sOutDir, $sAnnotationFile,
+            ".bed" );
+        $sBedFile .= ".groupby.bed";
+
+        $sCmd = "ln -s $sAnnotationFile $sBedFile";
+        exec_command($sCmd);
+    }
+
+    $sTmpFile =
+      Init_OutFileName( $phCmdLineOption, $sOutDir, $sBedFile, ".groupby.bed" );
     $sTmpFile .= ".sortbygroup.bed";
-    
+
     $sCmd = "sort -k 4,4 -k 6,6 $sBedFile > $sTmpFile";
     exec_command($sCmd);
-    
+
     $sCmd = "mv $sTmpFile $sBedFile";
     exec_command($sCmd);
-	
-	$sGroupedFile = Init_OutFileName($phCmdLineOption, $sOutDir, $sBedFile, ".groupby.bed");
+
+    $sGroupedFile =
+      Init_OutFileName( $phCmdLineOption, $sOutDir, $sBedFile, ".groupby.bed" );
     $sGroupedFile .= ".$sRegion.bed";
-	
-	$sCmd = $phCmdLineOption->{'bedtools_bin_dir'}."/bedtools groupby".
-			" -i ".$sBedFile.
-			" -g 1,4,6" .
-			" -opCols 2,3".
-			" -ops min,max".
-			" > ".$sGroupedFile;
-	
-	exec_command($sCmd);
-	
-	$sTmpFile = Init_OutFileName($phCmdLineOption, $sOutDir, $sBedFile, ".groupby.bed");
+
+    $sCmd =
+        $phCmdLineOption->{'bedtools_bin_dir'}
+      . "/bedtools groupby" . " -i "
+      . $sBedFile
+      . " -g 1,4,6"
+      . " -opCols 2,3"
+      . " -ops min,max" . " > "
+      . $sGroupedFile;
+
+    exec_command($sCmd);
+
+    $sTmpFile =
+      Init_OutFileName( $phCmdLineOption, $sOutDir, $sBedFile, ".groupby.bed" );
     $sTmpFile .= ".reorder.bed";
-    
-    open ($fpBED, "$sGroupedFile") or die "\tERROR! Cannot open $sGroupedFile for reading!\n";
-    open ($fpTMP, ">$sTmpFile") or die "ERROR! Cannot open $sTmpFile for writing!\n";
-    
+
+    open( $fpBED, "$sGroupedFile" )
+      or die "\tERROR! Cannot open $sGroupedFile for reading!\n";
+    open( $fpTMP, ">$sTmpFile" )
+      or die "ERROR! Cannot open $sTmpFile for writing!\n";
+
     while (<$fpBED>) {
-    	$_ =~ s/\s+$//;
-    	
-		($sRefID, $sID, $sStrand, $nStart, $nEnd) = split(/\t/, $_);
-		
-		print $fpTMP "$sRefID\t$nStart\t$nEnd\t$sID\t.\t$sStrand\n";
+        $_ =~ s/\s+$//;
+
+        ( $sRefID, $sID, $sStrand, $nStart, $nEnd ) = split( /\t/, $_ );
+
+        print $fpTMP "$sRefID\t$nStart\t$nEnd\t$sID\t.\t$sStrand\n";
     }
-    
+
     close($fpBED);
     close($fpTMP);
-    
+
     $sCmd = "mv $sTmpFile $sGroupedFile";
     exec_command($sCmd);
-	
-    $sSortedFile = Init_OutFileName($phCmdLineOption, $sOutDir, $sGroupedFile, ".bed");
-    $sSortedFile .= '.sorted.bed';
-	
-	# Use reference index sort order as a basis to sort this file
-	$sCmd = $phCmdLineOption->{'bedtools_bin_dir'}."/bedtools sort".
-			" -faidx $sIndexFile".
-			" -i $sGroupedFile > $sSortedFile";
-	
-	exec_command($sCmd);
-	
-    ($bDebug || $bVerbose) ? print STDERR "\n" : ();
 
-#    ($bDebug) ? print STDERR "Leaving $sSubName\n" : ();
-    
+    $sSortedFile =
+      Init_OutFileName( $phCmdLineOption, $sOutDir, $sGroupedFile, ".bed" );
+    $sSortedFile .= '.sorted.bed';
+
+    # Use reference index sort order as a basis to sort this file
+    $sCmd =
+        $phCmdLineOption->{'bedtools_bin_dir'}
+      . "/bedtools sort"
+      . " -faidx $sIndexFile"
+      . " -i $sGroupedFile > $sSortedFile";
+
+    exec_command($sCmd);
+
+    ( $bDebug || $bVerbose ) ? print STDERR "\n" : ();
+
+    #    ($bDebug) ? print STDERR "Leaving $sSubName\n" : ();
+
     return $sSortedFile;
 }
 
@@ -789,97 +915,114 @@ sub Generate_Gene_BedFile {
 # Notes
 #
 sub Process_GFF {
-    my $phCmdLineOption		= shift;
-    my $sAnnotationFile		= shift;
-    my $sRegion				= shift;
-    my $sFeatureID			= shift;
-    my $sAttributeID		= shift;
-    my $sOutDir				= shift;
+    my $phCmdLineOption = shift;
+    my $sAnnotationFile = shift;
+    my $sRegion         = shift;
+    my $sFeatureID      = shift;
+    my $sAttributeID    = shift;
+    my $sOutDir         = shift;
 
-    my $sSubName = (caller(0))[3];
+    my $sSubName = ( caller(0) )[3];
 
-    if (! ((defined $sAnnotationFile) &&
-           (defined $sRegion) &&
-           (defined $sFeatureID) &&
-           (defined $sAttributeID) &&
-           (defined $sOutDir) &&
-           (defined $phCmdLineOption))) {
+    if (
+        !(
+               ( defined $sAnnotationFile )
+            && ( defined $sRegion )
+            && ( defined $sFeatureID )
+            && ( defined $sAttributeID )
+            && ( defined $sOutDir )
+            && ( defined $phCmdLineOption )
+        )
+      )
+    {
         croak "$sSubName - required parameters missing\n";
     }
 
     # Local variables
-    my $bDebug   = (defined $phCmdLineOption->{'debug'}) ? TRUE : FALSE;
-    my $bVerbose = (defined $phCmdLineOption->{'verbose'}) ? TRUE : FALSE;
-    my %att=();
+    my $bDebug   = ( defined $phCmdLineOption->{'debug'} )   ? TRUE : FALSE;
+    my $bVerbose = ( defined $phCmdLineOption->{'verbose'} ) ? TRUE : FALSE;
+    my %att      = ();
     my (@atribs);
     my ($sBedFile);
-    my ($sRefID, $sSource, $sFeature, $nStart, $nEnd, $sScore, $sStrand, $sFrame, $sAttributes, $sID,@temp);
-    my ($fpGFF, $fpBED);
+    my (
+        $sRefID,      $sSource, $sFeature, $nStart,
+        $nEnd,        $sScore,  $sStrand,  $sFrame,
+        $sAttributes, $sID,     @temp
+    );
+    my ( $fpGFF, $fpBED );
     my ($nI);
 
     # Start
 
-#    ($bDebug) ? print STDERR "In $sSubName\n" : ();
+    #    ($bDebug) ? print STDERR "In $sSubName\n" : ();
 
-    ($bDebug || $bVerbose) ? print STDERR "\n\tProcessing GTF/GFF file $sAnnotationFile ...\n" : ();
-    
+    ( $bDebug || $bVerbose )
+      ? print STDERR "\n\tProcessing GTF/GFF file $sAnnotationFile ...\n"
+      : ();
+
     # initialize output file spec
-    $sBedFile = Init_OutFileName($phCmdLineOption, $sOutDir, $sAnnotationFile, ".".lc($phCmdLineOption->{'annotationfiletype'}));
+    $sBedFile = Init_OutFileName( $phCmdLineOption, $sOutDir, $sAnnotationFile,
+        "." . lc( $phCmdLineOption->{'annotationfiletype'} ) );
     $sBedFile .= ".$sRegion.bed";
-    
-    open($fpGFF, "$sAnnotationFile") or die "\tERROR! Cannot open $sAnnotationFile for reading !!!\n";
-    open($fpBED, ">$sBedFile") or die "\tERROR! Cannot open $sBedFile for writing !!!\n";
-    
+
+    open( $fpGFF, "$sAnnotationFile" )
+      or die "\tERROR! Cannot open $sAnnotationFile for reading !!!\n";
+    open( $fpBED, ">$sBedFile" )
+      or die "\tERROR! Cannot open $sBedFile for writing !!!\n";
+
     $nI = 0;
     while (<$fpGFF>) {
-    	$_ =~ s/\s+$//;
-    	
-    	next if ($_ =~ m/^#/);
-    	
-    	($sRefID, $sSource, $sFeature, $nStart, $nEnd, $sScore, $sStrand, $sFrame, $sAttributes) = split(/\t/, $_);
-    	
-    	next if ($sFeature ne $sFeatureID);
-    	
-    	next if ($sStrand !~ m/[-+]/);
-    	
-    	$sID = "Unknown";
-        @atribs = split(/;/,$sAttributes);
-        foreach (@atribs) {
-	    if ($_=~/\=/) {
-                $att{(split (/\=/,$_)) [0]} = (split (/\=/,$_))[1];
-            }
-            elsif ($_=~/\s+/){
-                $_=~s/\s+//g;
-                @temp=split (/\"/,$_);
-         	$att{$temp[0]} = $temp[1];
-            }
-            else {die "Unrecognized annotation file";} 
-        }
- 
-        if (exists $att{$sAttributeID}) {
-            $sID = $att{$sAttributeID};
-        } 
-        else {
-    		$nI++;
-    		$sID .= ".$nI";
-    	}
+        $_ =~ s/\s+$//;
 
-    	print $fpBED $sRefID."\t".($nStart - 1)."\t". $nEnd."\t".$sID;
-    	print $fpBED "\t.\t".$sStrand;
-    	print $fpBED "\n";
+        next if ( $_ =~ m/^#/ );
+
+        (
+            $sRefID, $sSource, $sFeature, $nStart, $nEnd,
+            $sScore, $sStrand, $sFrame,   $sAttributes
+        ) = split( /\t/, $_ );
+
+        next if ( $sFeature ne $sFeatureID );
+
+        next if ( $sStrand !~ m/[-+]/ );
+
+        $sID = "Unknown";
+        @atribs = split( /;/, $sAttributes );
+        foreach (@atribs) {
+            if ( $_ =~ /\=/ ) {
+                $att{ ( split( /\=/, $_ ) )[0] } = ( split( /\=/, $_ ) )[1];
+            } elsif ( $_ =~ /\s+/ ) {
+                $_ =~ s/\s+//g;
+                @temp = split( /\"/, $_ );
+                $att{ $temp[0] } = $temp[1];
+            } else {
+                die "Unrecognized annotation file";
+            }
+        }
+
+        if ( exists $att{$sAttributeID} ) {
+            $sID = $att{$sAttributeID};
+        } else {
+            $nI++;
+            $sID .= ".$nI";
+        }
+
+        print $fpBED $sRefID . "\t"
+          . ( $nStart - 1 ) . "\t"
+          . $nEnd . "\t"
+          . $sID;
+        print $fpBED "\t.\t" . $sStrand;
+        print $fpBED "\n";
     }
-    
+
     close($fpGFF);
     close($fpBED);
 
- 
-    ($bDebug || $bVerbose) ? print STDERR "\n" : ();
+    ( $bDebug || $bVerbose ) ? print STDERR "\n" : ();
 
-#    ($bDebug) ? print STDERR "Leaving $sSubName\n" : ();
-    
+    #    ($bDebug) ? print STDERR "Leaving $sSubName\n" : ();
+
     return $sBedFile;
 }
-
 
 # Init_OutFileName()
 #
@@ -912,45 +1055,33 @@ sub Init_OutFileName {
     my $sFileName       = shift;
     my $sExtension      = shift;
 
-    my $sSubName = (caller(0))[3];
+    my $sSubName = ( caller(0) )[3];
 
-    if (! ((defined $sFileName) &&
-           (defined $sExtension) &&
-           (defined $sOutDir) &&
-           (defined $phCmdLineOption))) {
+    if (
+        !(
+               ( defined $sFileName )
+            && ( defined $sExtension )
+            && ( defined $sOutDir )
+            && ( defined $phCmdLineOption )
+        )
+      )
+    {
         croak "$sSubName - required parameters missing\n";
     }
 
-    # Local variables
-    my $bDebug   = (defined $phCmdLineOption->{'debug'}) ? TRUE : FALSE;
-    my $bVerbose = (defined $phCmdLineOption->{'verbose'}) ? TRUE : FALSE;
- 
-    my ($sFile, $sDir);
+    my ( $sFile, $sDir );
     my $sOutFile;
 
-    # Start
-
-#    ($bDebug) ? print STDERR "In $sSubName\n" : ();
-
-#    ($bDebug || $bVerbose) ? print STDERR "\n\tInitializing filename...\n" : ();
-
-    ($_, $sDir, $sFile) = File::Spec->splitpath($sFileName);
+    ( $_, $sDir, $sFile ) = File::Spec->splitpath($sFileName);
     $sFile =~ m/^(\S+)$sExtension$/;
-	if (defined $1) {
-	    $sOutFile = $sOutDir.'/'.$1;
-	}
-	else {
-	    $sOutFile = $sOutDir.'/'.$sFile;
-	}
+    if ( defined $1 ) {
+        $sOutFile = $sOutDir . '/' . $1;
+    } else {
+        $sOutFile = $sOutDir . '/' . $sFile;
+    }
     $sOutFile = File::Spec->canonpath($sOutFile);
-
-#    ($bDebug || $bVerbose) ? print STDERR "\n" : ();
-
-#    ($bDebug) ? print STDERR "Leaving $sSubName\n" : ();
-    
     return $sOutFile;
 }
-
 
 ##############################################################################
 ### POD Documentation
@@ -965,9 +1096,9 @@ percent_mapped_stats.pl                     -program to generate percentage of r
 
 =head1 SYNOPSIS
 
-    percent_mapped_stats.pl                --r <reference_file> --i <bam_file> --a <annotation_file> 
-                                           --t <annotation file format(bed|gtf|gff3)> --f <feature> --id <attribute> 
-                                           --g <group_by> --o [output_dir] --org [org-type] 
+    percent_mapped_stats.pl                --r <reference_file> --i <bam_file> --a <annotation_file>
+                                           --t <annotation file format(bed|gtf|gff3)> --f <feature> --id <attribute>
+                                           --g <group_by> --o [output_dir] --org [org-type]
                                            --b [bedtools_bin_dir] --s [samtools_bin_dir] [--v]
 
     parameters in [] are optional
@@ -975,7 +1106,7 @@ percent_mapped_stats.pl                     -program to generate percentage of r
 
 =head1 OPTIONS
 
-   
+
     --r <reference_file>                            = path to reference fastA file.
 
     --i <bam_file>                                  = path to alignment BAM file SORTED BY NAME
