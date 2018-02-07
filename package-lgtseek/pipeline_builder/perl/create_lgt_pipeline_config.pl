@@ -344,7 +344,7 @@ sub main {
 
 		# Donor and recipient reads are the same in the sam2fasta output so we just run split_multifasta once
 		$config{'blastn_plus nt_r'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/split_multifasta/$;PIPELINEID$;_fasta_d/split_multifasta.fsa.list';
-		$config{'bwa_aln validation_r'}->{'$;QUERY_FILE$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_create_validated_bam/$;PIPELINEID$;_lgt_d/lgt_create_validate_bam.bam.list';
+		$config{'bwa_aln validation_r'}->{'$;QUERY_FILE$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_create_validated_bam/$;PIPELINEID$;_lgt_d/lgt_create_validated_bam.bam.list';
 
 		# If recipient is infected with LGT, change mpileup to use LGT-infected BAM list
 		if ($lgt_infected) {
