@@ -37,16 +37,14 @@ my $sHelpHeader    = "\nThis is " . PROGRAM . " version " . VERSION . "\n";
 
 my (@aRegions);
 my ( $sRefFile, $sBamFile, $sAnnotationFile );
-my (
-    $sGenicFile,       $sGenicBedFile, $sExonicBedFile,
-    $sIntronicBedFile, $sIntergenicBedFile
-);
+my ( $sGenicFile, $sGenicSanitizedFile, $sExonicBedFile,
+    $sIntronicBedFile, $sIntergenicSanitizedFile );
 my ( $sOutDir, $sSizeFile, $sOutFile, $sSortedFile, $sSummaryFile );
 my ( $Exon_inter, $intergenic_inter, $intron_inter, $genic_inter );
-my ( $e_file, $in_file, $it_file, $fout, $finalfile, $uniqfile );
+my ( $e_file, $in_file, $it_file, $fout, $finalfile );
 my ( $sPrefix, $sSampleId, $sRegion, $nTotalMappedReads, $nUniqueMappedReads );
-my ( $sCmd,    $sOpt );
-my ( $bDebug,  $bVerbose );
+my ( $sCmd,   $sOpt );
+my ( $bDebug, $bVerbose );
 my $out_flag = 0;
 
 ##############################################################################
@@ -181,6 +179,9 @@ $sSampleId = $sBamFile;
 $sSampleId =~ s/\.accepted_hits.sorted_by_name//;
 $sSampleId =~ s/\.bam$//;
 
+my $working_bam =
+  prune_unmapped_reads( $hCmdLineOption{'infile'}, $sOutDir, $sSampleId );
+
 if ( $hCmdLineOption{'org-type'} eq 'euk' ) {
 
     ####Exonic Bed File
@@ -230,42 +231,30 @@ if ( $hCmdLineOption{'org-type'} eq 'euk' ) {
     );
 }
 
-$sGenicBedFile =
+$sGenicSanitizedFile =
   Init_OutFileName( \%hCmdLineOption, $sOutDir, $sGenicFile, ".sorted.bed" );
-$sGenicBedFile .= '.sanitized.bed';
+$sGenicSanitizedFile .= '.sanitized.bed';
 $sCmd =
     $hCmdLineOption{'bedtools_bin_dir'}
   . "/bedtools merge"
   . " -s -i "
   . $sGenicFile . " > "
-  . $sGenicBedFile;
+  . $sGenicSanitizedFile;
 exec_command($sCmd);
 
-# Sadkins - 7/25/17 - During a test run, the merge unsorted the sorted bed file
-# So need to re-sort the sanitized file
-# my $sGenicSortedBedFile =
-#   Init_OutFileName( \%hCmdLineOption, $sOutDir, $sGenicBedFile,
-#     ".sanitized.bed" );
-# $sGenicSortedBedFile .= '.sorted.sanitized.bed';
-# $sCmd =
-#     $hCmdLineOption{'bedtools_bin_dir'}
-#   . "/bedtools sort"
-#   . " -faidx $sIndexFile"
-#   . " -i $sGenicBedFile > $sGenicSortedBedFile";
-# exec_command($sCmd);
-
 ####Intergenic Bed file
+
 # Should be already sorted and sanitized
-$sIntergenicBedFile =
-  Init_OutFileName( \%hCmdLineOption, $sOutDir, $sGenicBedFile,
+$sIntergenicSanitizedFile =
+  Init_OutFileName( \%hCmdLineOption, $sOutDir, $sGenicSanitizedFile,
     ".genic.sanitized.bed" );
-$sIntergenicBedFile .= '.intergenic.bed';
+$sIntergenicSanitizedFile .= '.intergenic.sanitized.bed';
 $sCmd =
     $hCmdLineOption{'bedtools_bin_dir'}
   . "/bedtools complement" . " -i "
-  . $sGenicBedFile . " -g "
+  . $sGenicSanitizedFile . " -g "
   . $sSizeFile . " > "
-  . $sIntergenicBedFile;
+  . $sIntergenicSanitizedFile;
 exec_command($sCmd);
 
 ###Bed tools intersect
@@ -273,38 +262,34 @@ if ( $hCmdLineOption{'org-type'} eq 'euk' ) {
     $Exon_inter =
       Init_OutFileName( \%hCmdLineOption, $sOutDir, $sSortedFile, ".bed" );
     $Exon_inter .= '.intersect.bed';
-    bed_intersect( \%hCmdLineOption, $hCmdLineOption{'infile'},
-        $sSortedFile, $Exon_inter );
+    bed_intersect( \%hCmdLineOption, $working_bam, $sSortedFile, $Exon_inter );
     $intron_inter =
       Init_OutFileName( \%hCmdLineOption, $sOutDir, $sIntronicBedFile, ".bed" );
     $intron_inter .= '.intersect.bed';
-    bed_intersect(
-        \%hCmdLineOption,  $hCmdLineOption{'infile'},
-        $sIntronicBedFile, $intron_inter
-    );
+    bed_intersect( \%hCmdLineOption, $working_bam,
+        $sIntronicBedFile, $intron_inter );
     $intergenic_inter =
-      Init_OutFileName( \%hCmdLineOption, $sOutDir, $sIntergenicBedFile,
+      Init_OutFileName( \%hCmdLineOption, $sOutDir, $sIntergenicSanitizedFile,
         ".bed" );
     $intergenic_inter .= '.intersect.bed';
     bed_intersect(
-        \%hCmdLineOption,          $hCmdLineOption{'infile'},
-        $sIntergenicBedFile, $intergenic_inter
+        \%hCmdLineOption,          $working_bam,
+        $sIntergenicSanitizedFile, $intergenic_inter
     );
 } else {
     $genic_inter =
-      Init_OutFileName( \%hCmdLineOption, $sOutDir, $sGenicBedFile, ".sanitized.bed" );
+      Init_OutFileName( \%hCmdLineOption, $sOutDir, $sGenicFile,
+        ".sorted.bed" );
     $genic_inter .= '.intersect.bed';
-    bed_intersect( \%hCmdLineOption, $hCmdLineOption{'infile'},
-        $sGenicBedFile, $genic_inter );
+    bed_intersect( \%hCmdLineOption, $working_bam, $sGenicFile, $genic_inter );
     $intergenic_inter =
-      Init_OutFileName( \%hCmdLineOption, $sOutDir, $sIntergenicBedFile,
-        ".bed" );
+      Init_OutFileName( \%hCmdLineOption, $sOutDir, $sIntergenicSanitizedFile,
+        ".sanitized.bed" );
     $intergenic_inter .= '.intersect.bed';
     bed_intersect(
-        \%hCmdLineOption,          $hCmdLineOption{'infile'},
-        $sIntergenicBedFile, $intergenic_inter
+        \%hCmdLineOption,          $working_bam,
+        $sIntergenicSanitizedFile, $intergenic_inter
     );
-
 }
 
 ###Call mapped subroutine to calculate % reads mapping to exon, intron and intergenic region
@@ -317,17 +302,6 @@ if ( $hCmdLineOption{'org-type'} eq 'euk' ) {
       or die "Error! Cannot open the file.";
     open( $fout, ">$finalfile" ) or die "Error! Cannot open the file.";
     mapped_euk( $e_file, $in_file, $it_file, $fout );
-
-##########For few test runs..Check unique reads obtained using mapped_euk with NH:i:1 option from bam file.
-    $uniqfile = $sOutDir . "/" . $sSampleId . ".uniq_reads.txt";
-    $sCmd =
-        $hCmdLineOption{'samtools_bin_dir'}
-      . "/samtools view -F 260 "
-      . $hCmdLineOption{'infile'}
-      . " | grep NH:i:1 | wc -l > "
-      . $uniqfile;
-    exec_command($sCmd);
-
 } else {
     $finalfile = $sOutDir . "/" . $sSampleId . ".Percent.txt";
     open( $e_file, "<$genic_inter" ) or die "Error! Cannot open the file.";
@@ -335,11 +309,13 @@ if ( $hCmdLineOption{'org-type'} eq 'euk' ) {
       or die "Error! Cannot open the file.";
     open( $fout, ">$finalfile" ) or die "Error! Cannot open the file.";
     mapped_prok( $e_file, $it_file, $fout, $out_flag );
-
 }
 
-print "Removing BED files........\n";
+print STDERR "Removing BED files........\n";
 $sCmd = "rm " . $sOutDir . "/*.bed";
+exec_command($sCmd);
+print STDERR "Removing aligned BAM file...\n";
+$sCmd = "rm " . $working_bam;
 exec_command($sCmd);
 
 exit;
@@ -348,9 +324,19 @@ exit;
 ### Subroutines
 ##############################################################################
 
+### Use samtools to remove unmapped reads from the BAM file.  Return new BAM
+sub prune_unmapped_reads {
+    my $input_bam   = shift;
+    my $outdir      = shift;
+    my $id          = shift;
+    my $working_bam = $outdir . "/" . $id . ".aligned.bam";
+    my $sam_cmd     = "samtools view -F 0x04 -b $input_bam > $working_bam";
+    exec_command($sam_cmd);
+    return $working_bam;
+}
+
 ###Percent reads mapping to genic and intergenic region for prokaryotes.
 sub mapped_prok {
-
     my $genic_file = shift;
     my $inter_file = shift;
     my $fout       = shift;
@@ -364,6 +350,7 @@ sub mapped_prok {
     my $t_count     = 0;
     my %hcount      = ();
 
+    print STDERR "Now calculating read counts from prok alignment...\n";
     while (<$genic_file>) {
         chomp($_);
         $read_g = ( split( /\t/, $_ ) )[3];
@@ -373,11 +360,11 @@ sub mapped_prok {
         $it_line = <$inter_file>;
         chomp($it_line);
         $read_it = ( split( /\t/, $it_line ) )[3];
-        ##Check if reads in genic and intergenic file is same.
-        if ( $read_g ne $read_it ) {
-            die
-              "Error: The input files are not correct. Use sorted by name BAM file";
-        }
+        ##Check if reads in genic and intergenic file are same.
+        die
+          "Error: The input files are not correct. Use sorted by name BAM file"
+          if $read_g ne $read_it;
+
         if ( !( exists $hcount{$read1} ) ) {
             foreach $k ( keys %hcount ) {
                 foreach $k1 ( keys %{ $hcount{$k} } ) {
@@ -401,7 +388,7 @@ sub mapped_prok {
 
         $g_count = ( split( /\t/, $_ ) )[-1];    # Read genic map count for read
         $it_count =
-          ( split( /\t/, $it_line ) )[-1];   # Read intergenic map count for read
+          ( split( /\t/, $it_line ) )[-1];  # Read intergenic map count for read
 
         if ( $g_count >= 1 ) {
             $hcount{$read1}{$tag}[1]++;     # Increment Genic Count
@@ -472,6 +459,7 @@ sub mapped_euk {
     my $t_count     = 0;
     my %hcount      = ();
 
+    print STDERR "Now calculating read counts from euk alignment...\n";
     while (<$exon_file>) {
         chomp($_);
         $read_e = ( split( /\t/, $_ ) )[3];
@@ -484,11 +472,10 @@ sub mapped_euk {
         $it_line = <$inter_file>;
         chomp($it_line);
         $read_it = ( split( /\t/, $it_line ) )[3];
-        ##Check if reads in exon,intron and intergenic file is same.
-        if ( $read_e ne $read_in or $read_e ne $read_it ) {
-            die
-              "Error: The input files are not correct. Use sorted by name bam file";
-        }
+        ##Check if reads in exon,intron and intergenic file are same.
+        die
+          "Error: The input files are not correct. Use sorted by name bam file"
+          if ( $read_e ne $read_in or $read_e ne $read_it );
 
         # If a new read is encountered, tally distribution of previous read
         if ( !( exists $hcount{$read1} ) ) {
@@ -517,11 +504,6 @@ sub mapped_euk {
         # Initialize new read in hash
         $hcount{$read1}{$tag} = [ 0, 0, 0, 0 ]
           if ( !( exists $hcount{$read1}{$tag} ) );
-
-# NOT COMPATABLE WITH HISAT2 - Sadkins 7/25/17
-#$e_count = (split (/\t/,$_))[6];             # Read exonic map count for read
-#$in_count = (split (/\t/,$in_line))[6];      # Read intronic map count for read
-#$it_count = (split (/\t/,$it_line))[6];      # Read intergenic map count for read
 
         $e_count = ( split( /\t/, $_ ) )[-1];   # Read exonic map count for read
         $in_count =
@@ -592,9 +574,10 @@ sub bed_intersect {
     $sCmd =
         $phCmdLineOption->{'bedtools_bin_dir'}
       . "/bedtools intersect" . " -a "
-      . $bam_file
-      . " -b " . $bed_file . " -bed -c "
-      . " > " . $outfile;
+      . $bam_file . " -b "
+      . $bed_file
+      . " -bed -c " . " > "
+      . $outfile;
 
     exec_command($sCmd);
 }
