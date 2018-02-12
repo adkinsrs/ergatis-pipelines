@@ -224,7 +224,6 @@ sub write_final_LGT {
                     $r_trace = $read;
                 }
 
-				print "$d_trace\t$r_trace\n";
                 next if ! defined $read_hits->{$d_trace}->{'euk'}
                   || ! defined $read_hits->{$r_trace}->{'bac'};
 
