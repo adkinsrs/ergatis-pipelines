@@ -330,7 +330,7 @@ sub prune_unmapped_reads {
     my $outdir      = shift;
     my $id          = shift;
     my $working_bam = $outdir . "/" . $id . ".aligned.bam";
-    my $sam_cmd     = "samtools view -F 0x04 -b $input_bam > $working_bam";
+    my $sam_cmd     = $hCmdLineOption{'samtools_bin_dir'}."/samtools view -F 0x04 -b $input_bam > $working_bam";
     exec_command($sam_cmd);
     return $working_bam;
 }
