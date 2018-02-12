@@ -52,9 +52,14 @@ B<--help>
 =head1  INPUT
 
     BlastN results that have been formatted into the m8 format.
-    2 files
+    2 files - Can be a list file pointing to a file
     1) Hits to the Eukaryota lineage
     2) Hits to the Bacteria lineage
+
+	List of reads in the read pair that aligned to the reference
+	Can be a list file
+
+	Identity of the reference (donor or recipient)
 
 =head1 OUTPUT
 
@@ -113,13 +118,12 @@ while (<IN>) {
       $infile = $_;
     } else {
         $infile = $options{'aligned_list'};
-
     }
     last;
 }
 close IN;
-
 my $aligned_reads = store_aligned_reads($infile);
+
 store_m8_hits( $bac_file, 'bac' );
 store_m8_hits( $euk_file, 'euk' );
 
@@ -131,10 +135,12 @@ exit(0);
 
 sub calc_hscore_of_reads {
     my $outfile = shift . "/scores.txt";
+	&_log( $DEBUG, "Now calculating h-score of reads ..." );
     open OFH,
       ">$outfile" || &_log( $ERROR, "Cannot open $outfile for writing: $!" );
     print OFH "#read\th_score\teuk/prok_ratio\n";
     foreach my $read ( keys %{$read_scores} ) {
+		#
         # Does a read have hits in both lineage types?
         if ( defined $read_scores->{$read}->{'bac'}
             && defined $read_scores->{$read}->{'euk'} )
@@ -152,6 +158,7 @@ sub calc_hscore_of_reads {
 sub store_aligned_reads {
     my $reads_file = shift;
     my %aligned_reads;
+	&_log( $DEBUG, "Now storing $reads_file ..." );
     open ALN,
       $reads_file || &_log( $ERROR, "Cannot open $reads_file for reading: $!" );
     while (<ALN>) {
@@ -164,6 +171,7 @@ sub store_aligned_reads {
 
 sub store_m8_hits {
     my ( $m8_hits, $ref ) = @_;
+	&_log( $DEBUG, "Now storing $m8_hits ..." );
     open M8,
       $m8_hits || &_log( $ERROR, "Cannot open $m8_hits for reading: $!" );
     while (<M8>) {
@@ -183,6 +191,7 @@ sub write_final_LGT {
     my ( $outdir, $aligned_reads, $aligned_ref ) = @_;
     my $outfile = $outdir . "/lgt_by_clone.txt";
     my %seen_hits;
+	&_log( $DEBUG, "Writing final LGT information to $outfile ...");
     open OFH,
       ">$outfile" || &_log( $ERROR, "Cannot open $outfile for writing: $!" );
     foreach my $read ( keys %{$read_hits} ) {
@@ -215,6 +224,7 @@ sub write_final_LGT {
                     $r_trace = $read;
                 }
 
+				print "$d_trace\t$r_trace\n";
                 next if ! defined $read_hits->{$d_trace}->{'euk'}
                   || ! defined $read_hits->{$r_trace}->{'bac'};
 
@@ -298,7 +308,7 @@ sub check_options {
     }
 
 # If hits are in lists.  Extract them.  Assuming only 1 hits file is in a given list.
-    if ( $opts->{'euk_hits'} =~ '/.list$' ) {
+    if ( $opts->{'euk_hits'} =~ /\.list$/ ) {
         open LIST, $opts->{'euk_hits'}
           || die "Cannot open $opts->{'euk_hits'} for reading: $!";
         while (<LIST>) {
@@ -311,7 +321,7 @@ sub check_options {
         $euk_file = $opts->{'euk_hits'};
     }
 
-    if ( $opts->{'bac_hits'} =~ '/.list$' ) {
+    if ( $opts->{'bac_hits'} =~ /\.list$/ ) {
         open LIST, $opts->{'bac_hits'}
           || die "Cannot open $opts->{'bac_hits'} for reading: $!";
         while (<LIST>) {
