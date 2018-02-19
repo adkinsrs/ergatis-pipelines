@@ -242,17 +242,30 @@ $sCmd =
   . $sGenicSanitizedFile;
 exec_command($sCmd);
 
+# In some cases (like for HiSat2 runs), the sanitized file is unsorted because the IndexFile sort order is different
+# So need to re-sort the sanitized file
+my $sGenicSortedBedFile =
+  Init_OutFileName( \%hCmdLineOption, $sOutDir, $sGenicSanitizedFile,
+    ".sanitized.bed" );
+$sGenicSortedBedFile .= '.sorted.sanitized.bed';
+$sCmd =
+    $hCmdLineOption{'bedtools_bin_dir'}
+  . "/bedtools sort"
+  . " -faidx $sIndexFile"
+  . " -i $sGenicSanitizedFile > $sGenicSortedBedFile";
+exec_command($sCmd);
+
 ####Intergenic Bed file
 
 # Should be already sorted and sanitized
 $sIntergenicSanitizedFile =
-  Init_OutFileName( \%hCmdLineOption, $sOutDir, $sGenicSanitizedFile,
-    ".genic.sanitized.bed" );
-$sIntergenicSanitizedFile .= '.intergenic.sanitized.bed';
+  Init_OutFileName( \%hCmdLineOption, $sOutDir, $sGenicSortedBedFile,
+    ".genic.sorted.sanitized.bed" );
+$sIntergenicSanitizedFile .= '.intergenic.sorted.sanitized.bed';
 $sCmd =
     $hCmdLineOption{'bedtools_bin_dir'}
   . "/bedtools complement" . " -i "
-  . $sGenicSanitizedFile . " -g "
+  . $sGenicSortedBedFile . " -g "
   . $sSizeFile . " > "
   . $sIntergenicSanitizedFile;
 exec_command($sCmd);
@@ -330,7 +343,8 @@ sub prune_unmapped_reads {
     my $outdir      = shift;
     my $id          = shift;
     my $working_bam = $outdir . "/" . $id . ".aligned.bam";
-    my $sam_cmd     = $hCmdLineOption{'samtools_bin_dir'}."/samtools view -F 0x04 -b $input_bam > $working_bam";
+    my $sam_cmd     = $hCmdLineOption{'samtools_bin_dir'}
+      . "/samtools view -F 0x04 -b $input_bam > $working_bam";
     exec_command($sam_cmd);
     return $working_bam;
 }
