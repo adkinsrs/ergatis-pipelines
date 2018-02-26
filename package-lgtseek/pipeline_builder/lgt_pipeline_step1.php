@@ -44,6 +44,24 @@ include_once('header.php');
 <label for="trefseq">RefSeq reference/list/index</label><br>
 <input type="text" name="trefseq" id="trefseq" class="textbox" value=''><br><br>
 </div>
+
+<div id="dbac_acc">
+<label for="tbac_acc">Bacteria accession ID list</label><br>
+<input type="text" name="tbac_acc" id="tbac_acc" class="textbox" value=''><br><br>
+</div>
+<div id="dbac_ref">
+<label for="tbac_ref">Bacteria taxon name for hit filtering</label><br>
+<input type="text" name="tbac_ref" id="tbac_ref" class="textbox" value='Bacteria'><br><br>
+</div>
+<div id="deuk_acc">
+<label for="teuk_acc">Eukaryotic accession ID list</label><br>
+<input type="text" name="teuk_acc" id="teuk_acc" class="textbox" value=''><br><br>
+</div>
+<div id="deuk_ref">
+<label for="teuk_ref">Eukaryotic taxon name for hit filtering</label><br>
+<input type="text" name="teuk_ref" id="teuk_ref" class="textbox" value='Eukaryota'><br><br>
+</div>
+
 <div id="dbam">
 <label for="tbam">BAM file or list</label><br>
 <input type="text" name="tbam" id="tbam" class="textbox" value=''><br>
@@ -56,7 +74,7 @@ include_once('header.php');
 <label for="tsra">SRA ID</label><br>
 <input type="text" name="tsra" id="tsra" class="textbox" value=''><br>
 </div>
-<label><input type="checkbox" name="c_build" value=1 >Check to Build BWA Indexes.</label>
+<label><input type="checkbox" name="c_build" value=1>Check to Build BWA Indexes.</label>
 </fieldset>
 
 <br>

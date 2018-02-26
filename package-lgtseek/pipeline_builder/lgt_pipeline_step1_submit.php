@@ -1,10 +1,10 @@
 <?php
 	ini_set('display_errors', 'On');
 	error_reporting(E_ALL | E_STRICT);
-	
+
 
 	$formFieldsArr = Array("output_dir" => "Output directory", "log_file" => "Log file", "r_input" => "Input File");
-	
+
 	$args = '';
 	$args .= "--data_directory=/mnt/output_data "; # By default gather output for use in LGTView
 	$local_dir = "/usr/local/scratch/pipeline_dir";
@@ -85,6 +85,27 @@
 			}
 		}
 
+		if ( !empty($_POST['tbac_acc']) ) {
+			$bac_acc = trim($_POST['tbac_acc']);
+			$bac_acc = adjust_paths($bac_acc, $dir, "/mnt/input_data/", false);
+			$args .= "--bac_accession $bac_acc ";
+		}
+		if ( !empty($_POST['teuk_acc']) ) {
+			$euk_acc = trim($_POST['teuk_acc']);
+			$euk_acc = adjust_paths($euk_acc, $dir, "/mnt/input_data/", false);
+			$args .= "--euk_accession $euk_acc ";
+		}
+		if ( !empty($_POST['tbac_ref']) ) {
+			$bac_ref = trim($_POST['tbac_ref']);
+			$bac_ref = adjust_paths($bac_ref, $dir, "/mnt/input_data/", false);
+			$args .= "--bac_lineage $bac_ref ";
+		}
+		if ( !empty($_POST['teuk_ref']) ) {
+			$euk_ref = trim($_POST['teuk_ref']);
+			$euk_ref = adjust_paths($euk_ref, $dir, "/mnt/input_data/", false);
+			$args .= "--euk_lineage $euk_ref ";
+		}
+
 		if ( $_POST['c_build'] == 1 ) {
 			$args .= "--build_indexes ";
 		}
@@ -144,13 +165,13 @@
 	# This function checks if the input file is a list.
 	# If it is a list, the paths of each file in list will be changed to reflect the location of the volume in the Docker container.  A new list file is created, and returned
 	# If not a list, path of the input file is changed to reflect the location of the volume in the Docker container and is returned
-	function adjust_paths ($filename, $new_dir, $mounted_dir) {
+	function adjust_paths ($filename, $new_dir, $mounted_dir, $adjust_list=true) {
 		$file_parts = pathinfo($filename);
 		$file_base = basename($filename);
 		# File needs to reflect the mounted directory path, not the path on the host
 		$mounted_file = $mounted_dir . "/" . $file_base;
 
-		if ($file_parts['extension'] == 'list') {
+		if ($file_parts['extension'] == 'list' and $adjust_list) {
 			# Construct filename for new list
 			$new_list = $new_dir . "/" . $file_base;
 

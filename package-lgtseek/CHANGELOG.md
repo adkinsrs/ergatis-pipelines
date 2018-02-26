@@ -1,6 +1,11 @@
 # CHANGELOG
 
-1/18/17
+2/26/18
+* Adding a few extra params for the UI
+  * Bacterial lineage filter taxon name (same for Eukaryotic)
+  * Bacteria accession ID list (same for Eukaryotic)
+
+1/18/18
 * Fixing bug in 'lgt_infected' use-case where only the recipient reads of lgt_infected cases were being output, and not the donor reads
 * Consequently this requires some of the pipeline to be rewritten
 

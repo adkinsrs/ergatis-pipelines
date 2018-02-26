@@ -37,8 +37,14 @@ B<--host_reference,-h>
 B<--bac_lineage>
 	Taxon name to search for in bacterial hits.  Will only consider best hits within that taxon lineage.
 
-	B<--euk_lineage>
+B<--euk_lineage>
 	Taxon name to search for in eukaryotic hits.  Will only consider best hits within that taxon lineage.
+
+B<--bac_accession>
+	List file of bacteria accession IDs to make a blast database alias with
+
+B<--euk_accession>
+	List file of eukaryotic (preferably metazoan) accession IDs to make a blast database alias with
 
 B<--lgt_infected, -i>
 	Flag to indicate that the recipient reference is infected with LGT from the donor reference.  This will enable a different pipeline layout compared to the LGT-free use-case
@@ -134,6 +140,8 @@ sub main {
 						  "refseq_reference|r=s",
 							"bac_lineage=s",
 							"euk_lineage=s",
+							"bac_accession=s",
+							"euk_accession=s",
 						  "build_indexes|B",
 						  "skip_alignment|S",
 						  "template_directory|t=s",
@@ -226,6 +234,9 @@ sub main {
 
 	$config{"global"}->{'$;BAC_LINEAGE$;'} = defined $options{'bac_lineage'} ? $options{'bac_lineage'} : "Bacteria";
 	$config{"global"}->{'$;EUK_LINEAGE$;'} = defined $options{'euk_lineage'} ? $options{'euk_lineage'} : "Eukaryota";
+
+	$config{"global"}->{'$;BACTERIA_ACC_LIST$;'} = defined $options{'bac_accession'} ? $options{'bac_accession'} : '$;DB_DIR$;/bacteria.accession.txt';
+	$config{"global"}->{'$;METAZOA_ACC_LIST$;'} = defined $options{'euk_accession'} ? $options{'bac_accession'} : '$;DB_DIR$;/metazoa.accession.txt';
 
 
 	# If the starting point is BAM input, then use that.

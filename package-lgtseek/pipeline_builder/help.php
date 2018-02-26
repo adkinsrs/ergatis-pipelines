@@ -35,6 +35,22 @@ include_once('header.php');
                             </li>
 						</ul>
 					</li>
+					<li> Specifying the bacteria and eukaryota to search against and to filter hits over:
+						<ul>
+							<li>
+							Bacteria accession ID list - List file of bacteria accession IDs to make a blast database alias with
+							</li>
+							<li>
+							Bacteria taxon name for hit filtering - Taxon name to search for in bacterial hits.  Will only consider best hits within that taxon lineage.  Default is 'Bacteria'.
+							</li>
+							<li>
+							Eukaryota accession ID list - List file of eukaryotic (preferably metazoan) accession IDs to make a blast database alias with
+							</li>
+							<li>
+							Eukaryota taxon name for hit filtering - Taxon name to search for in eukaryotic hits.  Will only consider best hits within that taxon lineage.  Default is 'Eukaryota'.
+							</li>
+						</ul>
+					</li>
 					<li>Specifying the input type (one is required):
 						<ul>
 							<li>
