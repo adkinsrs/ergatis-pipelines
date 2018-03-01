@@ -97,12 +97,10 @@
 		}
 		if ( !empty($_POST['tbac_ref']) ) {
 			$bac_ref = trim($_POST['tbac_ref']);
-			$bac_ref = adjust_paths($bac_ref, $dir, "/mnt/input_data/", false);
 			$args .= "--bac_lineage $bac_ref ";
 		}
 		if ( !empty($_POST['teuk_ref']) ) {
 			$euk_ref = trim($_POST['teuk_ref']);
-			$euk_ref = adjust_paths($euk_ref, $dir, "/mnt/input_data/", false);
 			$args .= "--euk_lineage $euk_ref ";
 		}
 
