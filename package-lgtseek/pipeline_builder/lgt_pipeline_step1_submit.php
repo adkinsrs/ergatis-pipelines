@@ -170,7 +170,7 @@
 		$mounted_file = $mounted_dir . "/" . $file_base;
 
 		if ($file_parts['extension'] == 'list' and $adjust_list) {
-			# Construct filename for new list
+			# Construct filename for new list file
 			$new_list = $new_dir . "/" . $file_base;
 
 			$fh = fopen($mounted_file, "r") or die("Cannot open $mounted_file - check the path to make sure it exists");
