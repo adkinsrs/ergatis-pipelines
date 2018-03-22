@@ -8,10 +8,10 @@ function ResetForm() {
 // Clear the text input fields
 function ResetText() {
 	var FormName = document.forms.namedItem("lgt_pipeline_step1_form");
-	var textFields = ["tsra", "tfastq", "tbam", "tdonor", "trecipient", "trefseq"];
+	var textFields = ["tsra", "tfastq", "tbam", "tdonor", "trecipient", "trefseq", "tbac_acc", "tbac_ref", "teuk_acc", "teuk_ref"];
     for (var i in textFields) {
 		field = FormName.elements[ textFields[i] ];
-       	field.value = '';
+       	field.value = field.defaultValue;
 	}
 }
 
@@ -52,5 +52,5 @@ function SetUpInputFields() {
 		document.getElementById('dfastq').style.display = "none";
 		document.getElementById('dsra').style.display = "block";
 	}
-	ResetText();
+	//ResetText();
 }

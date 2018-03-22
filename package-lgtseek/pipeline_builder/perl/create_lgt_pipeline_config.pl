@@ -236,7 +236,7 @@ sub main {
 	$config{"global"}->{'$;EUK_LINEAGE$;'} = defined $options{'euk_lineage'} ? $options{'euk_lineage'} : "Eukaryota";
 
 	$config{"global"}->{'$;BACTERIA_ACC_LIST$;'} = defined $options{'bac_accession'} ? $options{'bac_accession'} : '$;DB_DIR$;/bacteria.accession.txt';
-	$config{"global"}->{'$;METAZOA_ACC_LIST$;'} = defined $options{'euk_accession'} ? $options{'bac_accession'} : '$;DB_DIR$;/metazoa.accession.txt';
+	$config{"global"}->{'$;METAZOA_ACC_LIST$;'} = defined $options{'euk_accession'} ? $options{'euk_accession'} : '$;DB_DIR$;/metazoa.accession.txt';
 
 
 	# If the starting point is BAM input, then use that.

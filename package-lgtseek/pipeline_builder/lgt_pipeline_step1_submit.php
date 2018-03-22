@@ -87,22 +87,20 @@
 
 		if ( !empty($_POST['tbac_acc']) ) {
 			$bac_acc = trim($_POST['tbac_acc']);
-			$bac_acc = adjust_paths($bac_acc, $dir, "/mnt/input_data/", false);
+			$bac_acc = adjust_paths($bac_acc, $dir, "/mnt/input_data/acc_list", false);
 			$args .= "--bac_accession $bac_acc ";
 		}
 		if ( !empty($_POST['teuk_acc']) ) {
 			$euk_acc = trim($_POST['teuk_acc']);
-			$euk_acc = adjust_paths($euk_acc, $dir, "/mnt/input_data/", false);
+			$euk_acc = adjust_paths($euk_acc, $dir, "/mnt/input_data/acc_list", false);
 			$args .= "--euk_accession $euk_acc ";
 		}
 		if ( !empty($_POST['tbac_ref']) ) {
 			$bac_ref = trim($_POST['tbac_ref']);
-			$bac_ref = adjust_paths($bac_ref, $dir, "/mnt/input_data/", false);
 			$args .= "--bac_lineage $bac_ref ";
 		}
 		if ( !empty($_POST['teuk_ref']) ) {
 			$euk_ref = trim($_POST['teuk_ref']);
-			$euk_ref = adjust_paths($euk_ref, $dir, "/mnt/input_data/", false);
 			$args .= "--euk_lineage $euk_ref ";
 		}
 
@@ -172,7 +170,7 @@
 		$mounted_file = $mounted_dir . "/" . $file_base;
 
 		if ($file_parts['extension'] == 'list' and $adjust_list) {
-			# Construct filename for new list
+			# Construct filename for new list file
 			$new_list = $new_dir . "/" . $file_base;
 
 			$fh = fopen($mounted_file, "r") or die("Cannot open $mounted_file - check the path to make sure it exists");

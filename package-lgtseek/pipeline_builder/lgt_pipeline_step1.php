@@ -25,8 +25,8 @@ include_once('header.php');
 
 <fieldset name="Step2" style="display:none">
 <legend class="legend">STEP 2: Select an input file type <sup><a href='./help.php#form' target='_blank'>?</a></sup></legend>
-<label><input type="radio" name="r_input" id="rbam" onclick="SetUpInputFields()">BAM</label><br>
-<label><input type="radio" name="r_input" id="rfastq" onclick="SetUpInputFields()">FASTQ</label><br>
+<label><input type="radio" name="r_input" id="rbam" onclick="SetUpInputFields()" <?php echo is_dir_empty('/mnt/input_data/input_source')?> >BAM</label><br>
+<label><input type="radio" name="r_input" id="rfastq" onclick="SetUpInputFields()" <?php echo is_dir_empty('/mnt/input_data/input_source')?>>FASTQ</label><br>
 <label><input type="radio" name="r_input" id="rsra" onclick="SetUpInputFields()">SRA</label><br>
 </fieldset>
 
@@ -34,20 +34,44 @@ include_once('header.php');
 <legend class="legend">STEP 3: Provide the necessary file information <sup><a href='./help.php#form' target='_blank'>?</a></sup></legend>
 <div id="ddonor">
 <label for="tdonor">Donor reference/list/index</label><br>
-<input type="text" name="tdonor" id="tdonor" class="textbox" value=''><br><br>
+<select name="tdonor" id="tdonor">
+  <option value="" selected="selected">-----</option>
+  <?php
+    $dir = '/mnt/input_data/donor_ref';
+    populate_options($dir);
+  ?>
+</select><br><br>
 </div>
 <div id="drecipient">
 <label for="trecipient">Recipient reference/list/index</label><br>
-<input type="text" name="trecipient" id="trecipient" class="textbox" value=''><br><br>
+<select name="trecipient" id="trecipient">
+  <option value="" selected="selected">-----</option>
+  <?php
+    $dir = '/mnt/input_data/recipient_ref';
+    populate_options($dir);
+  ?>
+</select><br><br>
 </div>
 <div id="drefseq">
 <label for="trefseq">RefSeq reference/list/index</label><br>
-<input type="text" name="trefseq" id="trefseq" class="textbox" value=''><br><br>
+<select name="trefseq" id="trefseq">
+  <option value="" selected="selected">-----</option>
+  <?php
+    $dir = '/mnt/input_data/refseq_ref';
+    populate_options($dir);
+  ?>
+</select><br><br>
 </div>
 
 <div id="dbac_acc">
 <label for="tbac_acc">Bacteria accession ID list</label><br>
-<input type="text" name="tbac_acc" id="tbac_acc" class="textbox" value=''><br><br>
+<select name="tbac_acc" id="tbac_acc">
+  <option value="" selected="selected">-----</option>
+  <?php
+    $dir = '/mnt/input_data/acc_list';
+    populate_options($dir);
+  ?>
+</select><br><br>
 </div>
 <div id="dbac_ref">
 <label for="tbac_ref">Bacteria taxon name for hit filtering</label><br>
@@ -55,7 +79,13 @@ include_once('header.php');
 </div>
 <div id="deuk_acc">
 <label for="teuk_acc">Eukaryotic accession ID list</label><br>
-<input type="text" name="teuk_acc" id="teuk_acc" class="textbox" value=''><br><br>
+<select name="teuk_acc" id="teuk_acc">
+  <option value="" selected="selected">-----</option>
+  <?php
+    $dir = '/mnt/input_data/acc_list';
+    populate_options($dir);
+  ?>
+</select><br><br>
 </div>
 <div id="deuk_ref">
 <label for="teuk_ref">Eukaryotic taxon name for hit filtering</label><br>
@@ -64,11 +94,23 @@ include_once('header.php');
 
 <div id="dbam">
 <label for="tbam">BAM file or list</label><br>
-<input type="text" name="tbam" id="tbam" class="textbox" value=''><br>
+<select name="tbam" id="tbam">
+  <option value="" selected="selected">-----</option>
+  <?php
+    $dir = '/mnt/input_data/input_source';
+    populate_options($dir);
+  ?>
+</select><br><br>
 </div>
 <div id="dfastq">
 <label for="tfastq">FASTQ file or list</label><br>
-<input type="text" name="tfastq" id="tfastq" class="textbox" value=''><br>
+<select name="tfastq" id="tfastq">
+  <option value="" selected="selected">-----</option>
+  <?php
+    $dir = '/mnt/input_data/input_source';
+    populate_options($dir);
+  ?>
+</select><br><br>
 </div>
 <div id="dsra">
 <label for="tsra">SRA ID</label><br>
@@ -81,6 +123,20 @@ include_once('header.php');
 <input type="submit" name="bsubmit" value="Submit">
 <input type="reset" name="breset" onclick="ResetForm()" value="Reset">
 </form>
+
+<?php
+  function populate_options($dir) {
+    $files = array_slice(scandir($dir), 2);
+    foreach($files as $filename){
+      echo "<option value='./" . $filename . "'>".$filename."</option>";
+    }
+  }
+
+  function is_dir_empty($dir) {
+    if (!is_readable($dir) || count(scandir($dir)) == 2) return "disabled";
+    return "";
+  }
+?>
 
 <?php
 include_once('footer.php');
