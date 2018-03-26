@@ -116,23 +116,23 @@
                 </commandSet>
               </commandSet>
             </commandSet>
-            <!-- FINAL LGT PROCESSING -->
-            <commandSet type="serial">
-              <state>incomplete</state>
-              <name>determine_final_lgt.final</name>
-            </commandSet>
-            <commandSet type="serial">
-              <state>incomplete</state>
-              <name>lgt_create_validated_bam.lgt_r</name>
-            </commandSet>
-            <commandSet type="serial">
-              <state>incomplete</state>
-              <name>bwa_aln.validation_r</name>
-            </commandSet>
-            <commandSet type="serial">
-              <state>incomplete</state>
-              <name>lgt_mpileup.lgt_recipient</name>
-            </commandSet>
+          </commandSet>
+          <!-- FINAL LGT PROCESSING -->
+          <commandSet type="serial">
+            <state>incomplete</state>
+            <name>determine_final_lgt.final</name>
+          </commandSet>
+          <commandSet type="serial">
+            <state>incomplete</state>
+            <name>lgt_create_validated_bam.lgt_r</name>
+          </commandSet>
+          <commandSet type="serial">
+            <state>incomplete</state>
+            <name>bwa_aln.validation_r</name>
+          </commandSet>
+          <commandSet type="serial">
+            <state>incomplete</state>
+            <name>lgt_mpileup.lgt_recipient</name>
           </commandSet>
         </commandSet>
       </commandSet>
