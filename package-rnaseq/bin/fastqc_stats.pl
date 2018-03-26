@@ -3,9 +3,6 @@
 eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
     if 0; # not running under some shell
 
-eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
-    if 0; # not running under some shell
-
 ################################################################################
 ### POD Documentation
 ################################################################################
@@ -152,7 +149,7 @@ chdir $sOutDir or die "Error Cannot change the directory";
 @zip_files = glob("*fastqc.zip");
 
 ($bDebug || $bVerbose) ? 
-    print STDERR "\nUnziping the output folder ...\n" : ();
+    print STDERR "\nUnzipping the output folder ...\n" : ();
 
 foreach (@zip_files) {
 	$zipped = $_;
@@ -236,12 +233,19 @@ sub out_format {
 
 	$new_dir=$pref."_"."fastqc";
 	
-	@plots=('per_base_quality.png','sequence_length_distribution.png');
-	
-	foreach $temp (@plots) {
-		$cmd= "mv ".$outdir."/".$new_dir."/Images/".$temp." ".$outdir."/".$new_dir."/Images/".$pref.".".$temp ;   
-		exec_command($cmd);
-	}
+    # Rename all files to include the sample ID
+    my @working_dirs = ("$outdir/$new_dir", "$outdir/$new_dir/Images");
+    for my $working_dir (@working_dirs) {
+        chdir $working_dir;
+        opendir (DIR, $working_dir) or die "Cannot open directory $working_dir for reading: $!\n";
+        my @file_list = readdir DIR;
+        foreach my $file (@file_list) {
+            next if (-d $file); # Skip directories
+            my $newfile = "$pref.$file";
+            rename ($file, $newfile);
+        }
+        closedir DIR;
+    }
 	
 }
 
