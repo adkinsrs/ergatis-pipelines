@@ -188,7 +188,7 @@ foreach $key (keys (%bam)) {
 				my $file = $_;
 				# NOTE - could fail if there is 2+ BAM outputs in a group
                 $file =~ s/$key\.accepted_hits\.bam/hisat2.stderr/;
-				$tot_reads = get_total_reads_from_hisat_stderr($file, $single_end);
+				$tot_reads = get_total_reads_from_hisat_stderr($file, $singleStranded);
 				last;
 			}
 		}
