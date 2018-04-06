@@ -41,6 +41,7 @@ colnames(count.stat) <- c("Stat", as.character(sample.info[1,1]))
 data.tab <- data.tab[1:(idx-1),]
 
 for (i in 2:nrow(sample.info)) {
+	cat(as.character(sample.info[i,3]), "\n")
 	d <- read.delim(as.character(sample.info[i,3]), header=F, sep="\t")
 	tmp <- matrix(c(sum(d[,2][1:(idx-1)]), sum(d[,2])), nrow=2, ncol=1)
 	tmp <- data.frame(x=c(d[idx:nrow(d),2], tmp))
@@ -108,6 +109,10 @@ if (sum(ifelse((data.frame(table(as.character(sample.info[,2])))$Freq < 2), 1, 0
 	cat("\t* Estimating dispersions with replicates ...\n")
 	cds <- estimateDispersions(cds, method="pooled", sharingMode="fit-only", fitType="local")
 }
+
+out <- cbind(rownames(fData(cds)), fData(cds))
+colnames(out) <- c("ID", colnames(fData(cds)))
+write.table(out, file.path("dispersion_counts.tsv"), na="NA", sep="\t", quote=F, row.names=F)
 
 # WITH replicates (as least 3 each)
 #
