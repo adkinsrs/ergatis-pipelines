@@ -204,9 +204,7 @@ sub getTaxon {
             }
         }
         else {
-			# SAdkins 1/13/16 - URL in Entrez module is obsolete and incorrect
-			# We really should update BioPerl
-            my $db = Bio::DB::Taxonomy->new( -source => 'entrez', -location => $EUTILS_PATH );
+            my $db = Bio::DB::Taxonomy->new( -source => 'entrez' );
             my $taxon = $db->get_taxon( -taxonid => $taxonid );
             if (defined($taxon) && $taxon->isa('Bio::Taxon') ) {
                 my $name    = $taxon->scientific_name;
