@@ -9,132 +9,90 @@
         <state>incomplete</state>
         <name>lgtseek_classify_reads.default</name>
       </commandSet>
+      <!-- LGT side -->
+      <commandSet type="serial">
+        <state>incomplete</state>
+        <name>filter_dups_lc_seqs.lgt_recipient</name>
+      </commandSet>
+      <commandSet type="serial">
+        <state>incomplete</state>
+        <name>get_aligned_reads_list.lgt_recipient</name>
+      </commandSet>
+      <commandSet type="serial">
+        <state>incomplete</state>
+        <name>sam2fasta.fasta_r</name>
+      </commandSet>
+      <commandSet type="serial">
+        <state>incomplete</state>
+        <name>split_multifasta.fasta_r</name>
+      </commandSet>
       <commandSet type="parallel">
         <state>incomplete</state>
-        <!-- LGT READS -->
+        <!-- EUK BLAST -->
         <commandSet type="serial">
           <state>incomplete</state>
-          <commandSet type="parallel">
-            <state>incomplete</state>
-            <!-- DONOR -->
-            <commandSet type="serial">
-              <state>incomplete</state>
-              <commandSet type="serial">
-                <state>incomplete</state>
-                <name>filter_dups_lc_seqs.lgt_donor</name>
-              </commandSet>
-              <commandSet type="serial">
-                <state>incomplete</state>
-                <name>sam2fasta.fasta_d</name>
-              </commandSet>
-              <commandSet type="serial">
-                <state>incomplete</state>
-                <name>split_multifasta.fasta_d</name>
-              </commandSet>
-              <!-- EUK BLAST -->
-              <commandSet type="serial">
-                <state>incomplete</state>
-                <name>blastdb_alias.euk</name>
-              </commandSet>
-              <commandSet type="serial">
-                <state>incomplete</state>
-                <name>blastn_plus.nt_d</name>
-              </commandSet>
-              <commandSet type="serial">
-                <state>incomplete</state>
-                <name>concatenate_files.blast_d</name>
-              </commandSet>
-              <commandSet type="serial">
-                <state>incomplete</state>
-                <name>blast_lgt_finder.lgt_d</name>
-              </commandSet>
-              <commandSet type="serial">
-                <state>incomplete</state>
-                <name>blast2lca.lgt_d</name>
-              </commandSet>
-            </commandSet>
-            <!-- RECIPIENT -->
-            <commandSet type="serial">
-              <state>incomplete</state>
-              <commandSet type="serial">
-                <state>incomplete</state>
-                <name>filter_dups_lc_seqs.lgt_recipient</name>
-              </commandSet>
-              <!-- BWA & LCA -->
-              <commandSet type="parallel">
-                <state>incomplete</state>
-                <commandSet type="serial">
-                  <state>incomplete</state>
-                  <commandSet type="serial">
-                    <state>incomplete</state>
-                    <name>bwa_aln.lgt</name>
-                  </commandSet>
-                  <commandSet type="serial">
-                    <state>incomplete</state>
-                    <name>lgt_mpileup.lgt_refseq</name>
-                  </commandSet>
-                  <commandSet type="serial">
-                    <state>incomplete</state>
-                    <name>sam2lca.lgt</name>
-                  </commandSet>
-                </commandSet>
-                <commandSet type="serial">
-                  <state>incomplete</state>
-                  <commandSet type="serial">
-                    <state>incomplete</state>
-                    <name>get_aligned_reads_list.lgt_recipient</name>
-                  </commandSet>
-                  <commandSet type="serial">
-                    <state>incomplete</state>
-                    <name>sam2fasta.fasta_r</name>
-                  </commandSet>
-                  <commandSet type="serial">
-                    <state>incomplete</state>
-                    <name>split_multifasta.fasta_r</name>
-                  </commandSet>
-                  <!-- BAC BLAST -->
-                  <commandSet type="serial">
-                    <state>incomplete</state>
-                    <name>blastdb_alias.bac</name>
-                  </commandSet>
-                  <commandSet type="serial">
-                    <state>incomplete</state>
-                    <name>blastn_plus.nt_r</name>
-                  </commandSet>
-                  <commandSet type="serial">
-                    <state>incomplete</state>
-                    <name>concatenate_files.blast_r</name>
-                  </commandSet>
-                  <commandSet type="serial">
-                    <state>incomplete</state>
-                    <name>blast_lgt_finder.lgt_r</name>
-                  </commandSet>
-                  <commandSet type="serial">
-                    <state>incomplete</state>
-                    <name>blast2lca.lgt_r</name>
-                  </commandSet>
-                </commandSet>
-              </commandSet>
-            </commandSet>
-          </commandSet>
-          <!-- FINAL LGT PROCESSING -->
           <commandSet type="serial">
             <state>incomplete</state>
-            <name>determine_final_lgt.final</name>
+            <name>blastdb_alias.euk</name>
           </commandSet>
           <commandSet type="serial">
             <state>incomplete</state>
-            <name>lgt_create_validated_bam.lgt_r</name>
+            <name>blastn_plus.nt_d</name>
           </commandSet>
           <commandSet type="serial">
             <state>incomplete</state>
-            <name>bwa_aln.validation_r</name>
+            <name>concatenate_files.blast_d</name>
           </commandSet>
           <commandSet type="serial">
             <state>incomplete</state>
-            <name>lgt_mpileup.lgt_recipient</name>
+            <name>blast_lgt_finder.lgt_d</name>
+          </commandSet>
+          <commandSet type="serial">
+            <state>incomplete</state>
+            <name>blast2lca.lgt_d</name>
           </commandSet>
         </commandSet>
+        <!-- BAC BLAST -->
+        <commandSet type="serial">
+          <state>incomplete</state>
+          <commandSet type="serial">
+            <state>incomplete</state>
+            <name>blastdb_alias.bac</name>
+          </commandSet>
+          <commandSet type="serial">
+            <state>incomplete</state>
+            <name>blastn_plus.nt_r</name>
+          </commandSet>
+          <commandSet type="serial">
+            <state>incomplete</state>
+            <name>concatenate_files.blast_r</name>
+          </commandSet>
+          <commandSet type="serial">
+            <state>incomplete</state>
+            <name>blast_lgt_finder.lgt_r</name>
+          </commandSet>
+          <commandSet type="serial">
+            <state>incomplete</state>
+            <name>blast2lca.lgt_r</name>
+          </commandSet>
+        </commandSet>
+      </commandSet>
+      <!-- FINAL LGT PROCESSING -->
+      <commandSet type="serial">
+        <state>incomplete</state>
+        <name>determine_final_lgt.final</name>
+      </commandSet>
+      <commandSet type="serial">
+        <state>incomplete</state>
+        <name>lgt_create_validated_bam.lgt_r</name>
+      </commandSet>
+      <commandSet type="serial">
+        <state>incomplete</state>
+        <name>bwa_aln.validation_r</name>
+      </commandSet>
+      <commandSet type="serial">
+        <state>incomplete</state>
+        <name>lgt_mpileup.lgt_recipient</name>
       </commandSet>
     </commandSet>
   </commandSet>

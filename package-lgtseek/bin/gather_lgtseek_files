@@ -95,8 +95,6 @@ fi
 
 lgt_recipient_mpileup=${output_repo}/lgt_mpileup/${pipeline_id}_lgt_recipient/lgt_mpileup.list
 lgt_donor_mpileup=${output_repo}/lgt_mpileup/${pipeline_id}_lgt_donor/lgt_mpileup.list
-all_recipient_mpileup=${output_repo}/lgt_mpileup/${pipeline_id}_all_recipient/lgt_mpileup.list
-all_donor_mpileup=${output_repo}/lgt_mpileup/${pipeline_id}_all_donor/lgt_mpileup.list
 
 if [ -f $lgt_donor_mpileup ]; then
     echo "Now copying LGT donor mpileup file..."
@@ -110,20 +108,6 @@ if [ -f $lgt_recipient_bam ]; then
     ./cp_lgt_list_files $output_dir/lgt_recipient_mpileup $lgt_recipient_mpileup
 else
     echo "LGT recipient mpileup file is not present, skipping..."
-fi
-
-if [ -f $all_donor_mpileup ]; then
-    echo "Now copying all-donor mpileup file..."
-    ./cp_lgt_list_files $output_dir/all_donor_mpileup $all_donor_mpileup
-else
-    echo "All-donor mpileup file is not present, skipping..."
-fi
-
-if [ -f $all_recipient_mpileup ]; then
-    echo "Now copying all-recipient mpileup file..."
-    ./cp_lgt_list_files $output_dir/all_recipient_mpileup $all_recipient_mpileup
-else
-    echo "All-recipient mpileup file is not present, skipping..."
 fi
 
 donor_lgt_clone=${output_repo}/blast_lgt_finder/${pipeline_id}_lgt_d/i1/g1/blastn_by_clone.txt

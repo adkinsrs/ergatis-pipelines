@@ -284,17 +284,13 @@ sub main {
 
 	if ($donor_only) {
 		# In donor-only alignment cases, we do not keep the 'MM' matches
-
 		$config{"lgtseek_classify_reads default"}->{'$;RECIPIENT_FILE_LIST$;'} = '';
 		$config{"lgtseek_classify_reads default"}->{'$;LGT_DONOR_TOKEN$;'} = 'single_map';
 		$config{"lgtseek_classify_reads default"}->{'$;ALL_DONOR_TOKEN$;'} = 'all_map';
 		$config{"lgtseek_classify_reads default"}->{'$;ALL_RECIPIENT_TOKEN$;'} = 'no_map';
 
-		$config{"filter_dups_lc_seqs lgt_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgtseek_classify_reads/$;PIPELINEID$;_default/lgtseek_classify_reads.single_map.bam.list';
-		$config{"filter_dups_lc_seqs lgt_recipient"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgtseek_classify_reads/$;PIPELINEID$;_default/lgtseek_classify_reads.no_map.bam.list';
-		$config{"filter_dups_lc_seqs all_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgtseek_classify_reads/$;PIPELINEID$;_default/lgtseek_classify_reads.all_map.bam.list';
-		$config{'sam2fasta fasta_d'}->{'$;INPUT_FILE$;'} ='$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_donor/filter_dups_lc_seqs.bam.list';
-		$config{'sam2fasta fasta_r'}->{'$;INPUT_FILE$;'} ='$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_recipient/filter_dups_lc_seqs.bam.list';
+		# Donor and recipient reads are the same in the sam2fasta output so we just run split_multifasta once
+		$config{'blastn_plus nt_r'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/split_multifasta/$;PIPELINEID$;_fasta_d/split_multifasta.fsa.list';
 
 		push @gather_output_skip, 'move all recipient BAM';
 		push @gather_output_skip, 'move all donor BAM';
@@ -327,10 +323,8 @@ sub main {
 		$config{"determine_final_lgt final"}->{'$;REFERENCE_TYPE$;'} = 'recipient';
 		$config{"determine_final_lgt final"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/get_aligned_reads_list/$;PIPELINEID$;_lgt_recipient/get_aligned_reads_list.list';
 
-		$config{"filter_dups_lc_seqs lgt_recipient"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgtseek_classify_reads/$;PIPELINEID$;_default/lgtseek_classify_reads.single_map.bam.list';
-		$config{"filter_dups_lc_seqs lgt_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgtseek_classify_reads/$;PIPELINEID$;_default/lgtseek_classify_reads.no_map.bam.list';
-		$config{'sam2fasta fasta_r'}->{'$;INPUT_FILE$;'} ='$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_recipient/filter_dups_lc_seqs.bam.list';
-		$config{'sam2fasta fasta_d'}->{'$;INPUT_FILE$;'} ='$;REPOSITORY_ROOT$;/output_repository/filter_dups_lc_seqs/$;PIPELINEID$;_lgt_donor/filter_dups_lc_seqs.bam.list';
+		# Donor and recipient reads are the same in the sam2fasta output so we just run split_multifasta once
+		$config{'blastn_plus nt_d'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/split_multifasta/$;PIPELINEID$;_fasta_r/split_multifasta.fsa.list';
 
 		push @gather_output_skip, 'move LGT donor mpileup';
 		push @gather_output_skip, 'move all donor mpileup';
@@ -345,13 +339,10 @@ sub main {
 
 		# The mpileup component needs the donor reference to serve as a reference here too
 		$config{'lgt_mpileup lgt_donor'}->{'$;FASTA_REFERENCE$;'} = $options{donor_reference};
-		$config{'lgt_mpileup all_donor'}->{'$;FASTA_REFERENCE$;'} = $options{donor_reference};
 	}
 
 # If we have a use case where there is a good donor and good reference...
 	if (! ($donor_only || $host_only) ) {
-
-		$config{'lgt_mpileup all_recipient'}->{'$;FASTA_REFERENCE$;'} = $options{host_reference};
 
 		# Donor and recipient reads are the same in the sam2fasta output so we just run split_multifasta once
 		$config{'blastn_plus nt_r'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/split_multifasta/$;PIPELINEID$;_fasta_d/split_multifasta.fsa.list';
@@ -364,6 +355,9 @@ sub main {
 			$config{'gather_lgtseek_files'}->{'RECIPIENT_LGT_BAM_OUTPUT'} = '$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected_r/samtools_merge.bam.list' if $included_subpipelines{'post'};
 			$config{'gather_lgtseek_files'}->{'DONOR_LGT_BAM_OUTPUT'} = '$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected_d/samtools_merge.bam.list' if $included_subpipelines{'post'};
         }
+	} else {
+		$config{"filter_dups_lc_seqs lgt_recipient"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgtseek_classify_reads/$;PIPELINEID$;_default/lgtseek_classify_reads.single_map.bam.list';
+		$config{"filter_dups_lc_seqs lgt_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgtseek_classify_reads/$;PIPELINEID$;_default/lgtseek_classify_reads.single_map.bam.list';
 	}
 
 # If we are indexing references in the pipeline, we need to change some config inputs
@@ -383,14 +377,14 @@ sub main {
 		# If host only, add no-mapped alignment and post-NT blast alignment
 		if ($host_only) {
 			# Each individual genome is small enough to use 'is' instead of 'btwsw'
-			$config{"lgt_build_bwa_index refseq"}->{'$;ALGORITHM$;'} = "is";
+			#$config{"lgt_build_bwa_index refseq"}->{'$;ALGORITHM$;'} = "is";
 
 			$config{'bwa_aln validation_r'}->{'$;INPUT_FILE$;'} = '';
 			$config{'bwa_aln validation_r'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_recipient/lgt_build_bwa_index.fsa.list';
 
 			# Change the Refseq reference for bwa_aln
-			$config{'bwa_aln lgt'}->{'$;INPUT_FILE$;'} = '';
-			$config{'bwa_aln lgt'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_refseq/lgt_build_bwa_index.fsa.list';
+			#$config{'bwa_aln lgt'}->{'$;INPUT_FILE$;'} = '';
+			#$config{'bwa_aln lgt'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_refseq/lgt_build_bwa_index.fsa.list';
 		} else {
 			unless ($skip_alignment) {
 				# Change the donor reference for bwa_aln if not host-only run

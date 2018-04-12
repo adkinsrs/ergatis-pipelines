@@ -62,20 +62,6 @@
         </command>
         <command>
             <type>RunUnixCommand</type>
-            <name>move all donor mpileup</name>
-            <state>incomplete</state>
-            <executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
-            <arg>/mnt/output_data/$;PIPELINEID$;/all_donor_mpileup $;ALL_DONOR_MPILEUP$; || true</arg>
-        </command>
-        <command>
-            <type>RunUnixCommand</type>
-            <name>move all recipient mpileup</name>
-            <state>incomplete</state>
-            <executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
-            <arg>/mnt/output_data/$;PIPELINEID$;/all_recipient_mpileup $;ALL_RECIPIENT_MPILEUP$; || true</arg>
-        </command>
-        <command>
-            <type>RunUnixCommand</type>
             <name>move SRA metadata output</name>
             <state>incomplete</state>
             <executable>/bin/cp</executable>
