@@ -288,6 +288,8 @@ sub main {
 		$config{"lgtseek_classify_reads default"}->{'$;LGT_DONOR_TOKEN$;'} = 'single_map';
 		$config{"lgtseek_classify_reads default"}->{'$;ALL_DONOR_TOKEN$;'} = 'all_map';
 		$config{"lgtseek_classify_reads default"}->{'$;ALL_RECIPIENT_TOKEN$;'} = 'no_map';
+		$config{"filter_dups_lc_seqs lgt_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgtseek_classify_reads/$;PIPELINEID$;_default/lgtseek_classify_reads.single_map.bam.list';
+
 
 		# Donor and recipient reads are the same in the sam2fasta output so we just run split_multifasta once
 		$config{'blastn_plus nt_r'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/split_multifasta/$;PIPELINEID$;_fasta_d/split_multifasta.fsa.list';
@@ -322,6 +324,7 @@ sub main {
 		$config{"lgtseek_classify_reads default"}->{'$;ALL_RECIPIENT_TOKEN$;'} = 'all_map';
 		$config{"determine_final_lgt final"}->{'$;REFERENCE_TYPE$;'} = 'recipient';
 		$config{"determine_final_lgt final"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/get_aligned_reads_list/$;PIPELINEID$;_lgt_recipient/get_aligned_reads_list.list';
+		$config{"filter_dups_lc_seqs lgt_recipient"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgtseek_classify_reads/$;PIPELINEID$;_default/lgtseek_classify_reads.single_map.bam.list';
 
 		# Donor and recipient reads are the same in the sam2fasta output so we just run split_multifasta once
 		$config{'blastn_plus nt_d'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/split_multifasta/$;PIPELINEID$;_fasta_r/split_multifasta.fsa.list';
@@ -354,10 +357,7 @@ sub main {
 			$config{'determine_final_lgt final'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/get_aligned_reads_list/$;PIPELINEID$;_merged_donor/get_aligned_reads_list.list';
 			$config{'gather_lgtseek_files'}->{'RECIPIENT_LGT_BAM_OUTPUT'} = '$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected_r/samtools_merge.bam.list' if $included_subpipelines{'post'};
 			$config{'gather_lgtseek_files'}->{'DONOR_LGT_BAM_OUTPUT'} = '$;REPOSITORY_ROOT$;/output_repository/samtools_merge/$;PIPELINEID$;_lgt_infected_d/samtools_merge.bam.list' if $included_subpipelines{'post'};
-        }
-	} else {
-		$config{"filter_dups_lc_seqs lgt_recipient"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgtseek_classify_reads/$;PIPELINEID$;_default/lgtseek_classify_reads.single_map.bam.list';
-		$config{"filter_dups_lc_seqs lgt_donor"}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgtseek_classify_reads/$;PIPELINEID$;_default/lgtseek_classify_reads.single_map.bam.list';
+		}
 	}
 
 # If we are indexing references in the pipeline, we need to change some config inputs
