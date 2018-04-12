@@ -1,5 +1,9 @@
 # CHANGELOG
 
+4/12/18
+* Removing calls for mpileup analyses for \"all map\" and \"no map\" files.  Those files will still be present as output but I feel that the analyses should be handled outside the scope of the LGTSeek pipeline.
+* Fixed bug with donor\_only and recipient\_only cases, where two separate sets of input were being fed into the BLAST steps, and when it was time to compare the two BLAST outputs, there were no putative LGT hits (which would be expected since both inputs differed)
+
 2/26/18
 * Adding a few extra params for the UI
   * Bacterial lineage filter taxon name (same for Eukaryotic)
