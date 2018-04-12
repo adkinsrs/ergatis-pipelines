@@ -21,8 +21,6 @@ use Bio::DB::Taxonomy;
 use Bio::DB::EUtilities;
 use File::Find;
 
-my $EUTILS_PATH = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/';
-
 my $NODES = '/local/db/repository/ncbi/blast/20120414_001321/taxonomy/taxdump/nodes.dmp';
 my $NAMES =  '/local/db/repository/ncbi/blast/20120414_001321/taxonomy/taxdump/names.dmp';
 my $GI2TAX = '/local/db/repository/ncbi/blast/20120414_001321/taxonomy/gi_taxid_nucl.dmp';
@@ -162,8 +160,7 @@ sub getTaxon {
                 -eutil => 'esummary',
                 -email => 'example@foo.bar',
                 -db    => $self->{'type'},
-                -id    => [$gi],
-                -location => $EUTILS_PATH
+                -id    => [$gi]
             );
             while ( my $ds = $factory->next_DocSum ) {
                 my @res = $ds->get_contents_by_name('TaxId');
