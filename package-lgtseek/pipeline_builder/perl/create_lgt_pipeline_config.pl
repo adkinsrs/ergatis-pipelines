@@ -49,9 +49,6 @@ B<--euk_accession>
 B<--lgt_infected, -i>
 	Flag to indicate that the recipient reference is infected with LGT from the donor reference.  This will enable a different pipeline layout compared to the LGT-free use-case
 
-B<--refseq_reference,-r>
-	Path to the RefSeq reference fasta file, or list file (ends in .list).  If the reference has already been indexed by BWA, the index files must be in the same directory as the reference(s).
-
 B<--build_indexes,-B>
 	If the flag is enabled, will build indexes using BWA in the pipeline.  If you are using pre-build indexes it is important they are compatible with the version of BWA running in the pipeline (0.7.12 for internal Ergatis, 0.7.15 for Docker Ergatis).
 
@@ -137,11 +134,10 @@ sub main {
 						  "host_reference|h=s",
 						  "lgt_infected|i",
 						  "donor_reference|d=s",
-						  "refseq_reference|r=s",
-							"bac_lineage=s",
-							"euk_lineage=s",
-							"bac_accession=s",
-							"euk_accession=s",
+						  "bac_lineage=s",
+						  "euk_lineage=s",
+						  "bac_accession=s",
+						  "euk_accession=s",
 						  "build_indexes|B",
 						  "skip_alignment|S",
 						  "template_directory|t=s",
@@ -312,12 +308,6 @@ sub main {
 	}
 
 	if ($host_only) {
-		if ($options{refseq_reference} =~ /list$/) {
-			$config{"global"}->{'$;REFSEQ_LIST$;'} = $options{refseq_reference};
-		} else {
-			$config{"global"}->{'$;REFSEQ_REFERENCE$;'} = $options{refseq_reference};
-		}
-
 		$config{"lgtseek_classify_reads default"}->{'$;DONOR_FILE_LIST$;'} = '';
 		$config{"lgtseek_classify_reads default"}->{'$;LGT_RECIPIENT_TOKEN$;'} = 'single_map';
 		$config{"lgtseek_classify_reads default"}->{'$;ALL_DONOR_TOKEN$;'} = 'no_map';
@@ -377,14 +367,9 @@ sub main {
 		# If host only, add no-mapped alignment and post-NT blast alignment
 		if ($host_only) {
 			# Each individual genome is small enough to use 'is' instead of 'btwsw'
-			#$config{"lgt_build_bwa_index refseq"}->{'$;ALGORITHM$;'} = "is";
-
 			$config{'bwa_aln validation_r'}->{'$;INPUT_FILE$;'} = '';
 			$config{'bwa_aln validation_r'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_recipient/lgt_build_bwa_index.fsa.list';
 
-			# Change the Refseq reference for bwa_aln
-			#$config{'bwa_aln lgt'}->{'$;INPUT_FILE$;'} = '';
-			#$config{'bwa_aln lgt'}->{'$;INPUT_FILE_LIST$;'} = '$;REPOSITORY_ROOT$;/output_repository/lgt_build_bwa_index/$;PIPELINEID$;_refseq/lgt_build_bwa_index.fsa.list';
 		} else {
 			unless ($skip_alignment) {
 				# Change the donor reference for bwa_aln if not host-only run

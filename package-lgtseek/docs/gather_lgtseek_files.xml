@@ -34,20 +34,6 @@
         </command>
         <command>
             <type>RunUnixCommand</type>
-            <name>move all recipient BAM</name>
-            <state>incomplete</state>
-            <executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
-            <arg>/mnt/output_data/$;PIPELINEID$;/all_recipient_bam $;ALL_RECIPIENT_BAM_OUT$; || true</arg>
-        </command>
-        <command>
-            <type>RunUnixCommand</type>
-            <name>move all donor BAM</name>
-            <state>incomplete</state>
-            <executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
-            <arg>/mnt/output_data/$;PIPELINEID$;/all_donor_bam $;ALL_DONOR_BAM_OUT$; || true</arg>
-        </command>
-        <command>
-            <type>RunUnixCommand</type>
             <name>move LGT donor mpileup</name>
             <state>incomplete</state>
             <executable>$;BIN_DIR$;/cp_lgt_list_files</executable>
