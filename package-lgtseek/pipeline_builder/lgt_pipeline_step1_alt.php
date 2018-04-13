@@ -42,10 +42,6 @@ include_once('header.php');
 <label for="irecipient">Recipient reference file(s)</label><br>
 <input type="input" name="trecipient[]" id="trecipient" class="textbox" multiple value=''><br><br>
 </div>
-<div id="drefseq">
-<label for="irefseq">RefSeq reference file(s)</label><br>
-<input type="input" name="trefseq[]" id="trefseq" class="textbox" multiple value=''><br><br>
-</div>
 <div id="dbam">
 <label for="ibam">BAM file(s)</label><br>
 <input type="input" name="tbam[]" id="tbam" class="textbox" multiple value=''><br>

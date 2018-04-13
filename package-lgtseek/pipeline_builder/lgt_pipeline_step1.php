@@ -52,16 +52,6 @@ include_once('header.php');
   ?>
 </select><br><br>
 </div>
-<div id="drefseq">
-<label for="trefseq">RefSeq reference/list/index</label><br>
-<select name="trefseq" id="trefseq">
-  <option value="" selected="selected">-----</option>
-  <?php
-    $dir = '/mnt/input_data/refseq_ref';
-    populate_options($dir);
-  ?>
-</select><br><br>
-</div>
 
 <div id="dbac_acc">
 <label for="tbac_acc">Bacteria accession ID list</label><br>

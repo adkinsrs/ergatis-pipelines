@@ -8,7 +8,7 @@ function ResetForm() {
 // Clear the text input fields
 function ResetText() {
 	var FormName = document.forms.namedItem("lgt_pipeline_step1_form");
-	var textFields = ["tsra", "tfastq", "tbam", "tdonor", "trecipient", "trefseq", "tbac_acc", "tbac_ref", "teuk_acc", "teuk_ref"];
+	var textFields = ["tsra", "tfastq", "tbam", "tdonor", "trecipient", "tbac_acc", "tbac_ref", "teuk_acc", "teuk_ref"];
     for (var i in textFields) {
 		field = FormName.elements[ textFields[i] ];
        	field.value = field.defaultValue;
@@ -22,15 +22,12 @@ function SetUpRefFields() {
 	if (document.getElementById("r_case1").checked || document.getElementById("r_case2").checked) {
 		document.getElementById('ddonor').style.display = "block";
 		document.getElementById('drecipient').style.display = "block";
-		document.getElementById('drefseq').style.display = "none";
 	} else if (document.getElementById("r_case3").checked) {
 		document.getElementById('ddonor').style.display = "block";
 		document.getElementById('drecipient').style.display = "none";
-		document.getElementById('drefseq').style.display = "none";
 	} else if (document.getElementById("r_case4").checked) {
 		document.getElementById('ddonor').style.display = "none";
 		document.getElementById('drecipient').style.display = "block";
-		document.getElementById('drefseq').style.display = "block";
 	}
 	ResetText();
 }

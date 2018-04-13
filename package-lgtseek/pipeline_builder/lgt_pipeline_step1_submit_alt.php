@@ -77,18 +77,6 @@
 				$formValuesArr['r_input']['msg'] = "No recipient input file found.";
 			}
 		}
-		if ( !empty($_POST['irefseq']) ) {
-			$refseq = trim($_POST['irefseq']);
-			$refseq_list = '/mnt/input_data/refseq.list';
-			create_list_file($_FILES['irefseq'], $refseq_list);
-			$args .= "--refseq_reference $refseq_list ";
-		} else {
-			if ( trim($_POST['r_usecase']) == 'case4' ){
-				$errFlag++;
-				$formValuesArr['r_input']['error'] = $errFlag;
-				$formValuesArr['r_input']['msg'] = "No RefSeq input file found.";
-			}
-		}
 
 		if ( $_POST['c_build'] == 1 ) {
 			$args .= "--build_indexes ";
