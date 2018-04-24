@@ -136,8 +136,8 @@ my $prefix = $hConfig{'global'}{'PREFIX'}[0];
 
 $sCmd = $hCmdLineOption{'java_path'} . " -Djava.io.tmpdir=" .$hCmdLineOption{tmpdir};
 
-if (defined $hConfig{'realigner_target_creator'}{'Java_Memory'}) {
-	$sCmd .= " $hConfig{'realigner_target_creator'}{'Java_Memory'}[0]" ;
+if (defined $hConfig{'base_recalibration'}{'Java_Memory'}) {
+	$sCmd .= " $hConfig{'base_recalibration'}{'Java_Memory'}[0]" ;
 }
 
 $sCmd  .= " -jar " . $hCmdLineOption{'gatk_jar'} . " -T BaseRecalibrator " . 
