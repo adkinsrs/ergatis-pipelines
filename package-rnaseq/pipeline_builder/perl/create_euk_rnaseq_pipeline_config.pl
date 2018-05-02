@@ -1186,7 +1186,7 @@ if ( $samtools_convert_name == 1){
 	add_config_section($fpPC, "samtools_file_convert", "sorted_name");
 	add_config_parameters($fpPC, \%hParams);
 
-	if (( ! defined $hCmdLineOption{'sorted'}) && ($hCmdLineOption{'sorted'} !~ m/name/i)){
+	if (( defined $hCmdLineOption{'sorted'}) && ($hCmdLineOption{'sorted'} =~ m/name/i)){
 	
 		$sSamFileList = '$;REPOSITORY_ROOT$;/output_repository/samtools_file_convert/$;PIPELINEID$;_sorted_name/samtools_file_convert.sorted_by_name_sam.list';
 	}
