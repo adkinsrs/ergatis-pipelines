@@ -888,7 +888,7 @@ if (defined $hCmdLineOption{'alignment'} || defined $hCmdLineOption{'split'}) {
 		
 
 		if ((!(defined $sBwtIndexDir)) || (!(defined $sBwtIndexPrefix))) {
-			die "Error! Bowtie Index undefined !!!\n" if (!(defined $hCmdLineOption{'idxfile'}));
+			die "Error! Index file undefined !!!\n" if (!(defined $hCmdLineOption{'idxfile'}));
 			
 			($_, $sBwtIndexDir, $sBwtIndexPrefix) = File::Spec->splitpath($hCmdLineOption{'idxfile'});
 		}
@@ -1141,7 +1141,7 @@ if ( (! defined $hCmdLineOption{'alignment'}) && ( ! defined $hCmdLineOption{'fi
 	$samtools_convert_name = 0;
 }
 elsif ( (! defined $hCmdLineOption{'alignment'}) && (!((defined $hCmdLineOption{'sorted'}) && ($hCmdLineOption{'sorted'} =~ m/name/) && 
-   (defined $hCmdLineOption{'file_type'}) && ($hCmdLineOption{'file_type'} =~ m/SAM/i))) &&  (defined $hCmdLineOption{'diff_gene_expr'}) ) {
+   (defined $hCmdLineOption{'file_type'}) && ($hCmdLineOption{'file_type'} =~ m/SAM/i))) &&  (defined $hCmdLineOption{'diff_gene_expr'} && defined $hCmdLineOption{'count'}) ) {
 	$samtools_convert_name = 1;
 }
 
