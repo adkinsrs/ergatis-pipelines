@@ -33,7 +33,7 @@
             </param>
             <param>  
                 <key>--regex</key>
-                <value>".*\.multianno\.txt"</value>
+                <value>".*multianno\.txt"</value>
             </param>
             <param>  
                 <key>--output_list</key>
