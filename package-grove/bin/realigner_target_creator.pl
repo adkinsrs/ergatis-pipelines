@@ -144,8 +144,12 @@ $sCmd  .= " -jar " . $hCmdLineOption{'gatk_jar'} . " -T RealignerTargetCreator "
 		  " -I $hConfig{'realigner_target_creator'}{'Infile'}[0] -o $sOutDir/$prefix.bam.indels.list ".
 		  " -R $hConfig{'global'}{'REFERENCE_FILE'}[0] " ;
 
+if (defined $hConfig{'global'}{'KNOWN_REFERENCE'}) {
+        $sCmd .= " -known " . $hConfig{'global'}{'KNOWN_REFERENCE'}[0];
+}
+
 if (defined $hConfig{'realigner_target_creator'}{'OTHER_PARAMETERS'}) {
-	$sCmd .= $hConfig{'realigner_target_creator'}{'OTHER_PARAMETERS'}[0] ;
+	$sCmd .= $hConfig{'realigner_target_creator'}{'OTHER_PARAMETERS'}[0];
 }
 
 #print "$sCmd\n";

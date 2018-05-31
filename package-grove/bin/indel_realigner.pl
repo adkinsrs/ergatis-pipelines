@@ -144,6 +144,10 @@ $sCmd  .= " -jar " . $hCmdLineOption{'gatk_jar'} . " -T IndelRealigner " .
 		  " -I $hConfig{'indel_realigner'}{'Infile'}[0] -o $sOutDir/$prefix.realigned.bam ".
 		  " -targetIntervals $hConfig{'indel_realigner'}{'TargetInterval'}[0] -R $hConfig{'global'}{'REFERENCE_FILE'}[0] " ;
 
+if (defined $hConfig{'global'}{'KNOWN_REFERENCE'}) {
+        $sCmd .= " -known " . $hConfig{'global'}{'KNOWN_REFERENCE'}[0];
+}
+
 if (defined $hConfig{'indel_realigner'}{'OTHER_PARAMETERS'}) {
 	$sCmd .= $hConfig{'indel_realigner'}{'OTHER_PARAMETERS'}[0] ;
 }

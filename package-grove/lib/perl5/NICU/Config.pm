@@ -37,7 +37,7 @@ sub read_config {
                     next;
                 }
                 elsif ($_ =~ m/^;;\s*(.*)/) {
-                    $sDesc .= "$1.";
+                    $sDesc .= "$1";
                     next;
                 }
                 elsif ($_ =~ m/^\s*\$;(\S+)\$;\s*=\s*(.*)/) {
