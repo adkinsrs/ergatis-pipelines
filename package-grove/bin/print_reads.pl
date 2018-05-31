@@ -151,7 +151,7 @@ if (defined $hConfig{'print_reads'}{'OTHER_PARAMETERS'}) {
 #print "$sCmd\n";
 exec_command($sCmd);
 
-$config_out = "$sOutDir/print_reads.$prefix.config" ;
+$config_out = "$sOutDir/haplotype_caller.$prefix.config" ;
 $hConfig{'haplotype_caller'}{'INPUT_FILE'}[0] = "$sOutDir/$prefix.base_recal.bam" ;
 
 write_config(\%hCmdLineOption,\%hConfig,$config_out);

@@ -152,7 +152,7 @@ if (defined $hConfig{'base_recalibration'}{'OTHER_PARAMETERS'}) {
 exec_command($sCmd);
 
 #Write config file out..
-$config_out = "$sOutDir/base_recalibration.$prefix.config" ;
+$config_out = "$sOutDir/print_reads.$prefix.config" ;
 $hConfig{'print_reads'}{'Infile'}[0] = $hConfig{'base_recalibration'}{'Infile'}[0];
 $hConfig{'print_reads'}{'BQSR'}[0] = "$sOutDir/Merged.base.recal.grp" ;
 write_config(\%hCmdLineOption,\%hConfig,$config_out);

@@ -131,7 +131,7 @@ sub main {
     exec_command($cmd);
 
 	print STDOUT "GATK finished.  Now writing config file\n";
-    my $config_out = "$outdir/split_spliced_reads." .$prefix.".config" ;
+    my $config_out = "$outdir/realigner_target_creator." .$prefix.".config" ;
     $config{'realigner_target_creator'}{'Infile'}[0] = $outdir."/$prefix.split.bam";
     write_config(\%options, \%config, $config_out);
 }

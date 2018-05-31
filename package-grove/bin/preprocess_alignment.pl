@@ -159,7 +159,7 @@ sub main {
 
     exec_command($cmd);
 
-    my $config_out = "$outdir/preprocess_alignment." .$prefix.".config" ;
+    my $config_out = "$outdir/picard_processing." .$prefix.".config" ;
     $config{'picard_processing'}{'INPUT_FILE'}[0] = $outdir."/$prefix.sorted.bam";
     write_config(\%options, \%config, $config_out);
 

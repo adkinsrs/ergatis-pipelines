@@ -155,7 +155,7 @@ if (defined $hConfig{'realigner_target_creator'}{'OTHER_PARAMETERS'}) {
 #print "$sCmd\n";
 exec_command($sCmd);
 
-$config_out = "$sOutDir/realigner_target_creator.$prefix.config" ;
+$config_out = "$sOutDir/indel_realigner.$prefix.config" ;
 $hConfig{'indel_realigner'}{'Infile'}[0] = "$hConfig{'realigner_target_creator'}{'Infile'}[0]" ;
 $hConfig{'indel_realigner'}{'TargetInterval'}[0] = "$sOutDir/$prefix.bam.indels.list" ;
 write_config(\%hCmdLineOption,\%hConfig,$config_out);

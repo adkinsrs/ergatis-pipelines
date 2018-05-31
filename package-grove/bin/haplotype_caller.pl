@@ -126,7 +126,7 @@ sub main {
 
     exec_command($cmd);
 
-    my $config_out = "$outdir/haplotype_caller." .$prefix.".config" ;
+    my $config_out = "$outdir/variant_filtration." .$prefix.".config" ;
     $config{'variant_filtration'}{'INPUT_FILE'}[0] = $outdir."/$prefix.haplotype_caller.vcf";
     write_config(\%options, \%config, $config_out);
 }

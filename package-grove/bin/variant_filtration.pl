@@ -126,7 +126,7 @@ sub main {
 
     exec_command($cmd);
 
-    my $config_out = "$outdir/variant_filtration." .$prefix.".config" ;
+    my $config_out = "$outdir/annovar." .$prefix.".config" ;
     $config{'annovar'}{'INPUT_FILE'}[0] = $outdir."/$prefix.variant_filtration.vcf";
     write_config(\%options, \%config, $config_out);
 }

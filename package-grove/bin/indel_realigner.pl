@@ -157,7 +157,7 @@ if (defined $hConfig{'indel_realigner'}{'OTHER_PARAMETERS'}) {
 #print "$sCmd\n";
 exec_command($sCmd);
 
-$config_out = "$sOutDir/indel_realigner.$prefix.config" ;
+$config_out = "$sOutDir/base_recalibration.$prefix.config" ;
 $hConfig{'base_recalibration'}{'Infile'}[0] = "$sOutDir/$prefix.realigned.bam" ;
 
 write_config(\%hCmdLineOption,\%hConfig,$config_out);

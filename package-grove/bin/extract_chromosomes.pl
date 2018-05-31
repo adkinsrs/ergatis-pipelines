@@ -119,7 +119,7 @@ sub main {
 
     exec_command($cmd);
 
-    my $config_out = "$outdir/extract_chromosomes." .$prefix.".config" ;
+    my $config_out = "$outdir/preprocess_alignment." .$prefix.".config" ;
     $config{'preprocess_alignment'}{'INPUT_FILE'}[0] = $outdir."/$prefix.extract_chromosomes.bam";
     write_config(\%options, \%config, $config_out);
 }
