@@ -11,7 +11,7 @@
 			<state>incomplete</state>
 			<executable>$;BIN_DIR$;/determine_lgt_from_best_hit</executable>
 			<param>
-				<key>stderr</key>
+				<key>stdout</key>
 				<value>$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.stdout</value>
 			</param>
 			<param>

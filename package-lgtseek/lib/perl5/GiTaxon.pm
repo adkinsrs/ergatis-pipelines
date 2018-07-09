@@ -69,7 +69,7 @@ sub new {
 
     $self->{'cache'} = {};
 
-    $self->{'type'} = $args->{'type'} ? $args->{'type'} : 'nucleotide';
+    $self->{'type'} = $args->{'type'} ? $args->{'type'} : 'nuccore';
     my $gi_tax_file = 'gi_taxid_nucl.dmp';
     if ( $self->{'type'} eq 'protein' ) {
         $gi_tax_file = 'gi_taxid_prot.dmp';
