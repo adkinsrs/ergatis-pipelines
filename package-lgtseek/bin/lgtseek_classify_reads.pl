@@ -140,7 +140,7 @@ if ($donor_only || $host_only) {
 			} ) if $host_only;
 
 		# Create the list of counts
-		my $counts_file = $output_dir . "/" . $curr_prefix . ".counts";
+		my $counts_file = $output_dir . "/classification.counts";
 		my (@header, @vals);
 	    map {
 	        push( @header, $_ );
