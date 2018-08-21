@@ -68,9 +68,9 @@ sub findLGT {
           ? $options->{output_dir}
           : $directories;
         $filename = $name;
-    } elsif ( $options->{input} ) {
+    } elsif ( $options->{input_file} ) {
         my ( $name, $directories, $suffix ) =
-          fileparse( $options->{input}, qr/\.[^.]*/ );
+          fileparse( $options->{input_file}, qr/\.[^.]*/ );
         $output_dir =
           defined $options->{output_dir}
           ? $options->{output_dir}
