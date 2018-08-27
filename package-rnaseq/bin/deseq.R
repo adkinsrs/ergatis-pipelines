@@ -1,10 +1,10 @@
-#! /usr/local/packages/R-2.15.2/bin/Rscript --slave --vanilla
+#! /usr/local/packages/R-3.3.1/bin/Rscript --slave --vanilla
 
 #
-# Usage: deseq.R $sample_info $out_dir 
+# Usage: deseq2.R $sample_info $out_dir 
 #
 # tcreasy@som.umaryland.edu 
-#
+# modified by thodges@som.umaryland.edu to use DESeq2v1.18 instead of DESeq 
 ###############################################################################
 
 ##
@@ -12,10 +12,10 @@
 ## out_dir: absolute path of output directory
 ## annotation_file: optional. Absolute path of annotation file, first column of annotation file must be gene ID used for read counting, tab-delimited.
 ## 
-## tcreasy
+##
 
 rm(list=ls(all=T))
-cat("\n***** Starting DESeq (v1.24.0) analysis ******\n\n")
+cat("\n***** Starting DESeq2 (v) analysis ******\n\n")
 
 # input arguments
 args <- commandArgs(TRUE)
@@ -33,15 +33,14 @@ setwd(output.dir)
 
 ## combine single file into a data matrix and output counting statistics
 data.tab <- read.delim( as.character(sample.info[1,3]), header=F, sep="\t" )
-idx <- grep("no_feature", data.tab$V1)[1]    # Should only be 1 match in HTSeq file
 #idx <- which(data.tab=="__no_feature")
+idx <- grep("__no_feature", data.tab$V1)[1]
 count.stat <- matrix(c("sum counted", "total", sum(data.tab[,2][1:(idx-1)]), sum(data.tab[,2])), nrow=2, ncol=2)
 count.stat <- rbind(data.tab[idx:nrow(data.tab),], count.stat)
 colnames(count.stat) <- c("Stat", as.character(sample.info[1,1]))
 data.tab <- data.tab[1:(idx-1),]
 
 for (i in 2:nrow(sample.info)) {
-	cat(as.character(sample.info[i,3]), "\n")
 	d <- read.delim(as.character(sample.info[i,3]), header=F, sep="\t")
 	tmp <- matrix(c(sum(d[,2][1:(idx-1)]), sum(d[,2])), nrow=2, ncol=1)
 	tmp <- data.frame(x=c(d[idx:nrow(d),2], tmp))
@@ -54,21 +53,20 @@ for (i in 2:nrow(sample.info)) {
 
 
 colnames(data.tab) <- c("ID", as.character(sample.info[,1]))
-write.table(data.tab, file.path("all_counts"), na="NA", quote=F, row.names=F, sep="\t")
-write.table(count.stat, file.path("count_stat"), na="NA", quote=F, row.names=F, sep="\t")
+write.table(data.tab, file.path("all_counts"), na="", quote=F, row.names=F, sep="\t")
+write.table(count.stat, file.path("count_stat"), na="", quote=F, row.names=F, sep="\t")
 
 
 # remove genes without reads for all samples
 data.tab <- data.tab[which(rowSums(data.tab[,2:ncol(data.tab)])>0),]
-write.table(data.tab, file.path("all_counts_noZero"), na="NA", quote=F, row.names=F, sep="\t")
+write.table(data.tab, file.path("all_counts_noZero"), na="", quote=F, row.names=F, sep="\t")
 cat(paste("\n* There are ", ncol(data.tab)-1, " samples and ", nrow(data.tab), " genes used for DE analysis\n", sep=""))
 
 
-# import DESeq and gplots
-suppressMessages( library("DESeq") )
+# import DESeq2 and gplots
+suppressMessages( library("DESeq2") )
 suppressMessages( library("RColorBrewer") )
 suppressMessages( library("gplots") )
-
 
 # phenotypes to compare
 pheno <- unique(as.character(sample.info[,2]))
@@ -76,52 +74,36 @@ cat(paste("\n* Phenotypes found: ", toString(pheno), "\n", sep=""))
 d <- data.tab[,2:ncol(data.tab)]
 rownames(d) <- data.tab$ID
 
-
-# condition
+# condition information from sample info file
 condition <- factor(as.character(sample.info[,2]))
-cds <- newCountDataSet(d, condition)
 
-cds <- estimateSizeFactors(cds)
+# setup colData for creating DESeqData object
+colData <- data.frame(row.names = colnames(d), condition)
 
-#
-# Estimate Variance (i.e. dispersions)
-#
-cat("\n* Estimating dispersions...\n")
+# Create DESeqDataSetFromMatrix object 
+dds = DESeqDataSetFromMatrix(
+	countData = d,
+	colData = colData, 
+	design = ~ condition)
+	
+## DE analysis - DESeq() runs DESeq2 algorithm:
 
-if (sum(ifelse((data.frame(table(as.character(sample.info[,2])))$Freq < 2), 1, 0)) > 0) {
-	# WITH NO replicates
-	#
-	# Options: 
-	#  - method = "blind"
-	#  - sharingMode = "fit-only"
-	#  - fitType = "local"
-	#
-	cat("\t* Estimating dispersions without replicates ...\n")
-	cds <- estimateDispersions(cds, method="blind", sharingMode="fit-only", fitType="local")
-} else {
-	# WITH FEW replicates (2 or less replicates)
-	#
-	# Options: 
-	#  - method = "pooled"
-	#  - sharingMode = "fit-only"
-	#  - fitType = "local"
-	#
-	cat("\t* Estimating dispersions with replicates ...\n")
-	cds <- estimateDispersions(cds, method="pooled", sharingMode="fit-only", fitType="local")
-}
+		## estimating size factors
+		## estimating dispersions
+		## gene-wise dispersion estimates
+		## mean-dispersion relationship
+		## final dispersion estimates
+		## fitting model and testing
 
-out <- cbind(rownames(fData(cds)), fData(cds))
-colnames(out) <- c("ID", colnames(fData(cds)))
-write.table(out, file.path("dispersion_counts.tsv"), na="NA", sep="\t", quote=F, row.names=F)
+		dds = DESeq(dds)
+		
+		# To see Size factors for normalization
+		colData(dds)		
+	
+		#info about the matrix and design
+		head(dds)
+		resultsNames(dds)
 
-# WITH replicates (as least 3 each)
-#
-# Options: 
-#  - method = "per-condition"
-#  - sharingMode = "maximum"
-#  - fitType = "parametric"
-#
-#cds <- estimateDispersions(cds, method="per-condition", sharingMode="maximum", fitType="parametric")
 
 # create an output file name for the output PDF
 pdf.name <- paste(pheno[1], "-", pheno[2], ".pdf", sep="")
@@ -130,26 +112,19 @@ pdf(pdf.name)
 
 # variance testing
 cat("\n* Estimating variance...\n")
-vsd <- varianceStabilizingTransformation(cds)
-#select = order(rowMeans(counts(cds)), decreasing=TRUE)[1:20]
+# rlog transformation for clustering
+rld <- rlog(dds)
 
 # color palette for plots
 hmcol = colorRampPalette(brewer.pal(9, "RdBu"))(100)
 
-# heatmap of variance stabilized transformed data
-#var.title <- paste("Top 30 DEGs: ", pheno[1], " vs ", pheno[2], sep="")
-#heatmap.2(exprs(vsd)[select,], col=hmcol, trace="none", main=var.title, margin=c(13,13), cexRow=0.8, cexCol=0.8, keysize=1.0)
-
-# cat("\n* Results Snippet:\n")
-# print(head(exprs(vsd)))
-
 # output to tab file
-out <- cbind(rownames(exprs(vsd)), exprs(vsd))
-colnames(out) <- c("ID", colnames(exprs(vsd)))
-write.table(out, file.path("all_counts_noZero_normalized"), na="NA", sep="\t", quote=F, row.names=F)
+out <- cbind(rownames(assay(rld)), assay(rld))
+colnames(out) <- c("ID", colnames(assay(rld)))
+write.table(out, file.path("all_counts_noZero_normalized"), na="", sep="\t", quote=F, row.names=F)
 
 # Heatmap showing clustering of samples
-dists = dist( t( exprs(vsd) ) )
+dists = dist( t( assay(rld) ) )
 mat = as.matrix( dists )
 rownames(mat) = colnames(mat)
 dist.title <- paste("Sample Clustering", sep="")
@@ -160,111 +135,145 @@ for (k in 1:(length(pheno)-1)) {
 	
 	for (m in (k+1):length(pheno)) {
 		
-		cat(paste("\n* Running nbinomTest for: ", pheno[k], " vs ", pheno[m], "\n", sep=""))
+	cat(paste("\n* Running DESeq2 algorithm for: ", pheno[k], " vs ", pheno[m], "\n", sep=""))
+				
+	# To get results
+	res <- results(dds)
+		
+	#Results object
+	#Note: I need to discuss further with Amol about the independentFiltering parameter
+    res <- results(dds, independentFiltering=FALSE)
+    	    
+    #Information on results dataframe
+    mcols(res, use.names =T)
+    
+    # order output by FDR
+    res <- res[order(res$padj),]
+    	
+    cat("\n* Results Snippet: res\n")
+    print(head(res))
+    	
+	#summarize some basic tallies using the summary function
+    summary(res)	
+       
+    # plot the results using FDR=0.05 as the cutoff
+    ma.title <- paste("DEG MA Plot", " (FDR < 0.05)", sep="")
+    plotMA(res, main=ma.title, xlab="Mean of Normalized Counts", ylab=paste("LFC: ", pheno[k], " VS ", pheno[m], sep="")) 
+    
+    #Results no longer includes the Mean per gene for each condition so it needs to be added to the results
+    #Extracted the counts (normalized by size factors) for two conditions of interest
+    #From the counts slot of the dds object
+    
+    Read.Count.k <- rowMeans(counts(dds,normalized=TRUE)[,dds$condition == pheno[k]])
+    Read.Count.m <- rowMeans(counts(dds,normalized=TRUE)[,dds$condition == pheno[m]])
+    read.counts.both <- merge(Read.Count.m, Read.Count.k, by.x=0, by.y=0)
+    rownames(read.counts.both) <- read.counts.both[,1]
+    read.counts.both <- read.counts.both[,-1]
+    colnames(read.counts.both) <- c("Read.Count.m", "Read.Count.k")
+    
+    #create dataframe of res oject
+    res.df <- as.data.frame(res)
+    #Merge with read.counts.both
+    resdata <- merge(read.counts.both, res.df, by.x=0, by.y=0)
+    resdata <- resdata[,c(1,4,2,3,5:9)]
+    colnames(resdata) <- c("Feature.ID", "Read.Count.All", "Read.Count.m", "Read.Count.k",  "log2FoldChange","lfcSE", "stat", "p.Value", "padj")	
+    #Note:  Check with Amol to see if you need to: 1. add a FC column and 2. remove or keep the lfcSE, and stat columns
+    
+    # get read counts for each group for the top 30 most significant DEGs
+    # order output by absolute LFC
+    resdata <- resdata[order(-abs(resdata$log2FoldChange)),]
+    sig.genes = resdata[!is.na(resdata$padj<=0.05),]
+    print(dim(sig.genes))
 
-        # write png image of variance estimation
-	    #png(file=paste(pheno[k], "_vs_", pheno[m], ".variance_estimation.png", sep=""), width=720, height=720)
-		#plotDispEsts(cds)
-		#dev.off()
+    if(nrow(sig.genes) < 2) {
+      sig.genes <- resdata[resdata$pval<=0.05,]
+      print(dim(sig.genes))
+    }
+    
+    if(nrow(sig.genes) > 30) {
+      sig.genes <- sig.genes[1:30,]
+      print(dim(sig.genes))
+    }
+    
+    cat("\n* Results Snippet: sig.genes\n")
+    print(head(sig.genes))
+    
+		
+    #Prepare a matrix of sig.genes for heatmap	
+    read.counts.sig <- cbind(as.numeric(sig.genes[,3]), as.numeric(sig.genes[,4]))
+    colnames(read.counts.sig) <- c(pheno[m], pheno[k])
+    rownames(read.counts.sig) <- c(sig.genes[,1])
+    
+    cat("\n* Results Snippet: read.counts.1\n")
+    print(head(read.counts.sig))
+    
+    # draw heatmap of normalized read counts for the significant genes of each sample
+    sig.title <- paste("Top Significant DEGs", " (per condition)", sep="")		
+    heatmap.2(read.counts.sig, col=hmcol, trace="none", main=sig.title, margin=c(13,13), cexRow=0.8, cexCol=0.8, keysize=1.0)
+    
+    read.counts.sig <- sig.genes[,c(1,5)]
+    colnames(read.counts.sig) <- c("ID", "LFC")
+    read.counts.sig <- merge(read.counts.sig, out, by.x=1, by.y=1)
+    read.counts.sig <- read.counts.sig[order(-abs(read.counts.sig$LFC)),]
+    
+    cat("\n* Results Snippet: read.counts.2\n")
+    print(head(read.counts.sig))
+    
+    write.table(read.counts.sig, file.path(paste(pheno[k], "_vs_", pheno[m], ".top30.counts.txt", sep="")), na="", quote=F, row.names=F, sep="\t")
+    
+    hmap <- read.delim(file.path(paste(pheno[k], "_vs_", pheno[m], ".top30.counts.txt", sep="")), header=T, sep="\t" )
+    
+    
+    cat("\n* Results Snippet: hmap.1\n")
+    print(head(hmap))
+    
+    hmap <- hmap[,c(3:ncol(hmap))]
+    colnames(hmap) <- c(colnames(read.counts.sig)[3:ncol(read.counts.sig)])
+    rownames(hmap) <- c(read.counts.sig[,1])
+    hmap <- data.matrix(hmap)
+    
+    cat("\n* Results Snippet: hmap.2\n")
+    print(head(hmap))
+    
+    # draw heatmap of normalized read counts for the significant genes of each sample
+    sig.title <- paste("Top Significant DEGs",  " (per sample)", sep="\n")		
+    heatmap.2(hmap, col=hmcol, trace="none", main=sig.title, margin=c(13,13), cexRow=0.8, cexCol=0.8, keysize=1.0)
+    
+    # Change column names for clarity and brevity
+    colnames(resdata) <- c("Feature.ID", "Read.Count.All", paste("Read.Count.", pheno[m], sep=""), paste("Read.Count.", pheno[k], sep=""), paste("LFC(", pheno[k], "/", pheno[m], ")", sep=""),"lfcSE", "stat", "p.Value", "FDR")	
+    # write data to tsv file
+    write.table(resdata, file.path(paste(pheno[k], "_vs_", pheno[m], ".de_genes.txt", sep="")), na="", quote=F, row.names=F, sep="\t")
 
-		# run the negative binomial DEG test
-		res <- nbinomTest(cds, pheno[m], pheno[k])
-		#res <- cbind(res, NA, NA)
-
-		# order output by FDR
-		res <- res[order(res$padj),]
-		
-		cat("\n* Results Snippet: res\n")
-		print(head(res))
-		print(dim(res))
-		print(summary(res$pval))
-		print(summary(res$padj))
-		
-		# plot the results using FDR=0.05 as the cutoff
-		ma.title <- paste("DEG MA Plot", " (FDR < 0.05)", sep="")
-		plotMA(res, main=ma.title, cex=0.3, col=ifelse(res$padj>=0.05, "black", "red"), linecol="#ff000080", xlab="Mean of Normalized Counts", ylab=paste("LFC: ", pheno[k], " VS ", pheno[m], sep=""))
-
-		# plot the results using abs(LFC)>=1.0 as the cutoff
-		#plotMA(res, main="DEG MA Plot", cex=.2, col=ifelse( abs(res$log2FoldChange)>=1.0, "black", "red"), linecol="black", xlab="Mean of Normalized Counts", ylab=paste("LFC: ", pheno[k], " VS ", pheno[m], sep=""))
-		
-		
-		# get read counts for each group for the top 30 most significant DEGs
-		# order output by absolute LFC
-		res <- res[order(-abs(res$log2FoldChange)),]
-		tmp <- res
-		
-		# Change column names for clarity and brevity
-		#colnames(tmp) <- c("Feature.ID", "Read.Count.All", paste("Read.Count.", pheno[m], sep=""), paste("Read.Count.", pheno[k], sep=""), "FC", paste("LFC(", pheno[k], "/", pheno[m], ")", sep=""), "p.Value", "FDR", "NA", "NA")
-		colnames(tmp) <- c("Feature.ID", "Read.Count.All", paste("Read.Count.", pheno[m], sep=""), paste("Read.Count.", pheno[k], sep=""), "FC", paste("LFC(", pheno[k], "/", pheno[m], ")", sep=""), "p.Value", "FDR")	
-		# write data to tsv file
-		write.table(tmp, file.path(paste(pheno[k], "_vs_", pheno[m], ".de_genes.txt", sep="")), na="NA", quote=F, row.names=F, sep="\t")
-
-		cat("\n* Results Snippet: sig.genes\n")
-		sig.genes <- res[!(is.na(res$padj)) & (res$padj<=0.05),]
-		print(dim(sig.genes))
-		
-		if(nrow(sig.genes) < 2) {
-			sig.genes <- res[!(is.na(res$pval)) & (res$pval<=0.05),]
-			print(dim(sig.genes))
-		}
-		
-		if(nrow(sig.genes) >= 2) {
-			if(nrow(sig.genes) > 30) {
-				sig.genes <- sig.genes[1:30,]
-				print(dim(sig.genes))
-			}
-			
-			cat("\n* Results Snippet: sig.genes\n")
-			print(head(sig.genes))
-			
-			read.counts <- cbind(as.numeric(sig.genes[,3]), as.numeric(sig.genes[,4]))
-	
-			colnames(read.counts) <- c(pheno[m], pheno[k])
-			rownames(read.counts) <- c(sig.genes[,1])
-			
-			cat("\n* Results Snippet: read.counts.1\n")
-			print(head(read.counts))
-	
-			# draw heatmap of normalized read counts for the significant genes of each sample
-			sig.title <- paste("Top Significant DEGs", " (per condition)", sep="")		
-			heatmap.2(read.counts, col=hmcol, trace="none", main=sig.title, margin=c(13,13), cexRow=0.8, cexCol=0.8, keysize=1.0)
-			
-			read.counts <- sig.genes[,c(1,6)]
-			colnames(read.counts) <- c("ID", "LFC")
-			read.counts <- merge(read.counts, out, by="ID", x.all=TRUE)
-			read.counts <- read.counts[order(-abs(read.counts$LFC)),]
-			
-			cat("\n* Results Snippet: read.counts.2\n")
-			print(head(read.counts))
-			
-			write.table(read.counts, file.path(paste(pheno[k], "_vs_", pheno[m], ".top30.counts.txt", sep="")), na="NA", quote=F, row.names=F, sep="\t")
-			
-			hmap <- read.delim(file.path(paste(pheno[k], "_vs_", pheno[m], ".top30.counts.txt", sep="")), header=T, sep="\t" )
-			
-			cat("\n* Results Snippet: hmap.1\n")
-			print(head(hmap))
-			
-			hmap <- hmap[,c(3:ncol(hmap))]
-			colnames(hmap) <- c(colnames(read.counts)[3:ncol(read.counts)])
-			rownames(hmap) <- c(read.counts[,1])
-			hmap <- data.matrix(hmap)
-			
-			cat("\n* Results Snippet: hmap.2\n")
-			print(head(hmap))
-			
-			# draw heatmap of normalized read counts for the significant genes of each sample
-			sig.title <- paste("Top Significant DEGs",  " (per sample)", sep="\n")		
-			heatmap.2(hmap, col=hmcol, trace="none", main=sig.title, margin=c(13,13), cexRow=0.8, cexCol=0.8, keysize=1.0)
-		} else {
-			cat("\n* No significant DE genes found! Check study design and/or read counts!\n")
-		}
 	}
 }
 
 data.tab <- NULL
 d <- NULL
+dev.off()
 
 cat("\n\n* Garbage Collection Information\n\n")
 gc()
 
 cat("\n\n***** DEG Analysis Complete *****\n\n")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
