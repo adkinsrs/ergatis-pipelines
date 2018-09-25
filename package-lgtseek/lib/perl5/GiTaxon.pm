@@ -20,6 +20,7 @@ use MongoDB;
 use Bio::DB::Taxonomy;
 use Bio::DB::EUtilities;
 use File::Find;
+use Try::Tiny;
 
 my $NODES = '/local/db/repository/ncbi/blast/20120414_001321/taxonomy/taxdump/nodes.dmp';
 my $NAMES =  '/local/db/repository/ncbi/blast/20120414_001321/taxonomy/taxdump/names.dmp';
@@ -148,38 +149,49 @@ sub getTaxon {
     # First check the cache
     if ( $self->{cache}->{$gi} ) {
         return $self->{cache}->{$gi};
-    }
-    else {
+    } else {
         my $taxon_lookup =
           $self->{'gi2taxon'}->find_one( { 'gi' => "$gi" }, { 'taxon' => 1 } );
         if ($taxon_lookup) {
             $taxonid = $taxon_lookup->{'taxon'};
         } else {
 			#print STDERR "*** GiTaxon-getTaxon: Unable to find taxon for $gi, Checking NCBI\n";
-            my $factory = Bio::DB::EUtilities->new(
-                -eutil => 'esummary',
-                -email => 'example@foo.bar',
-                -db    => $self->{'type'},
-                -id    => [$gi]
-            );
-            while ( my $ds = $factory->next_DocSum ) {
-                my @res = $ds->get_contents_by_name('TaxId');
-                if (@res) {
-                    $taxonid = $res[0];
-                }
-                if ( !$taxonid ) {
-                    print STDERR "Unable to find taxonid at NCBI\n";
-                }
-                else {
-                    my $res = $self->{'gi2taxon'}->update_one(
-                        { 'gi'     => "$gi" },
-                        { '$set' => { 'gi'     => "$gi", 'taxon' => $taxonid } },
-                        { 'upsert' => 1, 'safe' => 1 }
-                    );
-                    #print STDERR "*** GiTaxon-getTaxon: Added $gi\t$taxonid to the db\n";
-                }
-            }
+            # Sometimes $gi is null
+            try {
+                my $factory = Bio::DB::EUtilities->new(
+                    -eutil => 'esummary',
+                    -email => 'example@foo.bar',
+                    -db    => $self->{'type'},
+                    -id    => [$gi]
+                );
 
+                # Catch potential object error
+                if ($factory->get_count == 0) {
+                    warn $gi . " - No hits returned\n";
+                }
+
+                while ( my $ds = $factory->next_DocSum ) {
+                    my @res = $ds->get_contents_by_name('TaxId');
+                    if (@res) {
+                        $taxonid = $res[0];
+                    }
+                    if ( ! defined $taxonid ) {
+                        print STDERR "Unable to find taxonid at NCBI\n";
+                    }
+                    else {
+                        my $res = $self->{'gi2taxon'}->update_one(
+                            { 'gi'     => "$gi" },
+                            { '$set' => { 'gi'     => "$gi", 'taxon' => $taxonid } },
+                            { 'upsert' => 1, 'safe' => 1 }
+                        );
+                        #print STDERR "*** GiTaxon-getTaxon: Added $gi\t$taxonid to the db\n";
+                    }
+                }
+            } catch {
+                warn "Caught error for ID $gi : $_";
+                # Since we can't get a taxon ID, just return empty-handed
+                return $retval;
+            }
         }
 
         ## NEW VVV 01.08.15 KBS v1.07
@@ -204,26 +216,31 @@ sub getTaxon {
             }
         }
         else {
-            my $db = Bio::DB::Taxonomy->new( -source => 'entrez' );
-            my $taxon = $db->get_taxon( -taxonid => $taxonid );
-            if (defined($taxon) && $taxon->isa('Bio::Taxon') ) {
-                my $name    = $taxon->scientific_name;
-                my $c       = $taxon;
-                my @lineage = ($name);
-                while ( my $parent = $db->ancestor($c) ) {
-                    unshift @lineage, $parent->scientific_name;
-                    $c = $parent;
+            # Sometimes $taxonid is null
+            try {
+                my $db = Bio::DB::Taxonomy->new( -source => 'entrez' );
+                my $taxon = $db->get_taxon( -taxonid => $taxonid );
+                if (defined($taxon) && $taxon->isa('Bio::Taxon') ) {
+                    my $name    = $taxon->scientific_name;
+                    my $c       = $taxon;
+                    my @lineage = ($name);
+                    while ( my $parent = $db->ancestor($c) ) {
+                        unshift @lineage, $parent->scientific_name;
+                        $c = $parent;
+                    }
+                    $retval = {
+                        'gi'       => $gi,
+                        'acc'      => $acc,
+                        'taxon_id' => $taxonid,
+                        'name'     => $name,
+                        'lineage'  => join( ";", @lineage )
+                    };
                 }
-                $retval = {
-                    'gi'       => $gi,
-                    'acc'      => $acc,
-                    'taxon_id' => $taxonid,
-                    'name'     => $name,
-                    'lineage'  => join( ";", @lineage )
-                };
-            }
-            else {
-                print STDERR "**GiTaxon unable to find taxon for taxon_id: $taxonid & gi:$gi\n";
+                else {
+                    print STDERR "**GiTaxon unable to find taxon for taxon_id: $taxonid & gi:$gi\n";
+                }
+            } catch {
+                warn "Caught error for taxon ID $taxonid : $_";
             }
         }
 
