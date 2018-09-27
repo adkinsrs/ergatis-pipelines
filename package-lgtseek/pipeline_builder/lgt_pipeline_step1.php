@@ -53,32 +53,13 @@ include_once('header.php');
 </select><br><br>
 </div>
 
-<div id="dbac_acc">
-<label for="tbac_acc">Bacteria accession ID list</label><br>
-<select name="tbac_acc" id="tbac_acc">
-  <option value="" selected="selected">-----</option>
-  <?php
-    $dir = '/mnt/input_data/acc_list';
-    populate_options($dir);
-  ?>
-</select><br><br>
-</div>
 <div id="dbac_ref">
-<label for="tbac_ref">Bacteria taxon name for hit filtering</label><br>
+<label for="tbac_ref">Bacteria taxon name string for hit filtering</label><br>
 <input type="text" name="tbac_ref" id="tbac_ref" class="textbox" value='Bacteria'><br><br>
 </div>
-<div id="deuk_acc">
-<label for="teuk_acc">Eukaryotic accession ID list</label><br>
-<select name="teuk_acc" id="teuk_acc">
-  <option value="" selected="selected">-----</option>
-  <?php
-    $dir = '/mnt/input_data/acc_list';
-    populate_options($dir);
-  ?>
-</select><br><br>
-</div>
+
 <div id="deuk_ref">
-<label for="teuk_ref">Eukaryotic taxon name for hit filtering</label><br>
+<label for="teuk_ref">Eukaryotic taxon name string for hit filtering</label><br>
 <input type="text" name="teuk_ref" id="teuk_ref" class="textbox" value='Eukaryota'><br><br>
 </div>
 
@@ -106,7 +87,7 @@ include_once('header.php');
 <label for="tsra">SRA ID</label><br>
 <input type="text" name="tsra" id="tsra" class="textbox" value=''><br>
 </div>
-<label><input type="checkbox" name="c_build" value=1>Check to Build BWA Indexes.</label>
+<label><input type="checkbox" name="c_build" value=1>Check to build indexes for BWA analysis in pipeline.</label>
 </fieldset>
 
 <br>
