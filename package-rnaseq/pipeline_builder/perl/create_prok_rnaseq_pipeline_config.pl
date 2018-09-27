@@ -23,7 +23,7 @@ create_prok_rnaseq_pipeline_config.pl - Creates the pipeline.layout and pipeline
                                           [--alignment] [--idxfile <bowtie_index>] [--visualization] 
                                           [--diff_gene_expr] [--comparison_groups <str>] [--count]  
                                           [--file_type <SAM|BAM>] [--sorted <position|name>] 
-                                          [--td <template_directory>] [--o <outdir>] [--v] 
+                                          [--td <template_directory>] [--o <outdir>] [--block] [--v] 
                                           [--man] [--help]
 
     parameters in [] are optional
@@ -97,6 +97,8 @@ create_prok_rnaseq_pipeline_config.pl - Creates the pipeline.layout and pipeline
     --td <template_directory>        = /path/to/template directory. Optional. [present working directory]
 
     --o <output dir>                 = /path/to/output directory. Optional. [present working directory]
+
+	--block							  = If true, run_rnaseq_pipeline.pl will not exit until pipeline finishes
 
     --v                              = generate runtime messages. Optional
 
@@ -172,7 +174,7 @@ GetOptions( \%hCmdLineOption,
 			'diff_gene_expr', 'comparison_groups=s', 'count', 'file_type=s', 'sorted=s', 
 			'repository_root|rr=s', 'ergatis_ini|ei=s', 
 			'outdir|o=s', 'template_dir|td=s',
-            'verbose|v',
+            'verbose|v', 'block',
             'debug',
             'help',
             'man') or pod2usage(2);
@@ -1024,6 +1026,10 @@ if (defined $hCmdLineOption{'repository_root'}) {
 	
 	$sCmd .= " --ergatis_config ".$hCmdLineOption{'ergatis_ini'};
 	
+	if (defined $hCmdLineOption{'block'}) {
+		$sCmd .= " --block";
+	}
+
 	exec_command($sCmd);
 	
 	($bDebug || $bVerbose) ? print STDERR "\nInitiation of pipeline on ergatis ..... done\n" : undef;
