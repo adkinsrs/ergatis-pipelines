@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 10/12/18
+*Added BDBAG component
+*changed create_euk script to make bag
+*changed config file and added xml files
+
+
+## 09/07/18
+*Deseq2 replaces Deseq
+*edited htseq shell script
+
 ## 9/21/17
 * Various changes with Bedtools scripts to make use of modern versions of Samtools and Bedtools
 * Fixed bug that doubled read counts for single-stranded reads in align_hisat_(split_)stats.pl
