@@ -128,6 +128,10 @@ create_euk_rnaseq_pipeline_config.pl - Creates the pipeline.layout and pipeline.
                                         Cuffdiff will take the place of a Cuffquant/Cuffdiff/Cuffnorm run also.
 
 	--tophat_legacy					  = If enabled, will use Tophat instead of HISAT2
+    
+    -bdbag			      = Make bdbag
+
+    -pname			      = Name of project for bdbag
 
     --td <template_directory>         = /path/to/template directory. Optional. [present working directory]
 
@@ -213,7 +217,7 @@ use constant PROGRAM => eval { ($0 =~ m/(\w+\.pl)$/) ? $1 : $0 };
 ##############################################################################
 
 my @aComponents = ("quality_stats", "quality_trimming", "alignment", "split", "visualization", 
-				   "rpkm_analysis", "diff_gene_expr", "isoform_analysis", "diff_isoform_analysis");
+				   "rpkm_analysis", "diff_gene_expr", "isoform_analysis", "diff_isoform_analysis", "bdbag");
 my %hCmdLineOption = ();
 my $sHelpHeader = "\nThis is ".PROGRAM." version ".VERSION."\n";
 
@@ -225,7 +229,7 @@ GetOptions( \%hCmdLineOption,
 			'isoform_analysis', 'include_novel', 'diff_isoform_analysis', 'use_ref_gtf', 
 			'repository_root|rr=s', 'ergatis_ini|ei=s', 
 			'outdir|o=s', 'template_dir|td=s',
-			            'cufflinks_legacy', 'tophat_legacy',
+			            'cufflinks_legacy', 'tophat_legacy', 'bdbag','pname=s'=> \my $pname,
                         'verbose|v',
                         'debug',
                         'help',
@@ -277,7 +281,9 @@ if (defined $hCmdLineOption{'outdir'}) {
 $sOutDir = File::Spec->canonpath($sOutDir);
 $sOutDir = File::Spec->rel2abs($sOutDir);
 
-$sTemplateDir = $RealBin."/../../pipeline_templates/Eukaryotic_RNA_Seq_Analysis";
+#$sTemplateDir = $RealBin."/../../pipeline_templates/Eukaryotic_RNA_Seq_Analysis";
+$sTemplateDir = $RealBin."/../pipeline_templates/Eukaryotic_RNA_Seq_Analysis";
+
 if (defined $hCmdLineOption{'template_dir'}) {
     $sTemplateDir = $hCmdLineOption{'template_dir'};
 }
@@ -1568,6 +1574,49 @@ if ( (defined $hCmdLineOption{'diff_gene_expr'}) || (defined $hCmdLineOption{'vi
 	complete_component($oPL);
 }
 
+#################################################
+#BDBAG COMPONENT
+#################################################
+
+
+if (defined $hCmdLineOption{'bdbag'}) {
+
+#@aComparisons = split(/,/, $hCmdLineOption{'comparison_groups'});
+#my $pname=$hCmdLineOption{'comparison_groups'};
+my $bdbag_rep = '$;REPOSITORY_ROOT$;/output_repository/cuffdiff/$;PIPELINEID$;_bdbag/';
+print("Project Name is ");
+print($pname);
+        print("\nIn the bdbag Component now\n");
+        #init_component($oPL, "serial");
+	#my $bdbag_rep = '$;REPOSITORY_ROOT$;/output_repository/cuffdiff/$;PIPELINEID$;_bdbag/';
+        if ((defined $hCmdLineOption{'alignment'})) {
+                print("\nIn bdbag alignment defined \n");
+                init_component($oPL, "serial");
+                #print($oPL);
+		
+		#my $temp_dir_test=$RealBin."/../pipeline_templates/Eukaryotic_RNA_Seq_Analysis";
+		#print($temp_dir_test);
+		include_component_layout($oPL, $sTemplateDir, "bdbag", "archive");
+                #include_component_layout($oPL, $temp_dir_test, "bdbag", "archive");
+                complete_component($oPL);
+                %hParams = ();
+                $hParams{'PID'} = ['$;PIPELINEID$;', "Pipeline ID"];
+	        $hParams{'REPROOT'} = ['$;REPOSITORY_ROOT$;', "Path to input"];
+		$hParams{'PNAME'} = ["$pname", "project name"];	
+		$hParams{'OTHER_ARGS'} = ['-fqc -align -cloud -make', "Other Args"];
+                #$hParams{'ANNOTATION_FILE'} = ["$hCmdLineOption{'gtffile'}", "path to annotation file in GFF or GTF format"];
+                config2params(\%hParams, \%hConfig, 'bdbag');
+                add_config_section($fpPC, "bdbag", "archive");
+                add_config_parameters($fpPC, \%hParams);
+                #$sCountsFileList = '$;REPOSITORY_ROOT$;/output_repository/htseq/$;PIPELINEID$;_exon_counts/htseq.counts.list';
+}
+
+	#if ((defined $hCmdLineOption{''})) {
+		
+	#}
+}
+
+
 # Complete pipeline.layout
 complete_pipeline_layout($oPL);
 
@@ -1595,6 +1644,9 @@ if (defined $hCmdLineOption{'repository_root'}) {
 	
 	($bDebug || $bVerbose) ? print STDERR "\nInitiation of pipeline on ergatis ..... done\n" : undef;
 }
+
+
+
 
 ################################################################################
 ### Subroutines
