@@ -14,11 +14,14 @@ if (defined $ENV{'DOCKER_HOST'}) {
     $host = $ENV{'DOCKER_HOST'} . ":8080/ergatis";
 }
 
+# If true, script will not exit until pipeline finishes
+my $block = 0;
 
 my %options;
 my $results = GetOptions (\%options,
                           "layout|l=s",
                           "config|c=s",
+                          "block|b",
                           "ergatis_config|e=s",
                           "repository_root|r=s",
                           "email_id|m=s"
@@ -58,11 +61,53 @@ sub make_pipeline {
         my $xml = $repository_root."/workflow/runtime/pipeline/$pipeline_id/pipeline.xml";
         my $pipeline = new Ergatis::Pipeline( id => $pipeline_id,
                                               path => $xml );
+        my $success;
         if(length($user_email) > 0) {
-        	$pipeline->run( 'ergatis_cfg' => $ergatis_config, 'email_user' => $user_email );
+        	$success = $pipeline->run( 'ergatis_cfg' => $ergatis_config, 'email_user' => $user_email, 'block' => $block );
         }
         else {
-        	$pipeline->run( 'ergatis_cfg' => $ergatis_config );
+        	$success = $pipeline->run( 'ergatis_cfg' => $ergatis_config, 'block' => $block );
+        }
+
+        # Only execute in docker
+        if ($block && !$success && $host ne 'ergatis.igs.umaryland.edu/'){
+            # If not successful, gather information about failed pipeline
+            my $stderr = "Problem running pipeline id:$pipeline->{'id'}\n\n";
+            $stderr .= "$pipeline->{'diagnostics'}->{'complete_components'} of ";
+            $stderr .= "$pipeline->{'diagnostics'}->{'total_components'} completed\n";
+            $stderr .= "\n";
+
+            $stderr .= "ERROR running component(s): \n";
+            foreach my $c (@{$pipeline->{'diagnostics'}->{'components'}}) {
+                $stderr .= "\t$c\n";
+
+                foreach my $t (@{$pipeline->{'diagnostics'}->{'command_info'}->{$c}}) {
+                    my $c = $$t[0];
+                    my $f = $$t[1];
+
+                    if (length $f) {
+                        open(FHD, "<", $f) or die "Could not open file $f\n$!";
+                        while(<FHD>) {
+                            $stderr .= "\t\t$_";
+                        }
+                        $stderr .= "\n";
+                    }
+                }
+            }
+
+            print STDERR $stderr;
+
+            my $output_dir = "/mnt/output_data";
+            mkdir($output_dir . "/logs");
+
+            $cmd = "scp /opt/projects/rnaseq/workflow/runtime/pipeline/$pipeline->{'id'}/pipeline.xml.log";
+            $cmd .= " $output_dir/logs/.";
+            system("$cmd");
+
+            open(OUT, ">", "$output_dir/logs/$pipeline->{'id'}.stderr") or
+                die "Could not open file to write error log $output_dir/logs/$pipeline->{'id'}.stderr\n";
+            print OUT $stderr;
+            close(OUT);
         }
     }
     return $pipeline_id;
@@ -89,5 +134,6 @@ sub check_options {
         die("Option $req is required") unless( exists( $opts->{$req} ) );
     }
 
+    $block = (defined $opts->{$block}) ? 1 : 0;
     
 }
