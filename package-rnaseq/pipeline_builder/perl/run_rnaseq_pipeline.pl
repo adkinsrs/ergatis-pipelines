@@ -3,7 +3,8 @@
 use strict;
 use warnings;
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
-use lib ("../lib/perl5");
+use lib ("../lib/perl5");    # Symlinked version of file in 'bin'
+use lib ("../../lib/perl5"); # Actual file in 'pipeline_builder/perl'
 use Ergatis::Pipeline;
 use Ergatis::SavedPipeline;
 use Ergatis::ConfigFile;
