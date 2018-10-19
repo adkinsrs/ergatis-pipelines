@@ -147,7 +147,7 @@ sub findLGT {
 	close OUTTRACE;
 
     my $valid_count =
-      `grep ';$options->{lineage1};' $output_dir/$filename\_by_clone.txt | grep ';$options->{lineage2};' | wc -l`;
+      `grep ';$options->{ref_lineage};' $output_dir/$filename\_by_clone.txt | wc -l`;
     my $valid_int_count =
       `wc -l $output_dir/$filename\_by_trace.txt | cut -f1 -d \' \'`;
     chomp $valid_count;
