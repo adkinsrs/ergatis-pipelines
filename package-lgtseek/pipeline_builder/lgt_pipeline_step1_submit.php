@@ -74,16 +74,11 @@
 			}
 		}
 
-		if ( !empty($_POST['tbac_acc']) ) {
-			$bac_acc = trim($_POST['tbac_acc']);
-			$bac_acc = adjust_paths($bac_acc, $dir, "/mnt/input_data/acc_list", false);
-			$args .= "--bac_accession $bac_acc ";
-		}
-		if ( !empty($_POST['teuk_acc']) ) {
-			$euk_acc = trim($_POST['teuk_acc']);
-			$euk_acc = adjust_paths($euk_acc, $dir, "/mnt/input_data/acc_list", false);
-			$args .= "--euk_accession $euk_acc ";
-		}
+		# Previously provided options to input accession files. 
+		# Currently (temporarily?) using default files with no room for change.
+		$args .= "--bac_accession /local/db/accession_lists_dir/bacteria.accesion.txt ";
+		$args .= "--euk_accession /local/db/accession_lists_dir/metazoa.accesion.txt ";
+
 		if ( !empty($_POST['tbac_ref']) ) {
 			$bac_ref = trim($_POST['tbac_ref']);
 			$args .= "--bac_lineage $bac_ref ";
