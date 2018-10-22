@@ -220,7 +220,7 @@ if($doge)
 	my $counts=$rep_path."/htseq/".$pid."*_counts/i1/g*/*.counts";                                                                                             
 	$syscmd="cp ".$counts." Counts";                                                                                                                           
 	system($syscmd) == 0 or die "system($syscmd) failed:$?\n"; 
-	$syscmd=$rb." ".$crs;
+	$syscmd=$rb."/Rscript ".$crs;
 	system($syscmd) == 0 or die "system($syscmd) failed:$?\n";
 	#print($syscmd);
 	#system("/usr/local/packages/r-3.4.0/bin/Rscript /home/apaala.chatterjee/RNA_Report/Generate_all_counts.R");
@@ -240,7 +240,7 @@ if($dode)
 	{
 		my $copyCounts=$rep_path."/deseq/".$pid."_differential_expression/i1/g*/";
 		#print($copyCounts);
-		my $copysyscmd=$rb." ".$frs." ".$copyCounts." DE";
+		my $copysyscmd=$rb."/Rscript ".$frs." ".$copyCounts." DE";
 		#print($copysyscmd);
 		system($copysyscmd) == 0 or die "system($syscmd) failed:$?\n";
 	}
