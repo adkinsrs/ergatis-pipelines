@@ -281,8 +281,17 @@ if (defined $hCmdLineOption{'outdir'}) {
 $sOutDir = File::Spec->canonpath($sOutDir);
 $sOutDir = File::Spec->rel2abs($sOutDir);
 
-#$sTemplateDir = $RealBin."/../../pipeline_templates/Eukaryotic_RNA_Seq_Analysis";
+if( -e '$RealBin."/../../pipeline_templates/Eukaryotic_RNA_Seq_Analysis"')
+{
+$sTemplateDir = $RealBin."/../../pipeline_templates/Eukaryotic_RNA_Seq_Analysis";
+}
+else
+{
 $sTemplateDir = $RealBin."/../pipeline_templates/Eukaryotic_RNA_Seq_Analysis";
+}
+
+#$sTemplateDir = $RealBin."/../../pipeline_templates/Eukaryotic_RNA_Seq_Analysis";
+#$sTemplateDir = $RealBin."/../pipeline_templates/Eukaryotic_RNA_Seq_Analysis";
 
 if (defined $hCmdLineOption{'template_dir'}) {
     $sTemplateDir = $hCmdLineOption{'template_dir'};
@@ -1586,11 +1595,18 @@ if (defined $hCmdLineOption{'bdbag'}) {
 my $bdbag_rep = '$;REPOSITORY_ROOT$;/output_repository/cuffdiff/$;PIPELINEID$;_bdbag/';
 print("Project Name is ");
 print($pname);
+        print("\nIn the bdbag Component now\n");
         #init_component($oPL, "serial");
 	#my $bdbag_rep = '$;REPOSITORY_ROOT$;/output_repository/cuffdiff/$;PIPELINEID$;_bdbag/';
         if ((defined $hCmdLineOption{'alignment'})) {
+                print("\nIn bdbag alignment defined \n");
                 init_component($oPL, "serial");
+                #print($oPL);
+		
+		#my $temp_dir_test=$RealBin."/../pipeline_templates/Eukaryotic_RNA_Seq_Analysis";
+		#print($temp_dir_test);
 		include_component_layout($oPL, $sTemplateDir, "bdbag", "archive");
+                #include_component_layout($oPL, $temp_dir_test, "bdbag", "archive");
                 complete_component($oPL);
                 %hParams = ();
                 $hParams{'PID'} = ['$;PIPELINEID$;', "Pipeline ID"];
@@ -1604,6 +1620,9 @@ print($pname);
                 #$sCountsFileList = '$;REPOSITORY_ROOT$;/output_repository/htseq/$;PIPELINEID$;_exon_counts/htseq.counts.list';
 }
 
+	#if ((defined $hCmdLineOption{''})) {
+		
+	#}
 }
 
 
