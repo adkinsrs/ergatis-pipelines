@@ -25,10 +25,10 @@ include_once('header.php');
 						The reference files include:
 						<ul>
                             <li>
-                            Donor genome reference - Either a single fasta sequence or a list file (ending in .list) consisting of paths to fasta references is accepted.  If passing a list file, the references must all be in the same directory as the list file.  If the "Build BWA Indexes" checkbox is checked, then a path to the reference index files, including the index prefix must be passed.  This reference is required for Use Cases 1 or 2.
+                            Donor genome reference - Either a single fasta sequence or a list file (ending in .list or .lst) consisting of paths to fasta references is accepted.  If passing a list file, the references must all be in the same directory as the list file.  If the "Build BWA Indexes" checkbox is checked, then a path to the reference index files, including the index prefix must be passed.  This reference is required for Use Cases 1 or 2.
                             </li>
                             <li>
-                            Recipient genome reference - Either a single fasta sequence or a list file (ending in .list) consisting of paths to fasta references is accepted.  If passing a list file, the references must all be in the same directory as the list file.  If the "Build BWA Indexes" checkbox is checked, then a path to the reference index files, including the index prefix must be passed. This reference is required for Use Cases 1 or 3.
+                            Recipient genome reference - Either a single fasta sequence or a list file (ending in .list or .lst) consisting of paths to fasta references is accepted.  If passing a list file, the references must all be in the same directory as the list file.  If the "Build BWA Indexes" checkbox is checked, then a path to the reference index files, including the index prefix must be passed. This reference is required for Use Cases 1 or 3.
                             </li>
 						</ul>
 					</li>

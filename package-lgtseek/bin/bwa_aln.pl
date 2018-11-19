@@ -376,7 +376,7 @@ sub determine_format {
         my ( $base, $dir_path, $ext ) = fileparse( $f_no_gz, qr/\.[^.]*/ );
 
         # Depending on the extension, we handle it differently
-        if ( $ext =~ /list/ ) {
+        if ( $ext =~ /l(i)?st/ ) {
             my @list_files = `cat $file`;
 
 # SAdkins - 7/7/16  the filter_dups_lc_seqs component will now output multiple BAM files since it is iterative. Because of this I need to merge the BAM files from the list into a single BAM file.
