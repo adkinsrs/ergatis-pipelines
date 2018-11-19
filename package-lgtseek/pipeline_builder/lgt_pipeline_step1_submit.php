@@ -76,8 +76,8 @@
 
 		# Previously provided options to input accession files. 
 		# Currently (temporarily?) using default files with no room for change.
-		$args .= "--bac_accession /local/db/accession_lists_dir/bacteria.accesion.txt ";
-		$args .= "--euk_accession /local/db/accession_lists_dir/metazoa.accesion.txt ";
+		$args .= "--bac_accession /local/db/accession_lists_dir/bacteria.accession.txt ";
+		$args .= "--euk_accession /local/db/accession_lists_dir/metazoa.accession.txt ";
 
 		if ( !empty($_POST['tbac_ref']) ) {
 			$bac_ref = trim($_POST['tbac_ref']);
