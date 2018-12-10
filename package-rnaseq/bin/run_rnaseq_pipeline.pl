@@ -100,7 +100,7 @@ sub make_pipeline {
             my $output_dir = "/mnt/output_data";
             mkdir($output_dir . "/logs");
 
-            $cmd = "scp /opt/projects/rnaseq/workflow/runtime/pipeline/$pipeline->{'id'}/pipeline.xml.log";
+            my $cmd = "scp /opt/projects/rnaseq/workflow/runtime/pipeline/$pipeline->{'id'}/pipeline.xml.log";
             $cmd .= " $output_dir/logs/.";
             system("$cmd");
 
