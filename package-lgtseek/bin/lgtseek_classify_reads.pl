@@ -103,7 +103,7 @@ my $results = GetOptions (\%options,
                      "output_dir|o=s",
 					 "prefix|p=s",
                      "log|l=s",
-                     "debug|d=s",
+                     "debug=s",
                      "help|h"
                       );
 
