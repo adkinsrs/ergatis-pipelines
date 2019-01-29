@@ -186,6 +186,9 @@ sub main {
 			&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.recipient_only.layout") if( $included_subpipelines{'lgtseek'} );
 		} else {
 			&write_include($writer, $pipelines->{'indexing'}) if( $included_subpipelines{'indexing'} );
+			unless ($skip_alignment) {
+				&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.both_aln.layout") if( $included_subpipelines{'lgtseek'} );
+            }
 			if ($lgt_infected){
 				&write_include($writer, $pipelines->{'lgtseek'}, "pipeline.lgt_infected.layout") if( $included_subpipelines{'lgtseek'} );
 			} else {
@@ -250,7 +253,12 @@ sub main {
 				$config{"lgtseek_classify_reads default"}->{'$;RECIPIENT_FILE$;'} = $options{bam_input};
 				delete $config{"bwa_aln recipient"};
 			} else {
-				&_log($ERROR, "ERROR: --skip_alignment only works with the good donor/unknown recipient use-case or the good recipient/unknown donor use-case. Exiting: $!");
+				$config{"lgtseek_classify_reads default"}->{'$;DONOR_FILE_LIST$;'} = '';
+				$config{"lgtseek_classify_reads default"}->{'$;DONOR_FILE$;'} = $options{bam_input};
+                #delete $config{"bwa_aln donor"};
+				$config{"lgtseek_classify_reads default"}->{'$;RECIPIENT_FILE_LIST$;'} = '';
+				$config{"lgtseek_classify_reads default"}->{'$;RECIPIENT_FILE$;'} = $options{bam_input};
+                #delete $config{"bwa_aln recipient"};
 			}
 		} else {
 			if ($donor_only) {
