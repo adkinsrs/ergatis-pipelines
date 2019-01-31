@@ -89,7 +89,7 @@
 			$args .= "--euk_lineage $euk_ref ";
 		}
 
-		if ( $_POST['c_build'] == 1 ) {
+		if ( isset($_POST['c_build']) ) {
 			$args .= "--build_indexes ";
 		}
 
