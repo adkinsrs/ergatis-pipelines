@@ -13,7 +13,7 @@
 	$errFlag = 0;
 
 	# Shouldn't hard-code things but this is just being used in the Docker container
-	$repo_root = "/opt/projects/lgtseek";
+	$repo_root = "/opt/projects/repository";
 
 # The first thing to do is to create the config and layout files for the pipeline
 	if (isset($_POST['bsubmit'])) {
