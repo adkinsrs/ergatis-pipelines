@@ -8,8 +8,8 @@
 	$args = '';
 	$args .= "--data_directory=/mnt/output_data "; # By default gather output for use in LGTView
 	$local_dir = "/usr/local/scratch/pipeline_dir";
-	# Config reflects path in Docker file.  Normal path is /var/www/html/cgi/ergatis.ini
-	$ergatis_config = "/var/www/html/config/ergatis.ini";
+	# Config reflects path in Docker file.  Normal path is /var/www/html/ergatis/cgi/ergatis.ini
+	$ergatis_config = "/var/www/html/ergatis/cgi/ergatis.ini";
 	$errFlag = 0;
 
 	# Shouldn't hard-code things but this is just being used in the Docker container
