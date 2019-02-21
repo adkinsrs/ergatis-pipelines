@@ -100,7 +100,14 @@
             <name>archive output</name>
             <state>incomplete</state>
             <executable>/bin/tar</executable>
-            <arg>-C /mnt/output_data -czvf /mnt/output_data/$;PIPELINEID$;_output.tgz $;PIPELINEID$; || true</arg>
+            <arg>-C /mnt/output_data -czvf /mnt/output_data/$;PIPELINEID$;_output.tgz $;PIPELINEID$;</arg>
+        </command>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>chmod archive</name>
+            <state>incomplete</state>
+            <executable>/bin/chmod</executable>
+            <arg>777 /mnt/output_data/$;PIPELINEID$;_output.tgz</arg>
         </command>
     </commandSet>
 </commandSetRoot>
