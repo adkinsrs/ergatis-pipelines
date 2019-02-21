@@ -93,6 +93,10 @@
 			$args .= "--build_indexes ";
 		}
 
+		if ( isset($_POST['c_skipaln']) ) {
+			$args .= "--skip_alignment ";
+		}
+
 
 		if ( trim($_POST['r_usecase']) == 'case2' ){
 			$args .= "--lgt_infected ";

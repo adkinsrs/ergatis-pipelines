@@ -9,9 +9,9 @@ function ResetForm() {
 function ResetText() {
 	var FormName = document.forms.namedItem("lgt_pipeline_step1_form");
 	var textFields = ["tsra", "tfastq", "tbam", "tdonor", "trecipient", "tbac_acc", "tbac_ref", "teuk_acc", "teuk_ref"];
-    for (var i in textFields) {
+	for (var i in textFields) {
 		field = FormName.elements[ textFields[i] ];
-       	field.value = field.defaultValue;
+		field.value = field.defaultValue;
 	}
 }
 
@@ -40,14 +40,26 @@ function SetUpInputFields() {
 		document.getElementById('dbam').style.display = "block";
 		document.getElementById('dfastq').style.display = "none";
 		document.getElementById('dsra').style.display = "none";
+		document.getElementById('cskipaln').style.display = "block";
 	} else if (document.getElementById("rfastq").checked) {
 		document.getElementById('dbam').style.display = "none";
 		document.getElementById('dfastq').style.display = "block";
 		document.getElementById('dsra').style.display = "none";
+		document.getElementById('cskipaln').style.display = "none";
 	} else if (document.getElementById("rsra").checked) {
 		document.getElementById('dbam').style.display = "none";
 		document.getElementById('dfastq').style.display = "none";
 		document.getElementById('dsra').style.display = "block";
+		document.getElementById('cskipaln').style.display = "none";
 	}
 	//ResetText();
+}
+
+function DisableBuildIndexes() {
+	if (document.getElementById('cskipaln').checked() {
+		document.getElementById('cbuild').disabled = true;
+		document.getElementById('cskipaln').checked = false;
+	} else {
+		document.getElementById('cbuild').disabled = false;
+	}
 }
