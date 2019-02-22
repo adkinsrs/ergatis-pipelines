@@ -163,6 +163,8 @@ my $files = LGT::LGTBestBlast->filterBlast({
 		'filter_min_overlap'	=> $options{filter_min_overlap}
 	});
 
+$gi_tax_obj->mongo_disconnect();
+
 exit(0);
 
 sub check_options {

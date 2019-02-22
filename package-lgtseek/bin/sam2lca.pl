@@ -158,6 +158,7 @@ foreach my $bam (@bam_files) {
 }
 
 my $files = $sam2lca_obj->writeOutput();
+$gi_tax_obj->mongo_disconnect();
 
 exit(0);
 

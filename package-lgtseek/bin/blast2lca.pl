@@ -158,7 +158,7 @@ my $files = $lgtseek_obj->blast2lca({
 		'best_hits_only'	=> $options{best_hits_only},
 	});
 
-
+$gi_tax_obj->mongo_disconnect();
 
 exit(0);
 

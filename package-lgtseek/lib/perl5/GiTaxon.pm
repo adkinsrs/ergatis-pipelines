@@ -16,7 +16,7 @@ sadkins@som.umaryland.edu
 package GiTaxon;
 use strict;
 use warnings;
-use MongoDB;
+use MongoDB; #v2.0.1
 use Bio::DB::Taxonomy;
 use Bio::DB::EUtilities;
 use File::Find;
@@ -130,7 +130,10 @@ sub new {
         print STDERR "======== &Gi2Taxon - Using $self->{'host'}\n";
     }
     bless $self;
-    $self->{'gi2taxon'} = $self->getgi2taxon( $self->{'gi2tax'} );
+
+    $self->{'mongo'} =
+      $self->get_mongodb_connection( $self->{'gi_db'}, $self->{'host'} );
+    $self->{'gi2taxon'} = $self->getgi2taxon( $self->{'mongo'}, $self->{'gi2tax'});
 
     return $self;
 }
@@ -164,6 +167,7 @@ sub getTaxon {
                     -db    => $self->{'type'},
                     -id    => [$gi]
                 );
+                sleep 3;
 
                 # Catch potential object error
                 if ($factory->get_count == 0) {
@@ -220,6 +224,7 @@ sub getTaxon {
             try {
                 my $db = Bio::DB::Taxonomy->new( -source => 'entrez' );
                 my $taxon = $db->get_taxon( -taxonid => $taxonid );
+                sleep 3;
                 if (defined($taxon) && $taxon->isa('Bio::Taxon') ) {
                     my $name    = $taxon->scientific_name;
                     my $c       = $taxon;
@@ -252,10 +257,7 @@ sub getTaxon {
 
 # Insert data from the data dump file into the MongoDB collection if the collection does not exist
 sub getgi2taxon {
-    my ( $self, $data_file ) = @_;
-
-    my $mongo =
-      $self->get_mongodb_connection( $self->{'gi_db'}, $self->{'host'} );
+    my ( $self, $mongo, $data_file ) = @_;
     my $coll = $mongo->get_collection( $self->{'gi_coll'} );
 	# If collection not found in database, update the db using the datafile
     if ($data_file) {
@@ -313,8 +315,13 @@ sub get_mongodb_connection {
     my ( $self, $dbname, $host ) = @_;
 
     # First we'll establish our connection to mongodb
-    my $conn = MongoDB->connect( $host );
-    return $conn->get_database($dbname);
+    my $client = MongoDB::MongoClient->new( host="$host", connect_timeout_ms=-1, socket_timeout_ms=-1 );
+    return $client->get_database($dbname);
 }
 
+sub mongo_disconnect {
+    my ($self) = @_;
+    my $mongo = $self->{'mongo'};
+    $mongo->disconnect();
+}
 1;
