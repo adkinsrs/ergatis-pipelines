@@ -55,11 +55,8 @@ function SetUpInputFields() {
 	//ResetText();
 }
 
-function DisableBuildIndexes() {
-	if (document.getElementById('cskipaln').checked() {
-		document.getElementById('cbuild').disabled = true;
-		document.getElementById('cskipaln').checked = false;
-	} else {
-		document.getElementById('cbuild').disabled = false;
+function ShowMessageforRefs() {
+	if (document.getElementById('cbuild').checked === false {
+        alert("Ensure reference files have index files in same directory");
 	}
 }

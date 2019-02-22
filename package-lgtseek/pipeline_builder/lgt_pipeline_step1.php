@@ -87,8 +87,8 @@ include_once('header.php');
 <label for="tsra">SRA ID</label><br>
 <input type="text" name="tsra" id="tsra" class="textbox" value=''><br>
 </div>
-<label><input type="checkbox" name="c_build" id="cbuild" value=1>Check to build indexes for BWA analysis in pipeline.</label>
-<label><input type="checkbox" name="c_skipaln" id="cskipaln" style="display:none" value=1 onclick="DisableBuildIndexes()">Check to skip alignment step. (Input must be BAM).</label>
+<label><input type="checkbox" name="c_build" id="cbuild" checked value=1 onclick="ShowMessageForRefs()">Check to build indexes for BWA analysis in pipeline.</label>
+<label><input type="checkbox" name="c_skipaln" id="cskipaln" style="display:none" value=1">Check to skip alignment step. (Input must be BAM).</label>
 </fieldset>
 
 <br>
