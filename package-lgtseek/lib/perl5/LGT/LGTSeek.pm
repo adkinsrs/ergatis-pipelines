@@ -149,7 +149,7 @@ sub _init {
            passed in globally. They can also be overridden here.
 
            taxon_dir - Directory where taxon information lives
-           taxon_idx_dir - Directory where taxon indices can be created (or where they are)
+           gi2tax - Path to a 'gi_taxid_nucl.dmp' or 'gi_taxid_prot.dmp' file
            taxon_host - Hostname of taxon mongo database
 
 =cut
@@ -175,8 +175,9 @@ sub getGiTaxon {
             {
                 'taxon_dir'  => $self->{taxon_dir},
                 'chunk_size' => 10000,
-                'idx_dir'    => $self->{taxon_idx_dir},
+		        'gi2tax'	=> $self->{gi2tax},
                 'host'       => $self->{taxon_host},
+                'port'      => $self->{port},
                 'type'       => 'nucleotide',
                 'verbose'    => $self->{verbose},
             }
