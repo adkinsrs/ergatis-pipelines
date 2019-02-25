@@ -176,8 +176,7 @@ sub getGiTaxon {
                 'taxon_dir'  => $self->{taxon_dir},
                 'chunk_size' => 500000,
 		        'gi2tax'	=> $self->{gi2tax},
-                'host'       => $self->{taxon_host},
-                'port'      => $self->{port},
+                'host'       => $self->{taxon_host} . ":" . $self->{port},
                 'type'       => 'nucleotide',
                 'verbose'    => $self->{verbose},
             }
