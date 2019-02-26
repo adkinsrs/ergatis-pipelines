@@ -284,6 +284,16 @@ sub getgi2taxon {
             while (<IN>) {
                 chomp;
                 my ( $gi, $taxon ) = split( /\t/, $_ );
+                # Determine if GI is in collection and update if taxon IDs do not match.
+                my $taxon_lookup = $coll->find_one( { 'gi' => "$gi" }, { 'taxon' => 1});
+                if ($taxon_lookup) {
+                    next if ($taxon_lookup->{'taxon'} eq $taxon);
+                    $coll->update_one(
+                            { 'gi'     => "$gi" },
+                            { '$set' => { 'gi'     => "$gi", 'taxon' => $taxon } },
+                            { 'upsert' => 1, 'safe' => 1 }
+                        );
+                }
                 $num_in_chunk++;
                 push( @chunk, { 'gi' => $gi, 'taxon' => $taxon } );
                 if ( $num_in_chunk == $self->{'chunk_size'} ) {
