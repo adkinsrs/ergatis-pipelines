@@ -261,6 +261,7 @@ sub getgi2taxon {
     my $coll = $mongo->get_collection( $self->{'gi_coll'} );
 	# If collection not found in database, update the db using the datafile
     if ($data_file) {
+        print "Loading data to Mongo\n" if $load;
 	    if ( !$coll->find_one() || $load ) {
             print STDERR
 "Found nothing in database $self->{gi_db} collection $self->{gi_coll} on $self->{host}\n";
@@ -317,8 +318,7 @@ sub get_mongodb_connection {
     # First we'll establish our connection to mongodb
     my $client = MongoDB::MongoClient->new({
         'host'=>$host, 
-        'connect_timeout_ms'=>-1,
-        'socket_timeout_ms'=>-1 
+        'socket_timeout_ms'=>120000
     });
     return $client->get_database($dbname);
 }

@@ -171,7 +171,7 @@ sub getGiTaxon {
         }
 
         # Adding option for loading monogdb data
-        $self->{load} = 0 if ! defined $self->{load};
+        $self->{load} = 0 if ! exists $self->{load};
 
         # Create the object.
         $self->{gitaxon} = GiTaxon->new(
@@ -179,6 +179,7 @@ sub getGiTaxon {
                 'taxon_dir'  => $self->{taxon_dir},
                 'chunk_size' => 500000,
 		        'gi2tax'	=> $self->{gi2tax},
+                'load' => $self->{load},
                 'host'       => $self->{taxon_host} . ":" . $self->{port},
                 'type'       => 'nucleotide',
                 'verbose'    => $self->{verbose},
