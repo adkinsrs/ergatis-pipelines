@@ -288,12 +288,13 @@ sub getgi2taxon {
                 # Determine if GI is in collection and update if taxon IDs do not match.
                 my $taxon_lookup = $coll->find_one( { 'gi' => "$gi" }, { 'taxon' => 1});
                 if ($taxon_lookup) {
-                    if ($taxon_lookup->{'taxon'} ne $taxon);
+                    if ($taxon_lookup->{'taxon'} ne $taxon) {
                         $coll->update_one(
                             { 'gi'     => "$gi" },
                             { '$set' => { 'gi'     => "$gi", 'taxon' => $taxon } },
                             { 'upsert' => 1, 'safe' => 1 }
                         );
+                    }
                     next;
                 }
                 push( @chunk, { 'gi' => $gi, 'taxon' => $taxon } );
