@@ -283,18 +283,19 @@ sub getgi2taxon {
 		      # In the data file, add new data to MongoDB database in chunks
             while (<IN>) {
                 chomp;
+                $num_in_chunk++;
                 my ( $gi, $taxon ) = split( /\t/, $_ );
                 # Determine if GI is in collection and update if taxon IDs do not match.
                 my $taxon_lookup = $coll->find_one( { 'gi' => "$gi" }, { 'taxon' => 1});
                 if ($taxon_lookup) {
-                    next if ($taxon_lookup->{'taxon'} eq $taxon);
-                    $coll->update_one(
+                    if ($taxon_lookup->{'taxon'} ne $taxon);
+                        $coll->update_one(
                             { 'gi'     => "$gi" },
                             { '$set' => { 'gi'     => "$gi", 'taxon' => $taxon } },
                             { 'upsert' => 1, 'safe' => 1 }
                         );
+                    next;
                 }
-                $num_in_chunk++;
                 push( @chunk, { 'gi' => $gi, 'taxon' => $taxon } );
                 if ( $num_in_chunk == $self->{'chunk_size'} ) {
                     $total += $num_in_chunk;
