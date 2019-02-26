@@ -170,6 +170,9 @@ sub getGiTaxon {
             map { $self->{$_} = $config->{$_} } keys %$config;
         }
 
+        # Adding option for loading monogdb data
+        $self->{load} = 0 if ! defined $self->{load};
+
         # Create the object.
         $self->{gitaxon} = GiTaxon->new(
             {

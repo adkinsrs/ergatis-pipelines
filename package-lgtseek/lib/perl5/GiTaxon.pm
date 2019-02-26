@@ -257,11 +257,11 @@ sub getTaxon {
 
 # Insert data from the data dump file into the MongoDB collection if the collection does not exist
 sub getgi2taxon {
-    my ( $self, $mongo, $data_file ) = @_;
+    my ( $self, $mongo, $data_file, $load ) = @_;
     my $coll = $mongo->get_collection( $self->{'gi_coll'} );
 	# If collection not found in database, update the db using the datafile
     if ($data_file) {
-	       if ( !$coll->find_one() ) {
+	    if ( !$coll->find_one() || $load ) {
             print STDERR
 "Found nothing in database $self->{gi_db} collection $self->{gi_coll} on $self->{host}\n";
             print "Getting the line count of the data file...\n";
@@ -315,7 +315,11 @@ sub get_mongodb_connection {
     my ( $self, $dbname, $host ) = @_;
 
     # First we'll establish our connection to mongodb
-    my $client = MongoDB::MongoClient->new( {'host'=>$host, 'connect_timeout_ms'=>-1, 'socket_timeout_ms'=>-1 } );
+    my $client = MongoDB::MongoClient->new({
+        'host'=>$host, 
+        'connect_timeout_ms'=>-1,
+        'socket_timeout_ms'=>-1 
+    });
     return $client->get_database($dbname);
 }
 
