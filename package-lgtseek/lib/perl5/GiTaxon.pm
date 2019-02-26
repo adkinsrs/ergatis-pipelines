@@ -133,7 +133,7 @@ sub new {
 
     $self->{'mongo'} =
       $self->get_mongodb_connection( $self->{'gi_db'}, $self->{'host'} );
-    $self->{'gi2taxon'} = $self->getgi2taxon( $self->{'mongo'}, $self->{'gi2tax'});
+    $self->{'gi2taxon'} = $self->getgi2taxon( $self->{'mongo'}, $self->{'gi2tax'}, $self->{'load'});
 
     return $self;
 }
