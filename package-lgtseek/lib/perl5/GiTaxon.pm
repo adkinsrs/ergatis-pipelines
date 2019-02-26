@@ -300,7 +300,6 @@ sub getgi2taxon {
                 push( @chunk, { 'gi' => $gi, 'taxon' => $taxon } );
                 $num_in_chunk++;
                 if ( $num_in_chunk >= $self->{'chunk_size'} ) {
-                    $num_in_chunk++;
                     $total += $num_in_chunk;
                     print join(
                         "",
