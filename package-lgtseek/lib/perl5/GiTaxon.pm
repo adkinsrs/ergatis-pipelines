@@ -269,8 +269,8 @@ sub getgi2taxon {
         print "Loading data to Mongo\n" if $load;
 	    if ( !$coll->find_one() || $load ) {
             print STDERR
-"Found nothing in database $self->{gi_db} collection $self->{gi_coll} on $self->{host}\n";
-            print "Getting the line count of the data file...\n";
+"Found nothing in database $self->{gi_db} collection $self->{gi_coll} on $self->{host}\n" if !$coll->find_one();
+            print "Getting the line count of the data file...\n" if $load;
             my $lc = `wc -l $data_file`;
             chomp $lc;
             $lc =~ s/\s.*//;
