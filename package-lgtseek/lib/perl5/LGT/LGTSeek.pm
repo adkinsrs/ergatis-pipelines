@@ -177,7 +177,7 @@ sub getGiTaxon {
         $self->{gitaxon} = GiTaxon->new(
             {
                 'taxon_dir'  => $self->{taxon_dir},
-                'chunk_size' => 500000,
+                'chunk_size' => 10000,
 		        'gi2tax'	=> $self->{gi2tax},
                 'load' => $self->{load},
                 'host'       => $self->{taxon_host} . ":" . $self->{port},
