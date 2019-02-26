@@ -25,7 +25,7 @@ use Try::Tiny;
 my $NODES = '/local/db/repository/ncbi/blast/20120414_001321/taxonomy/taxdump/nodes.dmp';
 my $NAMES =  '/local/db/repository/ncbi/blast/20120414_001321/taxonomy/taxdump/names.dmp';
 my $GI2TAX = '/local/db/repository/ncbi/blast/20120414_001321/taxonomy/gi_taxid_nucl.dmp';
-my $CHUNK_SIZE = 10000;
+my $CHUNK_SIZE = 100000;
 my $HOST = 'him.igs.umaryland.edu:10001';
 my $DB = 'gi2taxon';
 my $COLL = 'gi2taxonnuc';
@@ -57,6 +57,11 @@ sub new {
         defined $args->{'gi2tax'}
         ? $args->{'gi2tax'}
         : '';
+
+    $self->{'load'} =
+        defined $args->{'load'}
+        ? $args->{'load'}
+        : 0;
 
     $self->{'chunk_size'} =
       $args->{'chunk_size'} ? $args->{'chunk_size'} : $CHUNK_SIZE;
