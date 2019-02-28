@@ -336,7 +336,7 @@ sub get_mongodb_connection {
     # First we'll establish our connection to mongodb
     my $client = MongoDB::MongoClient->new({
         'host'=>$host, 
-        'socket_timeout_ms'=>120000
+        'socket_timeout_ms'=>900000
     });
     return $client->get_database($dbname);
 }
