@@ -1,5 +1,9 @@
 # CHANGELOG
 
+2/28/19
+* Modified GiTaxon.pm to use more modern Mongo.pm subroutines.  Also modified loading to upsert (update) GI and taxon info if GI already exists.
+* The --skip\_alignment option now works for use cases 1 and 2.
+
 1/8/19
 * Fixed bug with running single donor files in lgtseek\_classify\_reads.pl. The 'd' shorthand option was shared between the 'donor_file' option and 'debug' option
 
