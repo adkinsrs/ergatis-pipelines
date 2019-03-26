@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 03/26/18
+* Fixing issues where software.config was pointing to internal paths instead of the paths Docker needs
+
 ## 10/12/18
 * Added BDBAG component
 * changed create_euk script to make bag
