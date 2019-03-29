@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 03/29/18
+* Moved samtools bin from /usr/src/samtools to /opt/packages/samtools to keep all package locations consistent
+* Moved fastqc bin from /usr/bin/ to /opt/packages/fastqc since FastQC will be installed by source instead of by apt-get install
+
 ## 03/26/18
 * Fixing issues where software.config was pointing to internal paths instead of the paths Docker needs
 
