@@ -1,5 +1,8 @@
 # CHANGELOG
 
+4/8/19
+* Added component to concatenate all the BLASTN pairwise output files as well.  These should be passed to LGTView
+
 2/28/19
 * Modified GiTaxon.pm to use more modern Mongo.pm subroutines.  Also modified loading to upsert (update) GI and taxon info if GI already exists.
 * The --skip\_alignment option now works for use cases 1 and 2.

@@ -127,8 +127,8 @@ else
     echo "Recipient Blast 'clones' file is not present, skipping..."
 fi
 
-donor_m8=${output_repo}/concatenate_files/${pipeline_id}_blast_d/blastn.out
-recipient_m8=${output_repo}/concatenate_files/${pipeline_id}_blast_r/blastn.out
+donor_m8=${output_repo}/concatenate_files/${pipeline_id}_blast_d_pairwise/blastn.m8.out
+recipient_m8=${output_repo}/concatenate_files/${pipeline_id}_blast_r_pairwise/blastn.m8.out
 
 if [ -f $donor_m8 ]; then
     echo "Now copying donor Blast m8 file..."
@@ -142,6 +142,23 @@ if [ -f $recipient_m8 ]; then
     ./cp_lgt_list_files $output_dir/blast_validated_lgt $recipient_m8
 else
     echo "Recipient Blast m8 file is not present, skipping..."
+fi
+
+donor_pairwise=${output_repo}/concatenate_files/${pipeline_id}_blast_d_pairwise/blastn.pairwise.out
+recipient_pairwise=${output_repo}/concatenate_files/${pipeline_id}_blast_r_pairwise/blastn.pairwise.out
+
+if [ -f $donor_pairwise ]; then
+    echo "Now copying donor Blast pairwise file..."
+    ./cp_lgt_list_files $output_dir/blast_validated_lgt $donor_pairwise
+else
+    echo "Donor Blast pairwise file is not present, skipping..."
+fi
+
+if [ -f $recipient_pairwise ]; then
+    echo "Now copying recipient Blast pairwise file..."
+    ./cp_lgt_list_files $output_dir/blast_validated_lgt $recipient_pairwise
+else
+    echo "Recipient Blast pairwise file is not present, skipping..."
 fi
 
 exit 0

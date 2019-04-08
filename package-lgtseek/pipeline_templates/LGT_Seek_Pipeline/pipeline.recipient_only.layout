@@ -41,7 +41,11 @@
           </commandSet>
           <commandSet type="serial">
             <state>incomplete</state>
-            <name>concatenate_files.blast_d</name>
+            <name>concatenate_files.blast_d_m8</name>
+          </commandSet>
+          <commandSet type="serial">
+            <state>incomplete</state>
+            <name>concatenate_files.blast_d_pairwise</name>
           </commandSet>
           <commandSet type="serial">
             <state>incomplete</state>
@@ -65,7 +69,11 @@
           </commandSet>
           <commandSet type="serial">
             <state>incomplete</state>
-            <name>concatenate_files.blast_r</name>
+            <name>concatenate_files.blast_r_m8</name>
+          </commandSet>
+          <commandSet type="serial">
+            <state>incomplete</state>
+            <name>concatenate_files.blast_r_pairwise</name>
           </commandSet>
           <commandSet type="serial">
             <state>incomplete</state>

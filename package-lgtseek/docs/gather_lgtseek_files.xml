@@ -69,6 +69,13 @@
         </command>
         <command>
             <type>RunUnixCommand</type>
+            <name>move donor pairwise output</name>
+            <state>incomplete</state>
+            <executable>/bin/cp</executable>
+            <arg>$;DONOR_BLAST_PAIRWISE_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt || true</arg>
+        </command>
+        <command>
+            <type>RunUnixCommand</type>
             <name>move donor clone output</name>
             <state>incomplete</state>
             <executable>/bin/cp</executable>
@@ -87,6 +94,13 @@
             <state>incomplete</state>
             <executable>/bin/cp</executable>
             <arg>$;RECIPIENT_BLAST_M8_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt || true</arg>
+        </command>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>move recipient pairwise output</name>
+            <state>incomplete</state>
+            <executable>/bin/cp</executable>
+            <arg>$;RECIPIENT_BLAST_PAIRWISE_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt || true</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>
