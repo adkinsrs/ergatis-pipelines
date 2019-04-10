@@ -82,6 +82,11 @@ edgeRfit <- function(dge, compgroups=NULL) {
   dge <- estimateCommonDisp(dge)
   dge <- estimateTagwiseDisp(dge)
   
+  # Write dispersion counts to file
+  out <- cbind(rownames(dge), dge$tagwise.dispersion)
+  colnames(out) <- c("Gene.ID", "Tagwise.Dispersion")
+  write.table(out, file.path("dispersion_counts.tsv"), na="NA", sep="\t", quote=F, row.names=F)
+
   # test the results
   et <- exactTest(dge, pair=compgroups)
  
@@ -91,7 +96,7 @@ edgeRfit <- function(dge, compgroups=NULL) {
   # get total genes
   total.genes <- as.numeric(length(rownames(top)))
 
-  # significant DEGs
+  # significant DGEs
   sig.DGEs <- rownames(top)[top$FDR < FDR.cutoff & abs(top$logFC) > logFC.cutoff]
   sig.upDGEs <- rownames(top)[top$FDR < FDR.cutoff & top$logFC > logFC.cutoff]
   sig.downDGEs <- rownames(top)[top$FDR < FDR.cutoff & top$logFC < -logFC.cutoff]
