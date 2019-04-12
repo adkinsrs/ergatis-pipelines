@@ -136,8 +136,8 @@ sub new {
     }
     bless $self;
 
-    $self->{'mongo'} =
-      $self->get_mongodb_connection( $self->{'gi_db'}, $self->{'host'} );
+    $self->{'client'} = get_mongodb_connection( $self->{'host'} );
+    $self->{'mongo'} = get_database( $self->{'client'}, $self->{'gi_db'});
     $self->{'gi2taxon'} = $self->getgi2taxon( $self->{'mongo'}, $self->{'gi2tax'}, $self->{'load'});
 
     return $self;
@@ -331,19 +331,23 @@ sub insert_chunk {
 }
 
 sub get_mongodb_connection {
-    my ( $self, $dbname, $host ) = @_;
+    my ( $host ) = @_;
 
     # First we'll establish our connection to mongodb
-    my $client = MongoDB::MongoClient->new({
+    return  MongoDB::MongoClient->new({
         'host'=>$host, 
         'socket_timeout_ms'=>900000
     });
+}
+
+sub get_database {
+    my ($client, $dbname) = @_;
     return $client->get_database($dbname);
 }
 
 sub mongo_disconnect {
     my ($self) = @_;
-    my $mongo = $self->{'mongo'};
-    $mongo->disconnect();
+    my $client = $self->{'client'};
+    $client->disconnect();
 }
 1;
