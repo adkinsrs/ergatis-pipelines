@@ -25,10 +25,6 @@
                 <value>$;DATABASE_PATH$;</value>
             </param>
             <param>
-                <key>--remote</key>
-                <value>0</value>
-            </param>
-            <param>
                 <key>--evalue</key>
                 <value>$;EXPECT$;</value>
             </param>
