@@ -26,14 +26,6 @@ if [ ! -d $output_dir ]; then
     mkdir -p -m 777 $output_dir
 fi
 
-metadata_file=${output_repo}/download_sra/${pipeline_id}_default/${sra_run_id}_info.csv
-if [ -f $metadata_file ]; then
-    echo "Now copying SRA metadata file..."
-    cp $metadata_file $output_dir
-else
-    echo "Metadata file is not present, skipping..."
-fi
-
 counts_file=${output_repo}/lgtseek_classify_reads/${pipeline_id}_default/classification.counts
 if [ -f $counts_file ]; then
     echo "Now copying classification counts file..."
