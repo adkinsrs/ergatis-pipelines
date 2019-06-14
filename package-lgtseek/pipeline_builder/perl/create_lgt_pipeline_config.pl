@@ -283,9 +283,6 @@ sub main {
 		$config{"bwa_aln donor"}->{'$;QUERY_FILE$;'} = '$;REPOSITORY_ROOT$;/output_repository/sra2fastq/$;PIPELINEID$;_default/sra2fastq.list' if $donor_only;
 	}
 
-# If SRA ID was not input type, then remove that step from array
-	push @gather_output_skip, 'move SRA metadata output' unless $options{sra_id};
-
 	if ($donor_only) {
 		# In donor-only alignment cases, we do not keep the 'MM' matches
 		$config{"lgtseek_classify_reads default"}->{'$;RECIPIENT_FILE_LIST$;'} = '';

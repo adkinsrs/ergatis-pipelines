@@ -48,13 +48,6 @@
         </command>
         <command>
             <type>RunUnixCommand</type>
-            <name>move SRA metadata output</name>
-            <state>incomplete</state>
-            <executable>/bin/cp</executable>
-            <arg>$;METADATA_FILE$; /mnt/output_data/$;PIPELINEID$;/ || true</arg>
-        </command>
-        <command>
-            <type>RunUnixCommand</type>
             <name>move donor blast-validated BAM</name>
             <state>incomplete</state>
             <executable>$;BIN_DIR$;/cp_lgt_list_files</executable>

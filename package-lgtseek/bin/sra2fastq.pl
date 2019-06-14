@@ -40,6 +40,7 @@ my $output_dir;
 ################
 GetOptions(\%hCmdLineArgs,
 	   'input_file|i=s',
+	   'run_id|r=s',
 	   'sratoolkit|s=s',
 	   'output_dir|o=s',
 	   'data_dir|d=s',
@@ -51,7 +52,7 @@ pod2usage( {-exitval => 0, -verbose => 2, -output => \*STDERR} ) if ($hCmdLineAr
 
 checkCmdLineArgs(\%hCmdLineArgs);
 $data_dir_present = is_data_dir_present(\%hCmdLineArgs);
-ConvertSRS(\%hCmdLineArgs);
+ConvertSRA(\%hCmdLineArgs);
 
 ###############
 # SUBROUTINES #
@@ -74,21 +75,28 @@ sub is_data_dir_present{
 # Returns       : NA
 # Modifications :
 
-sub ConvertSRS {
+sub ConvertSRA {
 	my ($phCmdLineArgs) = @_;
 	my ($sCmd);
 	my $nExitCode;
     my $sSubName = (caller(0))[3];
 
 # Convert to fastq format
-	$sCmd = $phCmdLineArgs->{'sratoolkit'}."/bin/fastq-dump --split-3 -O " . $output_dir . " ".$phCmdLineArgs->{'input_file'};
-	printLogMsg($DEBUG, "INFO : $sSubName :: Start converting $phCmdLineArgs->{'input_file'} to FASTQ files in $output_dir.\nINFO : $sSubName :: Command : $sCmd");
+	$sCmd = $phCmdLineArgs->{'sratoolkit'}."/bin/fastq-dump --split-3 -O " . $output_dir . " ";
+	my $input;
+	if ($phCmdLineArgs->{'run_id'}){
+		$input = $phCmdLineArgs->{'run_id'};
+	} else {
+		$input = $phCmdLineArgs->{'input_file'};
+	}
+	$sCmd .= $input;
+	printLogMsg($DEBUG, "INFO : $sSubName :: Start converting $input to FASTQ files in $output_dir.\nINFO : $sSubName :: Command : $sCmd");
 	$nExitCode = system($sCmd);
 	#fastq-dump returns 0 on success
 	if($nExitCode != 0) {
-		printLogMsg($ERROR, "ERROR : $sSubName :: $phCmdLineArgs->{'input_file'} conversion failed with error");
+		printLogMsg($ERROR, "ERROR : $sSubName :: $input conversion failed with error");
 	} else {
-		printLogMsg($DEBUG, "INFO : $sSubName :: $phCmdLineArgs->{'input_file'} SRA to FASTQ conversion succesfully completed in $output_dir");
+		printLogMsg($DEBUG, "INFO : $sSubName :: $input SRA to FASTQ conversion succesfully completed in $output_dir");
 	}
 
 	# Creating a blank .pair file using the SRA ID.
@@ -96,7 +104,12 @@ sub ConvertSRS {
 	# 			a fastq list with paired-end fastq files results in two groups iterating over
 	# 			the same directory.  This ensures the directory is iterated over just once in
 	# 			that component.
-	my ($base, $dir, $ext) = fileparse($phCmdLineArgs->{'input_file'}, qr/\.[^.]*/);
+	my ($base, $dir, $ext);
+	if ($phCmdLineArgs->{'run_id'}){
+		$base = $phCmdLineArgs->{'run_id'};
+	} else {
+		($base, $dir, $ext) = fileparse($phCmdLineArgs->{'input_file'}, qr/\.[^.]*/);
+	}
 
 	# If we need to symlink our contents over from the 'data directory', find the newly created fastq files and perform the symlink.  I'm having trouble figuring how how to best do this in an --exec so I'm writing in a script and executing that.
 	if ($data_dir_present) {
@@ -146,12 +159,22 @@ sub checkCmdLineArgs {
 	if(exists($phCmdLineArgs->{'log'})) {
 		open($logfh, "> $phCmdLineArgs->{'log'}") or die "Could not open $phCmdLineArgs->{'log'} file for writing.Reason : $!\n";
 	}
-	@aRequired = qw(input_file sratoolkit output_dir);
+	@aRequired = qw(sratoolkit output_dir);
         foreach $sOption(@aRequired) {
                 if(!defined($phCmdLineArgs->{$sOption})) {
                         printLogMsg($ERROR,"ERROR! : Required option $sOption not passed");
                 }
         }
+
+	if (!(defined($phCmdLineArgs->{'run_id'}) || defined($phCmdLineArgs->{'input_file'}))) {
+		printLogMsg($ERROR, "ERROR! : Either 'run_id' or 'input_file' must be supplied!");
+	}
+
+	# TODO: fastq-dump may support all SRA IDs, so test that
+	if(defined($phCmdLineArgs->{'run_id'}) && $phCmdLineArgs->{'run_id'} =~ /^SR(S|X)/) {
+		my $run_id = $phCmdLineArgs->{'run_id'};
+		printLogMsg($ERROR, "ERROR : Sample and Experiment SRA IDs are not supported anymore.  Cannot support $run_id id.  Please use a Study or Run ID instead.");
+	}
 }
 
 ####################################################################################################################################################
@@ -188,6 +211,9 @@ sra2fastq.pl - Script to convert .sra files downloaded from NCBI SRA FTP site to
 	parameters in [] are optional
 
 =head1 OPTIONS
+
+	-r <run_id>	:	NCBI SRA compatible 9-character id. Could be Study id (SRPXXXXXX) or Run id (SRRXXXXXX). X stands for digit. Mandatory
+	                Can separate multiple IDs with commas.
 
 	-i <input_file>	:	Path to the input SRA file to be converted to FASTQ. Mandatory
 
