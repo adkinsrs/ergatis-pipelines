@@ -1138,20 +1138,25 @@ if (defined $hCmdLineOption{'alignment'} || defined $hCmdLineOption{'split'}) {
 $samtools_convert_position = 0;
 $samtools_convert_name = 0;
 
-if ( (! defined $hCmdLineOption{'alignment'}) && (!((defined $hCmdLineOption{'sorted'}) && ($hCmdLineOption{'sorted'} =~ m/position/) && 
-        (defined $hCmdLineOption{'file_type'}) && ($hCmdLineOption{'file_type'} =~ m/BAM/i))) && 
-      ((defined $hCmdLineOption{'visualization'}) || (defined $hCmdLineOption{'rpkm_analysis'}) ||
-      ((defined $hCmdLineOption{'isoform_analysis'}) || (defined $hCmdLineOption{'diff_isoform_analysis'}))) ) {
-    $samtools_convert_position = 1;
-}
+# Sample info file is either BAM or counts input
+if (! defined $hCmdLineOption{'alignment'}) {
+    if ( (!(defined $hCmdLineOption{'sorted'} && $hCmdLineOption{'sorted'} =~ m/position/ && 
+            defined $hCmdLineOption{'file_type'} && $hCmdLineOption{'file_type'} =~ m/BAM/i)) && 
+          (defined $hCmdLineOption{'visualization'} || defined $hCmdLineOption{'rpkm_analysis'} ||
+          (defined $hCmdLineOption{'isoform_analysis'} || defined $hCmdLineOption{'diff_isoform_analysis'})) ) {
+        $samtools_convert_position = 1;
+    }
 
-
-if ( (! defined $hCmdLineOption{'alignment'}) && ( ! defined $hCmdLineOption{'file_type'} ) &&  (defined $hCmdLineOption{'diff_gene_expr'}) ) {
-    $samtools_convert_name = 0;
-}
-elsif ( (! defined $hCmdLineOption{'alignment'}) && (!((defined $hCmdLineOption{'sorted'}) && ($hCmdLineOption{'sorted'} =~ m/name/) && 
-   (defined $hCmdLineOption{'file_type'}) && ($hCmdLineOption{'file_type'} =~ m/SAM/i))) &&  (defined $hCmdLineOption{'diff_gene_expr'} && defined $hCmdLineOption{'count'}) ) {
-    $samtools_convert_name = 1;
+    if (defined $hCmdLineOption{'diff_gene_expr'}){
+        if ( !(defined $hCmdLineOption{'sorted'} && $hCmdLineOption{'sorted'} =~ m/name/ && 
+           defined $hCmdLineOption{'file_type'} && $hCmdLineOption{'file_type'} =~ m/SAM/i)) {
+            $samtools_convert_name = 1;
+        }
+        # Sample Info file contains counts
+        if (! defined $hCmdLineOption{'count'}) {
+            $samtools_convert_name = 0;
+        }
+    }
 }
 
 if ( $samtools_convert_position == 1 && $samtools_convert_name == 1){
