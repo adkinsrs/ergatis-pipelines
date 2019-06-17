@@ -119,8 +119,8 @@ else
     echo "Recipient Blast 'clones' file is not present, skipping..."
 fi
 
-donor_m8=${output_repo}/concatenate_files/${pipeline_id}_blast_d_pairwise/blastn.m8.out
-recipient_m8=${output_repo}/concatenate_files/${pipeline_id}_blast_r_pairwise/blastn.m8.out
+donor_m8=${output_repo}/concatenate_files/${pipeline_id}_blast_d_m8/blastn.m8.out
+recipient_m8=${output_repo}/concatenate_files/${pipeline_id}_blast_r_m8/blastn.m8.out
 
 if [ -f $donor_m8 ]; then
     echo "Now copying donor Blast m8 file..."

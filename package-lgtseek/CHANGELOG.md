@@ -1,5 +1,8 @@
 # CHANGELOG
 
+6/13/19
+* Merged "download_sra" and "sra2fastq" components to take advantage of the "fastq-dump" ability of directly downloading SRA files
+
 4/8/19
 * Added component to concatenate all the BLASTN pairwise output files as well.  These should be passed to LGTView
 
