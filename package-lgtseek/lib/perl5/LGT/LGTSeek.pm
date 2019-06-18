@@ -1949,10 +1949,10 @@ sub mpileup {
         print STDERR "*** Warning *** &mpileup input: $input is empty.\n";
     }
     my ( $fn, $path, $suffix ) = fileparse( $config->{input}, '.bam' );
-    my ( $fn2, $path2, $suffix2 ) = fileparse( $config->{ref}, '.bam' );
+    #my ( $fn2, $path2, $suffix2 ) = fileparse( $config->{ref}, '.bam' );
     my $output_dir =
       $config->{output_dir} ? $config->{output_dir} : $self->{output_dir};
-    my $output = "$output_dir/${fn}_ref_{$fn2}\.mpileup";
+    my $output = "$output_dir/${fn}\.mpileup";
     if ( $self->{verbose} ) {
         print STDERR "======== &mpileup: Start ========\n";
     }

@@ -58,21 +58,21 @@
             <name>move donor m8 output</name>
             <state>incomplete</state>
             <executable>/bin/cp</executable>
-            <arg>$;DONOR_BLAST_M8_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt || true</arg>
+            <arg>$;DONOR_BLAST_M8_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt/donor.blastn.m8.out || true</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>
             <name>move donor pairwise output</name>
             <state>incomplete</state>
             <executable>/bin/cp</executable>
-            <arg>$;DONOR_BLAST_PAIRWISE_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt || true</arg>
+            <arg>$;DONOR_BLAST_PAIRWISE_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt/donor.blastn.pairwise.out || true</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>
             <name>move donor clone output</name>
             <state>incomplete</state>
             <executable>/bin/cp</executable>
-			<arg>$;DONOR_LGT_CLONE_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt || true</arg>
+            <arg>$;DONOR_LGT_CLONE_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt/donor.blastn_by_clone.txt || true</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>
@@ -86,21 +86,21 @@
             <name>move recipient m8 output</name>
             <state>incomplete</state>
             <executable>/bin/cp</executable>
-            <arg>$;RECIPIENT_BLAST_M8_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt || true</arg>
+            <arg>$;RECIPIENT_BLAST_M8_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt/recipient.blastn.m8.out || true</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>
             <name>move recipient pairwise output</name>
             <state>incomplete</state>
             <executable>/bin/cp</executable>
-            <arg>$;RECIPIENT_BLAST_PAIRWISE_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt || true</arg>
+            <arg>$;RECIPIENT_BLAST_PAIRWISE_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt/recipient.blastn.pairwise.out || true</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>
             <name>move recipient clone output</name>
             <state>incomplete</state>
             <executable>/bin/cp</executable>
-            <arg>$;RECIPIENT_LGT_CLONE_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt || true</arg>
+            <arg>$;RECIPIENT_LGT_CLONE_OUT$; /mnt/output_data/$;PIPELINEID$;/blast_validated_lgt/recipient.blastn_by_clone.txt || true</arg>
         </command>
         <command>
             <type>RunUnixCommand</type>

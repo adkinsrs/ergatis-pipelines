@@ -97,11 +97,11 @@ foreach my $ref (@ref_files) {
             ( $file_base, $file_dir, $file_ext ) =
               fileparse( $f_no_gz, qr/\.[^.]*/ );
             $out1 = $refname . "_" . $file_base . ".aln1.sai";
-            $out1 =~ s/bwa\.prelim\.filtered\.//g;
+            $out1 =~ s///g;
             align_BWA( \%options, "aln", $type{'bam'}, "-b1", $out1, $ref );
 
             $out2 = $refname . "_" . $file_base . ".aln2.sai";
-            $out2 =~ s/bwa\.prelim\.filtered\.//g;
+            $out2 =~ s///g;
             align_BWA( \%options, "aln", $type{'bam'}, "-b2", $out2, $ref );
 
             $in =
@@ -121,7 +121,7 @@ foreach my $ref (@ref_files) {
               fileparse( $f_no_gz, qr/\.[^.]*/ );
             $file_base =~ s/\.fastq$//;
             $out1 = $refname . "_" . $file_base . ".aln1.sai";
-            $out1 =~ s/bwa\.prelim\.filtered\.//g;
+            $out1 =~ s/bwa\.prelim\.filtered//g;
             align_BWA( \%options, "aln", $type{'fastq_1'}, "", $out1,
                 $ref );
 
@@ -131,7 +131,7 @@ foreach my $ref (@ref_files) {
               fileparse( $f_no_gz, qr/\.[^.]*/ );
             $file_base =~ s/\.fastq$//;
             $out2 = $refname . "_" . $file_base . ".aln2.sai";
-            $out2 =~ s/bwa\.prelim\.filtered\.//g;
+            $out2 =~ s/bwa\.prelim\.filtered//g;
             align_BWA( \%options, "aln", $type{'fastq_2'}, "", $out2,
                 $ref );
 
@@ -149,7 +149,7 @@ foreach my $ref (@ref_files) {
             );
         }
         $out = $refname . "_" . $file_base . ".bwa.bam";
-        $out =~ s/bwa\.prelim\.filtered\.//g;
+        $out =~ s/bwa\.prelim\.filtered//g;
         align_then_BAM( \%options, "sampe", $in, "", $out, $ref );
     } else {
         print_log_msg( $DEBUG,
@@ -162,7 +162,7 @@ foreach my $ref (@ref_files) {
               fileparse( $f_no_gz, qr/\.[^.]*/ );
             $file_base =~ s/\.fastq$//;
             $out = $refname . "_" . $file_base . ".aln.sai";
-            $out =~ s/bwa\.prelim\.filtered\.//g;
+            $out =~ s/bwa\.prelim\.filtered//g;
             align_BWA( \%options, "aln", $type{'fastq'}, "", $out, $ref );
 
             $in =
@@ -174,14 +174,14 @@ foreach my $ref (@ref_files) {
             ( $file_base, $file_dir, $file_ext ) =
               fileparse( $f_no_gz, qr/\.[^.]*/ );
             $out = $refname . "_" . $file_base . ".aln.sai";
-            $out =~ s/bwa\.prelim\.filtered\.//g;
+            $out =~ s/bwa\.prelim\.filtered//g;
             align_BWA( \%options, "aln", $type{'bam'}, "-b0", $out, $ref );
 
             $in = $options{'output_dir'} . "/" . $out . " " . $type{'bam'};
         }
 
         $out = $refname . "_" . $file_base . ".bwa.bam";
-        $out =~ s/bwa\.prelim\.filtered\.//g;
+        $out =~ s/bwa\.prelim\.filtered//g;
         align_then_BAM( \%options, "samse", $in, "", $out, $ref );
     }
 
@@ -281,7 +281,7 @@ sub align_BWA {
     }
 
 # Same files passed from bwa_aln component to another bwa_aln component may have .bwa.prelim.filtered.bam endings.  This doesn't break the script by having it but I would like to keep the name decently short - SAdkins 4/18/16
-    $outfile =~ s/bwa\.prelim\.filtered\.//g;
+    $outfile =~ s/bwa\.prelim\.filtered//g;
 
     $cmd =
         $tmp_dir_env
