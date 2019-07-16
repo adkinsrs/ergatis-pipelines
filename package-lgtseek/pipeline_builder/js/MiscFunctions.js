@@ -8,7 +8,7 @@ function ResetForm() {
 // Clear the text input fields
 function ResetText() {
 	var FormName = document.forms.namedItem("lgt_pipeline_step1_form");
-	var textFields = ["tsra", "tfastq", "tbam", "tdonor", "trecipient", "tbac_acc", "tbac_ref", "teuk_acc", "teuk_ref"];
+	var textFields = ["tsra", "tfastq", "tbam", "tdonor", "trecipient", "tbac_ref", "teuk_ref"];
 	for (var i in textFields) {
 		field = FormName.elements[ textFields[i] ];
 		field.value = field.defaultValue;
@@ -21,8 +21,8 @@ function SetUpRefFields() {
 	FormName.Step2.style.display = "block";
 	// If input param was not provided, disable both radio buttons
 	if (document.getElementById("rbam").disabled) {
-		document.getElementById("rbam").innerHTML = "BAM (disabled because input file not provided)"
-		document.getElementById("rfastq").innerHTML = "FASTQ (disabled because input file not provided)"
+		document.getElementById("rbam").innerHTML = "BAM (disabled because input file not provided)";
+		document.getElementById("rfastq").innerHTML = "FASTQ (disabled because input file not provided)";
 	}
 	if (document.getElementById("r_case1").checked || document.getElementById("r_case2").checked) {
 		document.getElementById('ddonor').style.display = "block";
