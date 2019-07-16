@@ -88,7 +88,9 @@ include_once('header.php');
 <input type="text" name="tsra" id="tsra" class="textbox" value=""><br>
 </div>
 <label><input type="checkbox" name="c_build" id="cbuild" checked value=1 onclick="ShowMessageForRefs()">Check to build indexes for BWA analysis in pipeline.</label>
-<label><input type="checkbox" name="c_skipaln" id="cskipaln" style="display:none" value=1">Check to skip alignment step. (Input must be BAM).</label>
+<div id="dskipaln" style="display:none">
+  <label><input type="checkbox" name="c_skipaln" id="cskipaln" value=1">Check to skip alignment step. (Input file must be a BAM file).</label>
+</div>
 </fieldset>
 
 <br>

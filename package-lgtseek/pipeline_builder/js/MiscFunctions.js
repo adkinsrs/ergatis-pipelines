@@ -19,11 +19,6 @@ function ResetText() {
 function SetUpRefFields() {
 	var FormName = document.forms.namedItem("lgt_pipeline_step1_form");
 	FormName.Step2.style.display = "block";
-	// If input param was not provided, disable both radio buttons
-	if (document.getElementById("rbam").disabled) {
-		document.getElementById("rbam").innerHTML = "BAM (disabled because input file not provided)";
-		document.getElementById("rfastq").innerHTML = "FASTQ (disabled because input file not provided)";
-	}
 	if (document.getElementById("r_case1").checked || document.getElementById("r_case2").checked) {
 		document.getElementById('ddonor').style.display = "block";
 		document.getElementById('drecipient').style.display = "block";
@@ -45,17 +40,17 @@ function SetUpInputFields() {
 		document.getElementById('dbam').style.display = "block";
 		document.getElementById('dfastq').style.display = "none";
 		document.getElementById('dsra').style.display = "none";
-		document.getElementById('cskipaln').style.display = "block";
+		document.getElementById('dskipaln').style.display = "block";
 	} else if (document.getElementById("rfastq").checked) {
 		document.getElementById('dbam').style.display = "none";
 		document.getElementById('dfastq').style.display = "block";
 		document.getElementById('dsra').style.display = "none";
-		document.getElementById('cskipaln').style.display = "none";
+		document.getElementById('dskipaln').style.display = "none";
 	} else if (document.getElementById("rsra").checked) {
 		document.getElementById('dbam').style.display = "none";
 		document.getElementById('dfastq').style.display = "none";
 		document.getElementById('dsra').style.display = "block";
-		document.getElementById('cskipaln').style.display = "none";
+		document.getElementById('dskipaln').style.display = "none";
 	}
 	//ResetText();
 }
