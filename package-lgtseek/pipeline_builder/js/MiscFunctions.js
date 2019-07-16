@@ -56,7 +56,7 @@ function SetUpInputFields() {
 }
 
 function ShowMessageforRefs() {
-	if (document.getElementById('cbuild').checked === false {
+	if (document.getElementById('cbuild').checked === false) {
         alert("Ensure reference files have index files in same directory");
 	}
 }
