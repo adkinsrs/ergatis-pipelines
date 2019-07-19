@@ -3,6 +3,7 @@
 6/18/19
 * Some filename cleanup
 * Fixing bug in gather\_lgtseek\_files.xml where output is overwritten after being copied
+* Fixing bug in gather\_lgtseek\_files.config that could cause an error with Use Case 2
 
 6/13/19
 * Merged "download_sra" and "sra2fastq" components to take advantage of the "fastq-dump" ability of directly downloading SRA files
