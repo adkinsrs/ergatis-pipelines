@@ -1,14 +1,20 @@
 # CHANGELOG
 
-## 10/12/18
-*Added BDBAG component
-*changed create_euk script to make bag
-*changed config file and added xml files
+## 03/29/18
+* Moved samtools bin from /usr/src/samtools to /opt/packages/samtools to keep all package locations consistent
+* Moved fastqc bin from /usr/bin/ to /opt/packages/fastqc since FastQC will be installed by source instead of by apt-get install
 
+## 03/26/18
+* Fixing issues where software.config was pointing to internal paths instead of the paths Docker needs
+
+## 10/12/18
+* Added BDBAG component
+* changed create_euk script to make bag
+* changed config file and added xml files
 
 ## 09/07/18
-*Deseq2 replaces Deseq
-*edited htseq shell script
+* Deseq2 replaces Deseq
+* edited htseq shell script
 
 ## 9/21/17
 * Various changes with Bedtools scripts to make use of modern versions of Samtools and Bedtools
